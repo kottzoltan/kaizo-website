@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="hu" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaizo CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--cyan:#29acd9;--cyan-dim:rgba(41,172,217,0.15);--green:#34c759;--orange:#ff9500;--red:#ff3b30;--purple:#af52de;--r:14px;--rs:8px;--sw:220px;}
+[data-theme="dark"]{--bg:#06070f;--sf:#0e1018;--s2:#151722;--bd:rgba(255,255,255,0.07);--tx:#f0efed;--dim:rgba(240,239,237,0.45);--mu:rgba(240,239,237,0.22);--sh:0 4px 24px rgba(0,0,0,0.4);}
+[data-theme="light"]{--bg:#f0f2f7;--sf:#fff;--s2:#f7f8fc;--bd:rgba(0,0,0,0.07);--tx:#0e1018;--dim:rgba(14,16,24,0.55);--mu:rgba(14,16,24,0.28);--sh:0 4px 24px rgba(0,0,0,0.08);}
+*{margin:0;padding:0;box-sizing:border-box;}html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);transition:background .3s,color .3s;overflow-x:hidden;}
+.app{display:flex;min-height:100vh;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:199;}.overlay.open{display:block;}
+.sidebar{width:var(--sw);flex-shrink:0;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:1.4rem 0;position:fixed;top:0;left:0;height:100vh;z-index:200;transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;}
+.sl{padding:0 1.4rem 1.2rem;border-bottom:1px solid var(--bd);margin-bottom:.8rem;}
+.lt{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--cyan);letter-spacing:.05em;}
+.ls{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);margin-top:.15rem;}
+.ns{padding:0 .8rem;margin-bottom:.4rem;}
+.nl{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mu);padding:0 .6rem;margin-bottom:.25rem;}
+.ni{display:flex;align-items:center;gap:.6rem;padding:.52rem .7rem;border-radius:var(--rs);font-size:.82rem;color:var(--dim);cursor:pointer;transition:all .18s;user-select:none;}
+.ni:hover{background:var(--s2);color:var(--tx);}.ni.active{background:var(--cyan-dim);color:var(--cyan);}
+.ni .ic{font-size:.95rem;width:1.15rem;text-align:center;}
+.sbb{margin-top:auto;padding:.8rem 1.4rem 0;border-top:1px solid var(--bd);}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.main{margin-left:0!important;}}
+@media(min-width:769px){.main{margin-left:var(--sw);}}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100;}
+.mb{display:none;background:none;border:none;color:var(--tx);font-size:1.3rem;cursor:pointer;padding:.2rem .4rem;border-radius:var(--rs);}
+@media(max-width:768px){.mb{display:block;}}
+.tt{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;white-space:nowrap;}
+.psw{display:flex;background:var(--s2);border:1px solid var(--bd);border-radius:100px;overflow:hidden;flex-shrink:0;}
+.pb{padding:.28rem .8rem;font-size:.7rem;font-family:'DM Sans',sans-serif;color:var(--dim);background:transparent;border:none;cursor:pointer;transition:all .2s;}
+.pb.active{background:var(--cyan-dim);color:var(--cyan);}
+.sw{flex:1;max-width:380px;position:relative;}
+.si-w{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.42rem 1rem .42rem 2.1rem;font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;transition:border-color .2s;}
+.si-w::placeholder{color:var(--mu);}.si-w:focus{border-color:var(--cyan);}
+.si{position:absolute;left:.72rem;top:50%;transform:translateY(-50%);font-size:.75rem;color:var(--mu);}
+.tr{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+.tbb{background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.28rem .75rem;font-size:.7rem;color:var(--dim);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.tbb:hover{border-color:var(--cyan);color:var(--cyan);}
+.bpp{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.bpp:hover{opacity:.85;}
+.content{padding:1.5rem;overflow-y:auto;flex:1;}
+.page{display:none;animation:fadeIn .22s ease;}.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* KPI */
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.2rem;}
+@media(max-width:900px){.kgrid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.kgrid{gap:.6rem;}}
+.kc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem 1.2rem;box-shadow:var(--sh);}
+.kl{font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem;}
+.kv{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;line-height:1;color:var(--tx);}
+.kd{margin-top:.35rem;font-size:.7rem;color:var(--mu);}
+.kd.up{color:var(--green);}.kd.dn{color:var(--red);}.kd.wa{color:var(--orange);}
+/* PAGE HEADER */
+.phd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.6rem;}
+.phd h1{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;}
+.phd-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+/* CARD */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:1rem;}
+.ch{padding:.9rem 1.2rem .75rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:.5rem;}
+.ct{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;}
+.ca{font-size:.68rem;color:var(--cyan);cursor:pointer;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.r31{display:grid;grid-template-columns:2fr 1fr;gap:1rem;}
+@media(max-width:768px){.r2,.r31{grid-template-columns:1fr;}}
+/* TABLE */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:500px;}
+th{text-align:left;font-size:.61rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);padding:.65rem 1rem;background:var(--s2);border-bottom:1px solid var(--bd);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s;}
+th:hover{color:var(--cyan);}
+th .si2{opacity:.4;margin-left:.3rem;font-size:.65rem;}
+th.sa .si2::after{content:'▲';}th.sd .si2::after{content:'▼';}th:not(.sa):not(.sd) .si2::after{content:'⇅';}
+td{padding:.68rem 1rem;font-size:.78rem;border-bottom:1px solid var(--bd);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:.15rem .55rem;border-radius:100px;font-size:.63rem;font-weight:500;white-space:nowrap;}
+.bn{background:rgba(41,172,217,.15);color:var(--cyan);}
+.bq{background:rgba(255,149,0,.15);color:var(--orange);}
+.bp2{background:rgba(175,82,222,.15);color:var(--purple);}
+.bw{background:rgba(52,199,89,.15);color:var(--green);}
+.bl{background:rgba(255,59,48,.15);color:var(--red);}
+.bng{background:rgba(255,107,53,.15);color:#ff6b35;}
+.bdr{background:rgba(255,255,255,.07);color:var(--mu);}
+/* PIPELINE KANBAN */
+.kanban-board{display:flex;gap:0;overflow-x:auto;padding:1rem 1.2rem;-webkit-overflow-scrolling:touch;}
+.k-col{min-width:175px;flex:1;padding:0 .45rem;}
+.k-col.drag-over .k-drop-zone{border-color:var(--cyan);background:var(--cyan-dim);}
+.k-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
+.k-name{font-size:.65rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);}
+.k-cnt{font-family:'DM Mono',monospace;font-size:.67rem;color:var(--mu);background:var(--s2);padding:.08rem .38rem;border-radius:100px;}
+.k-bar{height:3px;border-radius:2px;margin-bottom:.7rem;opacity:.7;}
+.k-drop-zone{min-height:60px;border:2px dashed transparent;border-radius:var(--rs);transition:border-color .18s,background .18s;padding:.2rem;}
+.k-card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.75rem;margin-bottom:.5rem;cursor:grab;transition:border-color .18s,transform .15s,opacity .18s,box-shadow .18s;}
+.k-card:hover{border-color:var(--cyan);transform:translateY(-1px);}
+.k-card.dragging{opacity:.35;cursor:grabbing;transform:scale(.97);}
+.k-card.drag-placeholder{background:var(--cyan-dim);border:2px dashed var(--cyan);height:60px;pointer-events:none;}
+.k-card-name{font-size:.78rem;font-weight:500;margin-bottom:.2rem;}
+.k-card-co{font-size:.68rem;color:var(--mu);margin-bottom:.45rem;}
+.k-card-ft{display:flex;align-items:center;justify-content:space-between;}
+.k-card-val{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--cyan);}
+.k-card-stars{font-size:.62rem;letter-spacing:-.05em;}
+.k-drag-handle{position:absolute;top:.5rem;right:.5rem;font-size:.7rem;color:var(--mu);opacity:0;transition:opacity .15s;}
+.k-card:hover .k-drag-handle{opacity:1;}
+.k-card{position:relative;}
+/* ACTIVITIES */
+.act-list{padding:0 1.2rem;}
+.act-item{display:flex;gap:.7rem;padding:.8rem 0;border-bottom:1px solid var(--bd);align-items:flex-start;cursor:pointer;}
+.act-item:hover{opacity:.8;}.act-item:last-child{border-bottom:none;}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.3rem;}
+.act-info{flex:1;min-width:0;}
+.act-title{font-size:.78rem;font-weight:500;margin-bottom:.18rem;}
+.act-meta{font-size:.68rem;color:var(--mu);}
+.act-date{font-family:'DM Mono',monospace;font-size:.66rem;white-space:nowrap;}
+/* FUNNEL */
+.funnel-wrap{padding:1rem 1.2rem;}
+.f-stage{margin-bottom:.45rem;}
+.f-row{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:.2rem;color:var(--dim);}
+.f-bg{background:var(--s2);border-radius:4px;overflow:hidden;height:20px;}
+.f-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:.5rem;font-size:.66rem;font-family:'DM Mono',monospace;color:rgba(255,255,255,.8);transition:width 1s cubic-bezier(.16,1,.3,1);}
+/* CHART */
+.cw{padding:.8rem 1.2rem 1.2rem;height:220px;position:relative;}
+/* AVATAR */
+.av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:600;flex-shrink:0;color:#fff;}
+/* SEARCH IN CARD */
+.cs{padding:.6rem 1.2rem;border-bottom:1px solid var(--bd);position:relative;}
+.cs input{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.38rem .9rem .38rem 1.9rem;font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;transition:border-color .2s;}
+.cs input:focus{border-color:var(--cyan);}.cs input::placeholder{color:var(--mu);}
+.cs .si{position:absolute;left:1.65rem;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--mu);}
+/* DETAIL */
+.detail-back{display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--cyan);font-size:.8rem;margin-bottom:1.2rem;width:fit-content;}
+.detail-back:hover{opacity:.75;}
+.detail-header{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:1.4rem 1.6rem;margin-bottom:1rem;box-shadow:var(--sh);}
+.detail-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.3rem;}
+.detail-sub{font-size:.78rem;color:var(--dim);}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem;}
+@media(max-width:768px){.detail-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.detail-grid{grid-template-columns:1fr;}}
+.df{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);padding:.8rem 1rem;}
+.df-l{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);margin-bottom:.3rem;}
+.df-v{font-size:.84rem;color:var(--tx);font-weight:500;}
+.df-v.mono{font-family:'DM Mono',monospace;}
+/* TIMELINE */
+.tl{padding:0 1.2rem;}
+.tl-item{display:flex;gap:.8rem;padding:.8rem 0;border-bottom:1px solid var(--bd);align-items:flex-start;}
+.tl-item:last-child{border-bottom:none;}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.28rem;}
+.tl-info{flex:1;}.tl-t{font-size:.8rem;font-weight:500;margin-bottom:.15rem;}
+.tl-m{font-size:.7rem;color:var(--mu);}
+/* PROB BAR */
+.prob-bar{display:flex;align-items:center;gap:.4rem;}
+.prob-track{flex:1;background:var(--s2);border-radius:3px;height:5px;overflow:hidden;min-width:40px;}
+.prob-fill{height:100%;border-radius:3px;}
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1.4rem;}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.form-grid.cols1{grid-template-columns:1fr;}
+@media(max-width:700px){.form-grid,.form-grid.cols3{grid-template-columns:1fr;}}
+.fg{display:flex;flex-direction:column;gap:.35rem;}
+.fg.span2{grid-column:span 2;}.fg.span3{grid-column:span 3;}
+@media(max-width:700px){.fg.span2,.fg.span3{grid-column:span 1;}}
+.form-label{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);font-weight:500;}
+.form-label .req{color:var(--red);margin-left:.2rem;}
+.form-input,.form-select,.form-textarea{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.55rem .8rem;font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;transition:border-color .22s,box-shadow .22s;width:100%;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,172,217,.12);}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--mu);}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.form-select option{background:var(--sf);}
+.form-divider{grid-column:1/-1;border:none;border-top:1px solid var(--bd);margin:.2rem 0;}
+.form-section-title{grid-column:1/-1;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;}
+.form-actions{padding:1rem 1.4rem;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:flex-end;gap:.7rem;flex-wrap:wrap;}
+.btn-cancel{background:transparent;border:1px solid var(--bd);border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;color:var(--dim);cursor:pointer;transition:all .2s;}
+.btn-cancel:hover{border-color:var(--tx);color:var(--tx);}
+.btn-save{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.btn-save:hover{opacity:.85;}
+.btn-draft{background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;color:var(--dim);cursor:pointer;transition:all .2s;}
+.btn-draft:hover{border-color:var(--cyan);color:var(--cyan);}
+/* STAR RATING */
+.star-rating{display:flex;gap:.3rem;}
+.star-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--mu);transition:color .15s;padding:0;}
+.star-btn.active{color:var(--orange);}
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--green);color:#fff;padding:.7rem 1.4rem;border-radius:100px;font-size:.82rem;font-weight:500;z-index:999;transform:translateY(4rem);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);}
+.toast.show{transform:translateY(0);opacity:1;}
+/* MOBILE TABLE */
+@media(max-width:600px){
+  .tw table{min-width:unset;}.tw table thead{display:none;}
+  .tw table tr{display:block;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);margin-bottom:.6rem;padding:.7rem;}
+  .tw table tr:hover{background:var(--sf);}
+  .tw table td{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border:none;font-size:.78rem;}
+  .tw table td::before{content:attr(data-label);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-right:.5rem;}
+}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSB()"></div>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sl"><div class="lt">KAIZO</div><div class="ls">CRM</div></div>
+  <div class="ns">
+    <div class="nl">Értékesítés</div>
+    <div class="ni active" onclick="nav('dashboard',this)"><span class="ic">📊</span>Dashboard</div>
+    <div class="ni" onclick="nav('pipeline',this)"><span class="ic">🔀</span>Pipeline</div>
+    <div class="ni" onclick="nav('customers',this)"><span class="ic">👥</span>Ügyfelek</div>
+    <div class="ni" onclick="nav('leads',this)"><span class="ic">📋</span>Leadek</div>
+    <div class="ni" onclick="nav('activities',this)"><span class="ic">📅</span>Teendők</div>
+  </div>
+  <div class="ns" style="margin-top:.4rem">
+    <div class="nl">Riportok</div>
+    <div class="ni" onclick="nav('forecast',this)"><span class="ic">📈</span>Előrejelzés</div>
+    <div class="ni" onclick="nav('team',this)"><span class="ic">🏆</span>Csapat telj.</div>
+  </div>
+  <div class="sbb"><div class="ni" onclick="nav('settings',this)"><span class="ic">⚙️</span>Beállítások</div></div>
+</aside>
+
+<div class="main">
+<header class="topbar">
+  <button class="mb" onclick="toggleSB()">☰</button>
+  <div class="tt" id="tbTitle">CRM Dashboard</div>
+  <div class="sw"><span class="si">🔍</span><input class="si-w" type="text" placeholder="Keresés..." id="gSearch" oninput="gSearchFn()"></div>
+  <div class="tr"><button class="tbb" onclick="toggleTheme()">🌙</button></div>
+</header>
+<div class="content">
+
+<!-- ══ DASHBOARD ══ -->
+<div class="page active" id="pg-dashboard">
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Aktív Leadek</div><div class="kv" id="dk-leads">1,284</div><div class="kd up">▲ 12% előző hó</div></div>
+    <div class="kc"><div class="kl">Pipeline érték</div><div class="kv" id="dk-pipe">48M</div><div class="kd up">▲ 8.4%</div></div>
+    <div class="kc"><div class="kl">Win / Lost</div><div class="kv" id="dk-win">34/12</div><div class="kd up">▲ 74% win rate</div></div>
+    <div class="kc"><div class="kl">Átl. zárási idő</div><div class="kv" id="dk-close">18n</div><div class="kd dn">▼ 2 nap lassabb</div></div>
+  </div>
+  <div class="r2">
+    <div class="card"><div class="ch"><span class="ct">Értékesítési Funnel</span></div><div class="funnel-wrap" id="dFunnel"></div></div>
+    <div class="card"><div class="ch"><span class="ct">Havi Bevétel Trend</span></div><div class="cw"><canvas id="dChart"></canvas></div></div>
+  </div>
+  <div class="card"><div class="ch"><span class="ct">Legutóbbi teendők</span><span class="ca" onclick="nav('activities',null)">Összes →</span></div><div class="act-list" id="dActs"></div></div>
+</div>
+
+<!-- ══ PIPELINE ══ -->
+<div class="page" id="pg-pipeline">
+  <div class="phd">
+    <h1>Pipeline — Kanban</h1>
+    <div class="phd-right">
+      <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+      <button class="bpp" onclick="nav('new-lead',null)">+ Új lehetőség</button>
+    </div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Lehetőségek</div><div class="kv" id="pipe-cnt">0</div><div class="kd up">aktív</div></div>
+    <div class="kc"><div class="kl">Összes érték</div><div class="kv" id="pipe-val">0</div><div class="kd">Ft</div></div>
+    <div class="kc"><div class="kl">Átl. valószínűség</div><div class="kv" id="pipe-prob">0%</div><div class="kd">avg</div></div>
+    <div class="kc"><div class="kl">Megnyert (30 nap)</div><div class="kv" id="pipe-won">34</div><div class="kd up">▲ 12%</div></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Kanban tábla</span>
+      <input id="pSearch" oninput="renderPipeline()" type="text" placeholder="Szűrés..." style="background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.28rem .7rem;font-size:.74rem;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;width:140px;">
+    </div>
+    <div class="kanban-board" id="pBoard"></div>
+  </div>
+</div>
+
+<!-- ══ ÜGYFELEK ══ -->
+<div class="page" id="pg-customers">
+  <div class="phd">
+    <h1>Ügyfelek</h1>
+    <div class="phd-right">
+      <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+      <button class="bpp" onclick="nav('new-customer',null)">+ Új ügyfél</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="cSearch" oninput="renderCust()" placeholder="Keresés: név, email, város..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('cust','name',this)">Ügyfél <span class="si2"></span></th>
+        <th onclick="srt('cust','email',this)">Email <span class="si2"></span></th>
+        <th onclick="srt('cust','phone',this)">Telefon <span class="si2"></span></th>
+        <th onclick="srt('cust','city',this)">Város <span class="si2"></span></th>
+        <th onclick="srt('cust','revenue',this)">Bevétel <span class="si2"></span></th>
+        <th onclick="srt('cust','deals',this)">Ügyletek <span class="si2"></span></th>
+        <th>Státusz</th>
+      </tr></thead>
+      <tbody id="cBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ LEADEK ══ -->
+<div class="page" id="pg-leads">
+  <div class="phd">
+    <h1>Leadek & Lehetőségek</h1>
+    <div class="phd-right">
+      <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+      <button class="bpp" onclick="nav('new-lead',null)">+ Új lead</button>
+    </div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Összes</div><div class="kv" id="lCnt">0</div><div class="kd up">aktív</div></div>
+    <div class="kc"><div class="kl">Pipeline érték</div><div class="kv" id="lVal">0</div><div class="kd">Ft</div></div>
+    <div class="kc"><div class="kl">Átl. valószínűség</div><div class="kv" id="lProb">0%</div><div class="kd">avg</div></div>
+    <div class="kc"><div class="kl">Lejárt határidő</div><div class="kv" id="lOver">0</div><div class="kd wa">⚠ figyelem</div></div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="lSearch" oninput="renderLeads()" placeholder="Keresés: lead, ügyfél, értékesítő..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('leads','partner_name',this)">Ügyfél <span class="si2"></span></th>
+        <th onclick="srt('leads','name',this)">Lehetőség <span class="si2"></span></th>
+        <th onclick="srt('leads','user',this)">Értékesítő <span class="si2"></span></th>
+        <th onclick="srt('leads','stage',this)">Fázis <span class="si2"></span></th>
+        <th onclick="srt('leads','expected_revenue',this)">Várható bev. <span class="si2"></span></th>
+        <th onclick="srt('leads','probability',this)">Valószínűség <span class="si2"></span></th>
+        <th onclick="srt('leads','date_deadline',this)">Határidő <span class="si2"></span></th>
+        <th onclick="srt('leads','priority',this)">Prio <span class="si2"></span></th>
+      </tr></thead>
+      <tbody id="lBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ TEENDŐK ══ -->
+<div class="page" id="pg-activities">
+  <div class="phd">
+    <h1>Teendők & Aktivitások</h1>
+    <div class="phd-right">
+      <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+      <button class="bpp" onclick="nav('new-activity',null)">+ Új teendő</button>
+    </div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Ma esedékes</div><div class="kv" id="act-today">3</div><div class="kd wa">⚠ azonnali</div></div>
+    <div class="kc"><div class="kl">Lejárt</div><div class="kv" id="act-over">1</div><div class="kd dn">figyelj rá</div></div>
+    <div class="kc"><div class="kl">Ezen a héten</div><div class="kv" id="act-week">7</div><div class="kd up">aktív</div></div>
+    <div class="kc"><div class="kl">Elvégzett (30n)</div><div class="kv" id="act-done">42</div><div class="kd up">▲ 18%</div></div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="aSearch" oninput="renderActs()" placeholder="Keresés: aktivitás, ügyfél, lead..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('acts','type_name',this)">Típus <span class="si2"></span></th>
+        <th onclick="srt('acts','summary',this)">Leírás <span class="si2"></span></th>
+        <th onclick="srt('acts','lead',this)">Lead <span class="si2"></span></th>
+        <th onclick="srt('acts','user',this)">Felelős <span class="si2"></span></th>
+        <th onclick="srt('acts','deadline',this)">Határidő <span class="si2"></span></th>
+        <th>Állapot</th>
+      </tr></thead>
+      <tbody id="aBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ ELŐREJELZÉS ══ -->
+<div class="page" id="pg-forecast">
+  <div class="phd">
+    <h1>Értékesítési Előrejelzés</h1>
+    <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl" id="fc-l0">Q1 forecast</div><div class="kv" id="fc-v0">62M</div><div class="kd up" id="fc-d0">▲ 94% teljesítve</div></div>
+    <div class="kc"><div class="kl" id="fc-l1">Q2 várható</div><div class="kv" id="fc-v1">78M</div><div class="kd up" id="fc-d1">▲ optimista</div></div>
+    <div class="kc"><div class="kl">Éves terv</div><div class="kv">240M</div><div class="kd">cél</div></div>
+    <div class="kc"><div class="kl" id="fc-l3">YTD teljesítés</div><div class="kv" id="fc-v3">26%</div><div class="kd up" id="fc-d3">▲ ütemterv szerint</div></div>
+  </div>
+  <div class="r2">
+    <div class="card"><div class="ch"><span class="ct">Forecast vs Tényleges</span></div><div class="cw"><canvas id="fChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct">Pipeline fázisonként</span></div><div class="cw"><canvas id="sChart"></canvas></div></div>
+  </div>
+  <div class="card"><div class="ch"><span class="ct">Valószínűsített bevétel — értékesítőnként</span></div><div class="funnel-wrap" id="fByUser"></div></div>
+</div>
+
+<!-- ══ CSAPAT ══ -->
+<div class="page" id="pg-team">
+  <div class="phd">
+    <h1>Csapat Teljesítmény</h1>
+    <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl" id="tm-l0">Összes lead</div><div class="kv" id="tm-v0">138</div><div class="kd up">aktív</div></div>
+    <div class="kc"><div class="kl">Megnyert</div><div class="kv" id="tm-v1">42</div><div class="kd up">win</div></div>
+    <div class="kc"><div class="kl">Elveszett</div><div class="kv" id="tm-v2">18</div><div class="kd dn">lost</div></div>
+    <div class="kc"><div class="kl">Átl. Win Rate</div><div class="kv" id="tm-v3">70%</div><div class="kd up">csapat avg</div></div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="tmSearch" oninput="renderTeam()" placeholder="Keresés..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('team','name',this)">Értékesítő <span class="si2"></span></th>
+        <th onclick="srt('team','leads',this)">Leadek <span class="si2"></span></th>
+        <th onclick="srt('team','won',this)">Megnyert <span class="si2"></span></th>
+        <th onclick="srt('team','lost',this)">Elveszett <span class="si2"></span></th>
+        <th onclick="srt('team','winrate',this)">Win Rate <span class="si2"></span></th>
+        <th onclick="srt('team','revenue',this)">Bevétel <span class="si2"></span></th>
+        <th onclick="srt('team','avg_deal',this)">Átl. ügylet <span class="si2"></span></th>
+      </tr></thead>
+      <tbody id="tmBody"></tbody>
+    </table></div>
+  </div>
+  <div class="r2">
+    <div class="card"><div class="ch"><span class="ct">Bevétel értékesítőnként</span></div><div class="cw"><canvas id="tmChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct">Win Rate összehasonlítás</span></div><div class="cw"><canvas id="wrChart"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══ BEÁLLÍTÁSOK ══ -->
+<div class="page" id="pg-settings">
+  <div class="phd"><h1>Beállítások</h1></div>
+  <div class="r2">
+    <div class="card"><div class="ch"><span class="ct">Megjelenés</span></div>
+      <div style="padding:1.2rem;display:flex;flex-direction:column;gap:1rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.84rem">Téma</span><button class="tbb" onclick="toggleTheme()">Váltás</button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.84rem">Nyelv</span>
+          <select style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.3rem .6rem;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;"><option>Magyar</option><option>English</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">
+        <span class="ct">Odoo API Kapcsolat</span>
+        <span id="conn-badge" class="badge bdr">⚫ Nincs kapcsolat</span>
+      </div>
+      <div style="padding:1.2rem;display:flex;flex-direction:column;gap:.8rem;">
+        <div>
+          <div style="font-size:.68rem;color:var(--mu);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.1em">Odoo URL</div>
+          <input id="cfg-url" type="text" placeholder="https://yourcompany.odoo.com" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.4rem .7rem;font-size:.8rem;color:var(--tx);font-family:'DM Mono',monospace;outline:none;">
+        </div>
+        <div>
+          <div style="font-size:.68rem;color:var(--mu);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.1em">Adatbázis neve</div>
+          <input id="cfg-db" type="text" placeholder="your_database" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.4rem .7rem;font-size:.8rem;color:var(--tx);font-family:'DM Mono',monospace;outline:none;">
+        </div>
+        <div>
+          <div style="font-size:.68rem;color:var(--mu);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.1em">Felhasználónév (email)</div>
+          <input id="cfg-user" type="email" placeholder="admin@yourcompany.com" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.4rem .7rem;font-size:.8rem;color:var(--tx);font-family:'DM Mono',monospace;outline:none;">
+        </div>
+        <div>
+          <div style="font-size:.68rem;color:var(--mu);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.1em">API Key / Jelszó</div>
+          <input id="cfg-key" type="password" placeholder="••••••••••••" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.4rem .7rem;font-size:.8rem;color:var(--tx);font-family:'DM Mono',monospace;outline:none;">
+        </div>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="bpp" onclick="odooConnect()">🔌 Kapcsolódás & Betöltés</button>
+          <button style="background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;color:var(--dim);cursor:pointer;" onclick="odooTestConn()">Kapcsolat tesztelése</button>
+        </div>
+        <div id="conn-log" style="font-size:.74rem;color:var(--mu);font-family:'DM Mono',monospace;line-height:1.6;display:none"></div>
+      </div>
+    </div>
+  </div>
+  <!-- API Docs -->
+  <div class="card">
+    <div class="ch"><span class="ct">📖 Integráció — hogyan működik?</span></div>
+    <div style="padding:1.2rem;display:flex;flex-direction:column;gap:1rem;">
+      <div style="background:var(--s2);border-radius:var(--rs);padding:1rem;font-size:.78rem;line-height:1.7;color:var(--dim)">
+        <div style="font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:var(--tx);margin-bottom:.6rem">🔄 Adatfolyam</div>
+        <div>1. <strong style="color:var(--tx)">Kapcsolódás</strong> → Odoo session auth (<code style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">/web/dataset/call_kw</code>)</div>
+        <div>2. <strong style="color:var(--tx)">Betöltés</strong> → <code style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">crm.lead.search_read()</code> → LEADS tömb feltöltése</div>
+        <div>3. <strong style="color:var(--tx)">Létrehozás</strong> → <code style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">crm.lead.create()</code> → visszakapja az új ID-t → hozzáadja a LEADS tömbhöz</div>
+        <div>4. <strong style="color:var(--tx)">Fázis mozgatás</strong> → <code style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">crm.lead.write({id}, {stage_id})</code></div>
+        <div>5. <strong style="color:var(--tx)">Demo mód</strong> → Ha nincs kapcsolat, lokális adatokkal dolgozik, semmi nem veszik el munkamenetenként</div>
+      </div>
+      <div style="background:var(--s2);border-radius:var(--rs);padding:1rem">
+        <div style="font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:var(--tx);margin-bottom:.6rem">📋 Szükséges Odoo jogosultságok</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.76rem;color:var(--dim)">
+          <div>✅ crm.lead — read, write, create</div>
+          <div>✅ res.partner — read, write, create</div>
+          <div>✅ crm.stage — read</div>
+          <div>✅ mail.activity — read, write, create</div>
+          <div>✅ crm.team — read</div>
+          <div>✅ res.users — read</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DETAIL ══ -->
+<div class="page" id="pg-detail">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div id="detailContent"></div>
+</div>
+
+<!-- ══ ÚJ LEAD / LEHETŐSÉG ══ -->
+<div class="page" id="pg-new-lead">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>📋 Új Lead / Lehetőség</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Alapadatok</span><span style="font-size:.72rem;color:var(--mu)">crm.lead</span></div>
+    <div class="form-grid cols3">
+      <div class="fg span2">
+        <label class="form-label">Lehetőség neve <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="pl. ERP bevezetés — Kovács Bt.">
+      </div>
+      <div class="fg">
+        <label class="form-label">Típus</label>
+        <select class="form-select"><option value="opportunity">Lehetőség</option><option value="lead">Lead</option></select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Ügyfél / Partner <span class="req">*</span></label>
+        <select class="form-select">
+          <option value="">— Válassz ügyfelet —</option>
+          <option>Kovács Bt.</option><option>Tech Kft.</option><option>Gyártó Zrt.</option>
+          <option>Logisztika Kft.</option><option>Holding Group</option><option>Smart Zrt.</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Kapcsolattartó neve</label>
+        <input class="form-input" type="text" placeholder="pl. Kovács János">
+      </div>
+      <div class="fg">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" placeholder="kapcsolat@ceg.hu">
+      </div>
+      <hr class="form-divider">
+      <div class="form-section-title">Értékesítési adatok</div>
+      <div class="fg">
+        <label class="form-label">Értékesítő <span class="req">*</span></label>
+        <select class="form-select">
+          <option>Nagy Ádám</option><option>Balogh Éva</option><option>Fekete Péter</option><option>Szabó Rita</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Értékesítési fázis <span class="req">*</span></label>
+        <select class="form-select">
+          <option>Új Lead</option><option>Minősített</option><option>Ajánlat</option><option>Tárgyalás</option><option>Megnyert</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Csapat</label>
+        <select class="form-select"><option>Értékesítési csapat A</option><option>Enterprise csapat</option><option>SMB csapat</option></select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Várható bevétel (Ft) <span class="req">*</span></label>
+        <input class="form-input" type="number" placeholder="0" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="fg">
+        <label class="form-label">Valószínűség (%)</label>
+        <input class="form-input" type="number" placeholder="0" min="0" max="100" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="fg">
+        <label class="form-label">Várható zárás dátuma</label>
+        <input class="form-input" type="date" value="2025-04-30">
+      </div>
+      <div class="fg">
+        <label class="form-label">Prioritás</label>
+        <div class="star-rating" id="leadPriorityStars">
+          <button class="star-btn" onclick="setStars(1)">☆</button>
+          <button class="star-btn" onclick="setStars(2)">☆</button>
+          <button class="star-btn" onclick="setStars(3)">☆</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="form-label">Forrás</label>
+        <select class="form-select"><option>Web</option><option>Hideg megkeresés</option><option>Ajánlás</option><option>Esemény</option><option>Email kampány</option></select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Telefon</label>
+        <input class="form-input" type="tel" placeholder="+36 1 234 5678" style="font-family:'DM Mono',monospace">
+      </div>
+      <hr class="form-divider">
+      <div class="fg span3">
+        <label class="form-label">Megjegyzés / Leírás</label>
+        <textarea class="form-textarea" placeholder="Az ügyfél igényeinek rövid leírása, kontextus..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-draft" onclick="showToast('Lead piszkozatként mentve')">Piszkozat</button>
+    <button class="btn-save" onclick="saveNewLead()">Mentés & Megnyitás</button>
+  </div>
+</div>
+
+<!-- ══ ÚJ ÜGYFÉL ══ -->
+<div class="page" id="pg-new-customer">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>👥 Új ügyfél rögzítése</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Céges adatok</span><span style="font-size:.72rem;color:var(--mu)">res.partner · customer_rank &gt; 0</span></div>
+    <div class="form-grid cols3">
+      <div class="fg span2">
+        <label class="form-label">Cégnév <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="pl. Kovács Bt.">
+      </div>
+      <div class="fg">
+        <label class="form-label">Adószám</label>
+        <input class="form-input" type="text" placeholder="12345678-2-42" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="fg">
+        <label class="form-label">Kapcsolattartó neve</label>
+        <input class="form-input" type="text" placeholder="pl. Kovács János">
+      </div>
+      <div class="fg">
+        <label class="form-label">Beosztás</label>
+        <input class="form-input" type="text" placeholder="pl. Ügyvezető">
+      </div>
+      <div class="fg">
+        <label class="form-label">Email <span class="req">*</span></label>
+        <input class="form-input" type="email" placeholder="info@ceg.hu">
+      </div>
+      <div class="fg">
+        <label class="form-label">Telefon</label>
+        <input class="form-input" type="tel" placeholder="+36 1 234 5678" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="fg">
+        <label class="form-label">Weboldal</label>
+        <input class="form-input" type="url" placeholder="https://ceg.hu">
+      </div>
+      <div class="fg">
+        <label class="form-label">Iparág</label>
+        <select class="form-select">
+          <option>IT / Technológia</option><option>Gyártás</option><option>Kereskedelem</option>
+          <option>Logisztika</option><option>Pénzügy</option><option>Egészségügy</option><option>Egyéb</option>
+        </select>
+      </div>
+      <hr class="form-divider">
+      <div class="form-section-title">Cím</div>
+      <div class="fg span2">
+        <label class="form-label">Utca, házszám</label>
+        <input class="form-input" type="text" placeholder="pl. Fő utca 12.">
+      </div>
+      <div class="fg">
+        <label class="form-label">Irányítószám</label>
+        <input class="form-input" type="text" placeholder="1234" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="fg">
+        <label class="form-label">Város <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="Budapest">
+      </div>
+      <div class="fg">
+        <label class="form-label">Ország</label>
+        <select class="form-select"><option>Magyarország</option><option>Ausztria</option><option>Németország</option><option>Románia</option></select>
+      </div>
+      <hr class="form-divider">
+      <div class="form-section-title">CRM beállítások</div>
+      <div class="fg">
+        <label class="form-label">Felelős értékesítő</label>
+        <select class="form-select"><option>Nagy Ádám</option><option>Balogh Éva</option><option>Fekete Péter</option><option>Szabó Rita</option></select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Ügyfél státusza</label>
+        <select class="form-select"><option value="prospect">Prospect</option><option value="active">Aktív ügyfél</option></select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Fizetési feltétel</label>
+        <select class="form-select"><option>30 nap nettó</option><option>15 nap nettó</option><option>Azonnali</option></select>
+      </div>
+      <div class="fg span3">
+        <label class="form-label">Megjegyzés</label>
+        <textarea class="form-textarea" placeholder="Belső megjegyzés az ügyfélről..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-save" onclick="saveNewCustomer()">Ügyfél mentése</button>
+  </div>
+</div>
+
+<!-- ══ ÚJ TEENDŐ ══ -->
+<div class="page" id="pg-new-activity">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>📅 Új teendő / aktivitás</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Aktivitás adatai</span><span style="font-size:.72rem;color:var(--mu)">mail.activity</span></div>
+    <div class="form-grid cols3">
+      <div class="fg">
+        <label class="form-label">Típus <span class="req">*</span></label>
+        <select class="form-select">
+          <option value="call">📞 Hívás</option>
+          <option value="email">📧 Email</option>
+          <option value="meeting">📅 Meeting</option>
+          <option value="todo">✅ Teendő</option>
+          <option value="sign">✍️ Aláírás</option>
+          <option value="reminder">🔔 Emlékeztető</option>
+        </select>
+      </div>
+      <div class="fg span2">
+        <label class="form-label">Cím / Leírás <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="pl. Demo bemutató — ERP modul">
+      </div>
+      <div class="fg">
+        <label class="form-label">Kapcsolódó Lead / Lehetőség</label>
+        <select class="form-select">
+          <option value="">— Válassz leadet —</option>
+          <option>ERP bevezetés — Kovács Bt.</option>
+          <option>Robot automatizálás — Gyártó Zrt.</option>
+          <option>CRM integráció — Tech Kft.</option>
+          <option>IoT platform — Smart Zrt.</option>
+          <option>HR rendszer — Logisztika Kft.</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Ügyfél / Partner</label>
+        <select class="form-select">
+          <option value="">— Válassz partnert —</option>
+          <option>Kovács Bt.</option><option>Tech Kft.</option><option>Gyártó Zrt.</option>
+          <option>Logisztika Kft.</option><option>Smart Zrt.</option><option>Holding Group</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Felelős <span class="req">*</span></label>
+        <select class="form-select">
+          <option>Nagy Ádám</option><option>Balogh Éva</option><option>Fekete Péter</option><option>Szabó Rita</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="form-label">Határidő <span class="req">*</span></label>
+        <input class="form-input" type="date" value="2025-03-25">
+      </div>
+      <div class="fg">
+        <label class="form-label">Időpont (opcionális)</label>
+        <input class="form-input" type="time" value="10:00">
+      </div>
+      <div class="fg">
+        <label class="form-label">Időtartam</label>
+        <select class="form-select"><option>30 perc</option><option>1 óra</option><option>1.5 óra</option><option>2 óra</option><option>egész nap</option></select>
+      </div>
+      <hr class="form-divider">
+      <div class="fg span3">
+        <label class="form-label">Megjegyzés / Napirend</label>
+        <textarea class="form-textarea" placeholder="Mit kell megbeszélni, előkészíteni..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-save" onclick="saveNewActivity()">Mentés & Meghívó küldése</button>
+  </div>
+</div>
+
+</div></div></div>
+
+<script>
+const TODAY = '2025-03-20';
+const AVC = {'Nagy Ádám':'#29acd9','Balogh Éva':'#af52de','Fekete Péter':'#ff9500','Szabó Rita':'#34c759'};
+const STAGES = [{n:'Új Lead',c:'#29acd9'},{n:'Minősített',c:'#ff9500'},{n:'Ajánlat',c:'#af52de'},{n:'Tárgyalás',c:'#ff6b35'},{n:'Megnyert',c:'#34c759'}];
+const SBG = {'Új Lead':'bn','Minősített':'bq','Ajánlat':'bp2','Tárgyalás':'bng','Megnyert':'bw','Elveszett':'bl'};
+let activePeriod = 'Q1';
+let detailBackPage = 'leads';
+
+/* ══ DATA ══ */
+let LEADS = [
+  {id:1,name:'ERP bevezetés',partner_name:'Kovács Bt.',email:'info@kovacs.hu',phone:'+36 1 234 5678',stage:'Új Lead',user:'Nagy Ádám',expected_revenue:2400000,probability:20,priority:1,date_deadline:'2025-03-28',source:'Web',notes:'Érdeklődnek az ERP modulok iránt, elsősorban pénzügy és HR.'},
+  {id:2,name:'CRM integráció',partner_name:'Tech Kft.',email:'sales@tech.hu',phone:'+36 20 345 6789',stage:'Minősített',user:'Balogh Éva',expected_revenue:1850000,probability:45,priority:2,date_deadline:'2025-03-22',source:'Ajánlás',notes:'Meglévő Salesforce rendszerüket szeretnék lecserélni.'},
+  {id:3,name:'Robot automatizálás',partner_name:'Gyártó Zrt.',email:'ceo@gyarto.hu',phone:'+36 30 456 7890',stage:'Ajánlat',user:'Nagy Ádám',expected_revenue:6200000,probability:65,priority:3,date_deadline:'2025-03-25',source:'Esemény',notes:'Gyártósori automatizálás, 3 robot egység, implementáció Q2.'},
+  {id:4,name:'HR rendszer',partner_name:'Logisztika Kft.',email:'hr@logisztika.hu',phone:'+36 70 567 8901',stage:'Tárgyalás',user:'Fekete Péter',expected_revenue:3100000,probability:80,priority:2,date_deadline:'2025-03-30',source:'Hideg megkeresés',notes:'250 fős cég, bérszámfejtés + jelenléti nyilvántartás.'},
+  {id:5,name:'Készletkezelés',partner_name:'Retail Zrt.',email:'info@retail.hu',phone:'+36 1 678 9012',stage:'Új Lead',user:'Balogh Éva',expected_revenue:980000,probability:15,priority:0,date_deadline:'2025-04-05',source:'Web',notes:''},
+  {id:6,name:'Pénzügyi modul',partner_name:'Holding Group',email:'cfo@holding.hu',phone:'+36 30 789 0123',stage:'Megnyert',user:'Nagy Ádám',expected_revenue:8500000,probability:100,priority:3,date_deadline:'2025-03-20',source:'Ajánlás',notes:'Szerződés aláírva, implementáció megkezdve.'},
+  {id:7,name:'Webshop integráció',partner_name:'E-com Kft.',email:'dev@ecom.hu',phone:'+36 20 890 1234',stage:'Minősített',user:'Fekete Péter',expected_revenue:1200000,probability:40,priority:1,date_deadline:'2025-04-10',source:'Email kampány',notes:''},
+  {id:8,name:'Projekt mgmt',partner_name:'Builder Zrt.',email:'pm@builder.hu',phone:'+36 1 901 2345',stage:'Ajánlat',user:'Balogh Éva',expected_revenue:2750000,probability:60,priority:2,date_deadline:'2025-04-02',source:'Web',notes:''},
+  {id:9,name:'Adatmigrálás',partner_name:'Legacy Corp',email:'it@legacy.hu',phone:'+36 70 012 3456',stage:'Elveszett',user:'Szabó Rita',expected_revenue:1500000,probability:0,priority:1,date_deadline:'2025-03-15',source:'Web',notes:'Az ügyfél a versenytársat választotta.'},
+  {id:10,name:'IoT platform',partner_name:'Smart Zrt.',email:'cto@smart.hu',phone:'+36 30 123 4567',stage:'Tárgyalás',user:'Szabó Rita',expected_revenue:4800000,probability:70,priority:3,date_deadline:'2025-04-15',source:'Esemény',notes:'Gyártósori IoT szenzorok + dashboard integráció.'},
+];
+let CUST = [
+  {id:1,name:'Kovács Bt.',email:'info@kovacs.hu',phone:'+36 1 234 5678',city:'Budapest',revenue:12400000,deals:3,status:'active',contact:'Kovács János',industry:'IT / Technológia'},
+  {id:2,name:'Tech Kft.',email:'sales@tech.hu',phone:'+36 20 345 6789',city:'Debrecen',revenue:8500000,deals:2,status:'active',contact:'Tóth Péter',industry:'IT / Technológia'},
+  {id:3,name:'Gyártó Zrt.',email:'ceo@gyarto.hu',phone:'+36 30 456 7890',city:'Győr',revenue:24000000,deals:5,status:'active',contact:'Nagy Imre',industry:'Gyártás'},
+  {id:4,name:'Logisztika Kft.',email:'hr@logisztika.hu',phone:'+36 70 567 8901',city:'Pécs',revenue:6200000,deals:2,status:'active',contact:'Varga Eszter',industry:'Logisztika'},
+  {id:5,name:'Retail Zrt.',email:'info@retail.hu',phone:'+36 1 678 9012',city:'Budapest',revenue:3800000,deals:1,status:'prospect',contact:'Kiss Tamás',industry:'Kereskedelem'},
+  {id:6,name:'Holding Group',email:'cfo@holding.hu',phone:'+36 30 789 0123',city:'Budapest',revenue:48000000,deals:7,status:'active',contact:'Horváth Gábor',industry:'Pénzügy'},
+  {id:7,name:'E-com Kft.',email:'dev@ecom.hu',phone:'+36 20 890 1234',city:'Miskolc',revenue:4200000,deals:2,status:'prospect',contact:'Szabó Anna',industry:'Kereskedelem'},
+  {id:8,name:'Builder Zrt.',email:'pm@builder.hu',phone:'+36 1 901 2345',city:'Székesfehérvár',revenue:9800000,deals:3,status:'active',contact:'Fekete László',industry:'Gyártás'},
+  {id:9,name:'Smart Zrt.',email:'cto@smart.hu',phone:'+36 30 123 4567',city:'Budapest',revenue:15600000,deals:4,status:'active',contact:'Molnár Dávid',industry:'IT / Technológia'},
+  {id:10,name:'Legacy Corp',email:'it@legacy.hu',phone:'+36 70 012 3456',city:'Kecskemét',revenue:2100000,deals:1,status:'lost',contact:'Balogh Sándor',industry:'Egyéb'},
+];
+let ACTS = [
+  {id:1,type:'📞',type_name:'Hívás',summary:'Demo hívás',lead:'Robot automatizálás',partner:'Gyártó Zrt.',user:'Nagy Ádám',deadline:'2025-03-21',status:'due',notes:'Bemutató az ERP + robot modul integrációról.'},
+  {id:2,type:'📧',type_name:'Email',summary:'Ajánlat elküldése',lead:'CRM integráció',partner:'Tech Kft.',user:'Balogh Éva',deadline:'2025-03-22',status:'due',notes:''},
+  {id:3,type:'📅',type_name:'Meeting',summary:'Ügyvezetői meeting',lead:'Pénzügyi modul',partner:'Holding Group',user:'Nagy Ádám',deadline:'2025-03-23',status:'planned',notes:'Szerződés részletek véglegesítése.'},
+  {id:4,type:'✍️',type_name:'Aláírás',summary:'Szerződés aláírás',lead:'HR rendszer',partner:'Logisztika Kft.',user:'Fekete Péter',deadline:'2025-03-24',status:'planned',notes:''},
+  {id:5,type:'🔔',type_name:'Emlékeztető',summary:'Follow-up call',lead:'ERP bevezetés',partner:'Kovács Bt.',user:'Nagy Ádám',deadline:'2025-03-25',status:'planned',notes:''},
+  {id:6,type:'📞',type_name:'Hívás',summary:'Bemutatás — IoT',lead:'IoT platform',partner:'Smart Zrt.',user:'Szabó Rita',deadline:'2025-03-26',status:'planned',notes:''},
+  {id:7,type:'📧',type_name:'Email',summary:'Árajánlat megküldése',lead:'Webshop integráció',partner:'E-com Kft.',user:'Fekete Péter',deadline:'2025-03-19',status:'overdue',notes:'Figyelem: lejárt!'},
+];
+let TEAM = [
+  {id:1,name:'Nagy Ádám',leads:42,won:18,lost:6,winrate:75,revenue:28400000,avg_deal:1577778},
+  {id:2,name:'Balogh Éva',leads:38,won:14,lost:8,winrate:63,revenue:19200000,avg_deal:1371429},
+  {id:3,name:'Fekete Péter',leads:31,won:12,lost:5,winrate:70,revenue:16800000,avg_deal:1400000},
+  {id:4,name:'Szabó Rita',leads:27,won:9,lost:7,winrate:56,revenue:12600000,avg_deal:1400000},
+];
+
+/* ══ HELPERS ══ */
+const fM  = n => (n/1000000).toFixed(2)+'M Ft';
+const fK  = n => n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'E':n;
+const q   = id => (document.getElementById(id)||{value:''}).value.toLowerCase();
+const el  = id => document.getElementById(id);
+const isOverdue = d => d && d < TODAY;
+const dateCell  = d => `<span style="font-family:'DM Mono',monospace;font-size:.74rem;color:${isOverdue(d)?'var(--red)':'var(--tx)'}">${d||'—'}${isOverdue(d)?' ⚠':''}</span>`;
+
+const ACT_STATUS = {
+  due:     '<span class="badge bq">Esedékes</span>',
+  planned: '<span class="badge bn">Tervezett</span>',
+  overdue: '<span class="badge bl">Lejárt</span>',
+  done:    '<span class="badge bw">Kész</span>',
+};
+const CUST_STATUS = {
+  active:  '<span class="badge bw">Aktív</span>',
+  prospect:'<span class="badge bn">Prospect</span>',
+  lost:    '<span class="badge bl">Elveszett</span>',
+};
+
+/* ══ SORT ══ */
+const SS = {};
+function srt(ds,field,th) {
+  const k=ds+'.'+field, asc=SS[k]!=='asc'; SS[k]=asc?'asc':'desc';
+  th.closest('table').querySelectorAll('th').forEach(t=>t.classList.remove('sa','sd'));
+  th.classList.add(asc?'sa':'sd');
+  const map={leads:LEADS,cust:CUST,acts:ACTS,team:TEAM};
+  map[ds].sort((a,b)=>{let va=a[field],vb=b[field];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return asc?(va>vb?1:va<vb?-1:0):(va<vb?1:va>vb?-1:0);});
+  ({leads:renderLeads,cust:renderCust,acts:renderActs,team:renderTeam})[ds]();
+}
+
+/* ══ PERIOD DATA ══ */
+const PD = {
+  Q1:  {leads:312,pipe:'82.4M',prob:'48%',won:28, fc:{l0:'Q1 forecast',v0:'62M',d0:'▲ 94% teljesítve',l1:'Q2 várható',v1:'78M',d1:'▲ optimista',l3:'YTD teljesítés',v3:'26%',d3:'▲ ütemterv szerint'},
+         tm:{v0:'138',v1:'42',v2:'18',v3:'70%'}, chart_l:['Jan','Feb','Már'],chart_in:[3.2,4.1,5.8],chart_plan:[6,7,8]},
+  Q2:  {leads:428,pipe:'124.8M',prob:'54%',won:34, fc:{l0:'Q1+Q2 teljesítve',v0:'128M',d0:'▲ 107%',l1:'Q3 várható',v1:'96M',d1:'▲ optimista',l3:'YTD teljesítés',v3:'48%',d3:'▲ ütemterv szerint'},
+         tm:{v0:'186',v1:'68',v2:'24',v3:'74%'}, chart_l:['Ápr','Máj','Jún'],chart_in:[6.2,8.1,7.4],chart_plan:[8,9,9]},
+  YTD: {leads:740,pipe:'207.2M',prob:'51%',won:62, fc:{l0:'YTD teljesítés',v0:'192M',d0:'▲ 15.8%',l1:'H2 várható',v1:'48M',d1:'▲ konzervatív',l3:'Éves teljesítés',v3:'80%',d3:'▲ célon belül'},
+         tm:{v0:'324',v1:'110',v2:'42',v3:'72%'}, chart_l:['Jan','Feb','Már','Ápr','Máj','Jún'],chart_in:[3.2,4.1,5.8,6.2,8.1,7.4],chart_plan:[6,7,8,8,9,9]},
+  '12M':{leads:1842,pipe:'498.6M',prob:'52%',won:148, fc:{l0:'12H teljesítés',v0:'386M',d0:'▲ 24.1%',l1:'Köv. 12H',v1:'424M',d1:'▲ növekvő trend',l3:'Növekedés',v3:'161%',d3:'▲ rekord év'},
+         tm:{v0:'784',v1:'264',v2:'98',v3:'73%'}, chart_l:["Ápr'24",'Jún','Aug','Okt','Dec',"Feb'25"],chart_in:[14.2,18.4,22.1,24.8,28.6,21.4],chart_plan:[16,18,22,24,28,20]},
+};
+
+function setPeriod(btn, p) {
+  activePeriod = p;
+  document.querySelectorAll('.psw .pb').forEach(b => {
+    const m = b.getAttribute('onclick')?.match(/'([^']+)'/);
+    b.classList.toggle('active', m?.[1] === p);
+  });
+  applyPeriod(p);
+}
+
+function applyPeriod(p) {
+  const d = PD[p]; if (!d) return;
+  // Pipeline
+  if(el('pipe-cnt'))  el('pipe-cnt').textContent  = d.leads;
+  if(el('pipe-val'))  el('pipe-val').textContent  = d.pipe;
+  if(el('pipe-prob')) el('pipe-prob').textContent = d.prob;
+  if(el('pipe-won'))  el('pipe-won').textContent  = d.won;
+  // Leads
+  if(el('lCnt'))  el('lCnt').textContent  = d.leads;
+  if(el('lVal'))  el('lVal').textContent  = d.pipe;
+  if(el('lProb')) el('lProb').textContent = d.prob;
+  // Forecast KPI-k
+  ['l0','v0','d0','l1','v1','d1','l3','v3','d3'].forEach(k => {
+    const e = el('fc-'+k); if(e) e.textContent = d.fc[k]||'';
+  });
+  // Delta osztályok a forecast-on
+  ['d0','d1','d3'].forEach(k => {
+    const e = el('fc-'+k); if(!e) return;
+    const txt = d.fc[k]||'';
+    e.className = 'kd ' + (txt.startsWith('▲')?'up':txt.startsWith('▼')?'dn':'');
+  });
+  // Csapat KPI-k
+  ['v0','v1','v2','v3'].forEach(k => { const e=el('tm-'+k); if(e) e.textContent=d.tm[k]; });
+  // Dashboard KPI-k
+  if(el('dk-leads')) el('dk-leads').textContent = d.leads.toLocaleString('hu-HU');
+  if(el('dk-pipe'))  el('dk-pipe').textContent  = d.pipe;
+  if(el('dk-win'))   el('dk-win').textContent   = d.won+'/'+Math.round(d.won*0.35);
+  // Charts
+  updateDashChart(d);
+  updateForecastChart(d);
+}
+
+/* ══ RENDER ══ */
+/* ══ DRAG & DROP STATE ══ */
+let dragLeadId = null;
+let dragSourceStage = null;
+
+function renderPipeline() {
+  const qs = q('pSearch');
+  const ls = LEADS.filter(l=>!qs||l.name.toLowerCase().includes(qs)||l.partner_name.toLowerCase().includes(qs));
+  const b = el('pBoard'); if(!b) return; b.innerHTML='';
+
+  STAGES.forEach(st => {
+    const sl = ls.filter(l=>l.stage===st.n);
+    const col = document.createElement('div');
+    col.className = 'k-col';
+    col.dataset.stage = st.n;
+
+    col.innerHTML = `
+      <div class="k-head">
+        <span class="k-name">${st.n}</span>
+        <span class="k-cnt" id="kcnt-${st.n.replace(/\s/g,'_')}">${sl.length}</span>
+      </div>
+      <div class="k-bar" style="background:${st.c}"></div>
+      <div class="k-drop-zone" id="kdrop-${st.n.replace(/\s/g,'_')}"></div>`;
+
+    b.appendChild(col);
+
+    const dropZone = col.querySelector('.k-drop-zone');
+
+    // Kártyák renderelése a drop zone-ba
+    sl.forEach(l => {
+      const card = document.createElement('div');
+      card.className = 'k-card';
+      card.draggable = true;
+      card.dataset.leadId = l.id;
+      card.dataset.stage = st.n;
+      card.innerHTML = `
+        <span class="k-drag-handle" title="Húzd át">⣿</span>
+        <div class="k-card-name">${l.name}</div>
+        <div class="k-card-co">${l.partner_name}</div>
+        <div class="k-card-ft">
+          <span class="k-card-val">${fM(l.expected_revenue)}</span>
+          <span class="k-card-stars">${'★'.repeat(l.priority)}${'☆'.repeat(3-l.priority)}</span>
+        </div>`;
+
+      // Klikk: detail nézet (csak ha nem drag volt)
+      card.addEventListener('click', () => {
+        if (!card.classList.contains('was-dragging')) showDetail('lead', l.id);
+        card.classList.remove('was-dragging');
+      });
+
+      // Drag start
+      card.addEventListener('dragstart', e => {
+        dragLeadId = l.id;
+        dragSourceStage = st.n;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', l.id);
+        // Ghost kép: kissé átlátszó
+        setTimeout(() => card.classList.add('was-dragging'), 0);
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        // Drop zone highlight törlése
+        document.querySelectorAll('.k-col').forEach(c => c.classList.remove('drag-over'));
+        document.querySelectorAll('.k-card.drag-placeholder').forEach(p => p.remove());
+        dragLeadId = null;
+        dragSourceStage = null;
+      });
+
+      dropZone.appendChild(card);
+    });
+
+    // Drop zone events az oszlopon
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+
+      // Placeholder pozícionálás
+      const existing = dropZone.querySelector('.drag-placeholder');
+      if (!existing) {
+        const ph = document.createElement('div');
+        ph.className = 'k-card drag-placeholder';
+        dropZone.appendChild(ph);
+      }
+
+      // Rendezés: kurzor helyzete alapján placeholder mozgatása
+      const afterEl = getDragAfterElement(dropZone, e.clientY);
+      const ph = dropZone.querySelector('.drag-placeholder');
+      if (afterEl) dropZone.insertBefore(ph, afterEl);
+      else dropZone.appendChild(ph);
+    });
+
+    dropZone.addEventListener('dragleave', e => {
+      // Csak akkor távolítjuk el ha tényleg elhagyjuk az oszlopot
+      if (!col.contains(e.relatedTarget)) {
+        col.classList.remove('drag-over');
+        dropZone.querySelector('.drag-placeholder')?.remove();
+      }
+    });
+
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      dropZone.querySelector('.drag-placeholder')?.remove();
+
+      const id = parseInt(e.dataTransfer.getData('text/plain'));
+      const lead = LEADS.find(l => l.id === id);
+      if (!lead || lead.stage === st.n) return;
+
+      const oldStage = lead.stage;
+      lead.stage = st.n;
+
+      // Odoo API hívás (ha kapcsolódva)
+      odooUpdateLeadStage(lead.id, st.n);
+
+      // Toast visszajelzés
+      showToast(`✓ ${lead.name} → ${st.n}`);
+
+      // Csak a pipeline-t frissítjük, nem az egész oldalt
+      renderPipeline();
+
+      // KPI-k frissítése
+      updatePipelineKPIs();
+    });
+  });
+
+  updatePipelineKPIs();
+}
+
+function getDragAfterElement(container, y) {
+  const draggables = [...container.querySelectorAll('.k-card:not(.dragging):not(.drag-placeholder)')];
+  return draggables.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function updatePipelineKPIs() {
+  const ls = LEADS;
+  if(el('pipe-cnt'))  el('pipe-cnt').textContent  = ls.filter(l=>l.stage!=='Elveszett').length;
+  if(el('pipe-val'))  el('pipe-val').textContent  = fK(ls.filter(l=>l.stage!=='Elveszett').reduce((s,l)=>s+l.expected_revenue,0));
+  const pp = ls.filter(l=>l.probability>0&&l.stage!=='Elveszett');
+  if(el('pipe-prob')) el('pipe-prob').textContent = Math.round(pp.reduce((s,l)=>s+l.probability,0)/(pp.length||1))+'%';
+}
+
+function renderCust() {
+  const qs = q('cSearch');
+  const list = CUST.filter(c=>!qs||c.name.toLowerCase().includes(qs)||c.email.toLowerCase().includes(qs)||c.city.toLowerCase().includes(qs));
+  const colors=['#29acd9','#af52de','#ff9500','#34c759'];
+  el('cBody').innerHTML = list.map((c,i)=>`<tr onclick="showDetail('cust',${c.id})">
+    <td data-label="Ügyfél"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${colors[i%4]}">${c.name.substring(0,2)}</div><div><div>${c.name}</div><div style="font-size:.68rem;color:var(--mu)">${c.contact}</div></div></div></td>
+    <td data-label="Email" style="font-size:.75rem;color:var(--dim)">${c.email}</td>
+    <td data-label="Telefon" style="font-family:'DM Mono',monospace;font-size:.74rem">${c.phone}</td>
+    <td data-label="Város">${c.city}</td>
+    <td data-label="Bevétel" style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(c.revenue)}</td>
+    <td data-label="Ügyletek" style="font-family:'DM Mono',monospace">${c.deals}</td>
+    <td data-label="Státusz">${CUST_STATUS[c.status]||''}</td>
+  </tr>`).join('');
+}
+
+function renderLeads() {
+  const qs = q('lSearch');
+  const list = LEADS.filter(l=>!qs||l.name.toLowerCase().includes(qs)||l.partner_name.toLowerCase().includes(qs)||l.user.toLowerCase().includes(qs));
+  el('lCnt').textContent = list.length;
+  el('lVal').textContent = fK(list.reduce((s,l)=>s+l.expected_revenue,0));
+  const pp = list.filter(l=>l.probability>0);
+  el('lProb').textContent = Math.round(pp.reduce((s,l)=>s+l.probability,0)/(pp.length||1))+'%';
+  el('lOver').textContent = list.filter(l=>isOverdue(l.date_deadline)&&l.stage!=='Megnyert'&&l.stage!=='Elveszett').length;
+  el('lBody').innerHTML = list.map(l=>`<tr onclick="showDetail('lead',${l.id})">
+    <td data-label="Ügyfél"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${AVC[l.user]||'#555'}">${l.partner_name.substring(0,2)}</div>
+    <div><div>${l.partner_name}</div><div style="font-size:.68rem;color:var(--mu)">${l.email}</div></div></div></td>
+    <td data-label="Lehetőség">${l.name}</td>
+    <td data-label="Értékesítő" style="font-size:.76rem">${l.user}</td>
+    <td data-label="Fázis"><span class="badge ${SBG[l.stage]||'bn'}">${l.stage}</span></td>
+    <td data-label="Várható bev." style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(l.expected_revenue)}</td>
+    <td data-label="Valószínűség">
+      <div class="prob-bar">
+        <div class="prob-track"><div class="prob-fill" style="width:${l.probability}%;background:${l.probability>=70?'var(--green)':l.probability>=40?'var(--orange)':'var(--red)'}"></div></div>
+        <span style="font-family:'DM Mono',monospace;font-size:.7rem;width:2.2rem">${l.probability}%</span>
+      </div>
+    </td>
+    <td data-label="Határidő">${dateCell(l.date_deadline)}</td>
+    <td data-label="Prio" style="font-size:.72rem">${'★'.repeat(l.priority)}${'☆'.repeat(3-l.priority)}</td>
+  </tr>`).join('');
+}
+
+function renderActs() {
+  const qs = q('aSearch');
+  const list = ACTS.filter(a=>!qs||a.summary.toLowerCase().includes(qs)||a.partner.toLowerCase().includes(qs)||a.lead.toLowerCase().includes(qs));
+  el('aBody').innerHTML = list.map(a=>`<tr onclick="showDetail('act',${a.id})">
+    <td data-label="Típus">${a.type} ${a.type_name}</td>
+    <td data-label="Leírás" style="font-weight:500">${a.summary}</td>
+    <td data-label="Lead" style="font-size:.75rem;color:var(--dim)">${a.lead}</td>
+    <td data-label="Felelős" style="font-size:.76rem">${a.user}</td>
+    <td data-label="Határidő">${dateCell(a.deadline)}</td>
+    <td data-label="Állapot">${ACT_STATUS[a.status]||''}</td>
+  </tr>`).join('');
+  // Dashboard activities
+  const da = el('dActs');
+  if(da) da.innerHTML = ACTS.slice(0,5).map(a=>`
+    <div class="act-item" onclick="showDetail('act',${a.id})">
+      <div class="act-dot" style="background:${a.status==='overdue'?'var(--red)':a.status==='due'?'var(--orange)':'var(--cyan)'}"></div>
+      <div class="act-info"><div class="act-title">${a.type} ${a.summary} — ${a.partner}</div><div class="act-meta">${a.lead} · ${a.user}</div></div>
+      <div class="act-date" style="color:${isOverdue(a.deadline)?'var(--red)':'var(--mu)'}">${a.deadline}</div>
+    </div>`).join('');
+}
+
+function renderTeam() {
+  const qs = q('tmSearch');
+  const list = TEAM.filter(t=>!qs||t.name.toLowerCase().includes(qs));
+  el('tmBody').innerHTML = list.map(t=>`<tr onclick="showDetail('member',${t.id})">
+    <td data-label="Értékesítő"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${AVC[t.name]||'#555'}">${t.name.split(' ').map(w=>w[0]).join('')}</div>${t.name}</div></td>
+    <td data-label="Leadek" style="font-family:'DM Mono',monospace">${t.leads}</td>
+    <td data-label="Megnyert" style="font-family:'DM Mono',monospace;color:var(--green)">${t.won}</td>
+    <td data-label="Elveszett" style="font-family:'DM Mono',monospace;color:var(--red)">${t.lost}</td>
+    <td data-label="Win Rate">
+      <div class="prob-bar">
+        <div class="prob-track"><div class="prob-fill" style="width:${t.winrate}%;background:${t.winrate>=70?'var(--green)':t.winrate>=50?'var(--orange)':'var(--red)'}"></div></div>
+        <span style="font-family:'DM Mono',monospace;font-size:.7rem;width:2.2rem">${t.winrate}%</span>
+      </div>
+    </td>
+    <td data-label="Bevétel" style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(t.revenue)}</td>
+    <td data-label="Átl. ügylet" style="font-family:'DM Mono',monospace">${fM(t.avg_deal)}</td>
+  </tr>`).join('');
+}
+
+function renderFunnel() {
+  const fd=[{s:'Új Lead',c:284,p:100,cl:'#29acd9'},{s:'Minősített',c:156,p:55,cl:'#ff9500'},{s:'Ajánlat',c:89,p:31,cl:'#af52de'},{s:'Tárgyalás',c:44,p:15,cl:'#ff6b35'},{s:'Megnyert',c:34,p:12,cl:'#34c759'}];
+  const w=el('dFunnel'); if(w) w.innerHTML=fd.map(f=>`
+    <div class="f-stage"><div class="f-row"><span>${f.s}</span><span style="font-family:'DM Mono',monospace">${f.c} lead</span></div>
+    <div class="f-bg"><div class="f-fill" style="width:${f.p}%;background:${f.cl}">${f.p}%</div></div></div>`).join('');
+  const fb=el('fByUser'); if(fb){
+    const cl=['#29acd9','#af52de','#ff9500','#34c759'];
+    fb.innerHTML=TEAM.map((t,i)=>`
+      <div class="f-stage"><div class="f-row"><span>${t.name}</span><span style="font-family:'DM Mono',monospace">${fM(t.revenue)}</span></div>
+      <div class="f-bg"><div class="f-fill" style="width:${Math.round(t.winrate)}%;background:${cl[i]}">${t.winrate}%</div></div></div>`).join('');
+  }
+}
+
+/* ══ DETAIL NÉZET ══ */
+function showDetail(type, id) {
+  const maps = {lead:LEADS, cust:CUST, act:ACTS, member:TEAM};
+  const item = maps[type]?.find(x=>x.id===id); if(!item) return;
+  detailBackPage = {lead:'leads',cust:'customers',act:'activities',member:'team'}[type];
+  let html = '';
+
+  if (type==='lead') {
+    const stageColor = STAGES.find(s=>s.n===item.stage)?.c||'#555';
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div>
+            <div class="detail-title">${item.name}</div>
+            <div class="detail-sub">${item.partner_name} · ${item.user}</div>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+            <span class="badge ${SBG[item.stage]||'bn'}" style="font-size:.76rem;padding:.3rem .8rem">${item.stage}</span>
+            <button class="bpp" style="font-size:.74rem" onclick="nav('new-activity',null)">📅 Teendő</button>
+            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">✏️ Szerkesztés</button>
+          </div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="df"><div class="df-l">Lehetőség neve</div><div class="df-v">${item.name}</div></div>
+        <div class="df"><div class="df-l">Ügyfél</div><div class="df-v">${item.partner_name}</div></div>
+        <div class="df"><div class="df-l">Email</div><div class="df-v mono">${item.email}</div></div>
+        <div class="df"><div class="df-l">Telefon</div><div class="df-v mono">${item.phone}</div></div>
+        <div class="df"><div class="df-l">Értékesítő</div><div class="df-v">${item.user}</div></div>
+        <div class="df"><div class="df-l">Forrás</div><div class="df-v">${item.source||'—'}</div></div>
+        <div class="df"><div class="df-l">Várható bevétel</div><div class="df-v mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.expected_revenue)}</div></div>
+        <div class="df"><div class="df-l">Valószínűség</div>
+          <div class="df-v">
+            <div class="prob-bar">
+              <div class="prob-track" style="height:8px"><div class="prob-fill" style="width:${item.probability}%;background:${item.probability>=70?'var(--green)':item.probability>=40?'var(--orange)':'var(--red)'}"></div></div>
+              <span style="font-family:'DM Mono',monospace">${item.probability}%</span>
+            </div>
+          </div>
+        </div>
+        <div class="df"><div class="df-l">Várható zárás</div><div class="df-v mono" style="color:${isOverdue(item.date_deadline)?'var(--red)':'var(--tx)'}">${item.date_deadline}${isOverdue(item.date_deadline)?' ⚠':''}</div></div>
+        <div class="df"><div class="df-l">Prioritás</div><div class="df-v">${'★'.repeat(item.priority)}${'☆'.repeat(3-item.priority)} · ${['Alacsony','Normál','Magas','Kritikus'][item.priority]}</div></div>
+        <div class="df"><div class="df-l">Típus</div><div class="df-v">${item.stage==='Megnyert'||item.stage==='Elveszett'?item.stage:'Aktív lehetőség'}</div></div>
+        <div class="df"><div class="df-l">Fázis</div><div class="df-v"><span class="badge ${SBG[item.stage]||'bn'}">${item.stage}</span></div></div>
+      </div>
+      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">Megjegyzés</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
+      <div class="card">
+        <div class="ch"><span class="ct">Pipeline fázisok</span></div>
+        <div style="padding:1.2rem;display:flex;gap:0;overflow-x:auto">
+          ${STAGES.map(s=>`
+            <div style="flex:1;min-width:80px;text-align:center;padding:.5rem .3rem">
+              <div style="width:32px;height:32px;border-radius:50%;background:${s.n===item.stage?stageColor:'var(--s2)'};border:2px solid ${s.n===item.stage?stageColor:'var(--bd)'};display:flex;align-items:center;justify-content:center;margin:0 auto .4rem;font-size:.7rem;color:${s.n===item.stage?'#fff':'var(--mu)'}">
+                ${STAGES.findIndex(x=>x.n===s.n)<STAGES.findIndex(x=>x.n===item.stage)?'✓':'·'}
+              </div>
+              <div style="font-size:.62rem;color:${s.n===item.stage?'var(--tx)':'var(--mu)'};font-weight:${s.n===item.stage?'600':'400'}">${s.n}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Aktivitások</span><span class="ca" onclick="nav('new-activity',null)">+ Új teendő</span></div>
+        <div class="tl">
+          ${ACTS.filter(a=>a.lead===item.name).map(a=>`
+            <div class="tl-item">
+              <div class="tl-dot" style="background:${a.status==='overdue'?'var(--red)':a.status==='due'?'var(--orange)':'var(--cyan)'}"></div>
+              <div class="tl-info"><div class="tl-t">${a.type} ${a.summary}</div><div class="tl-m">${a.user} · ${ACT_STATUS[a.status]||''}</div></div>
+              <div style="font-family:'DM Mono',monospace;font-size:.68rem;color:${isOverdue(a.deadline)?'var(--red)':'var(--mu)'}">${a.deadline}</div>
+            </div>`).join('')||'<div style="padding:1rem;color:var(--mu);font-size:.8rem">Nincs rögzített aktivitás</div>'}
+        </div>
+      </div>`;
+
+  } else if (type==='cust') {
+    const custLeads = LEADS.filter(l=>l.partner_name===item.name);
+    const custActs  = ACTS.filter(a=>a.partner===item.name);
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div>
+            <div class="detail-title">${item.name}</div>
+            <div class="detail-sub">${item.industry||'—'} · ${item.city}</div>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:center">
+            ${CUST_STATUS[item.status]||''}
+            <button class="bpp" style="font-size:.74rem" onclick="nav('new-lead',null)">+ Új lehetőség</button>
+          </div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="df"><div class="df-l">Kapcsolattartó</div><div class="df-v">${item.contact||'—'}</div></div>
+        <div class="df"><div class="df-l">Email</div><div class="df-v mono">${item.email}</div></div>
+        <div class="df"><div class="df-l">Telefon</div><div class="df-v mono">${item.phone}</div></div>
+        <div class="df"><div class="df-l">Város</div><div class="df-v">${item.city}</div></div>
+        <div class="df"><div class="df-l">Iparág</div><div class="df-v">${item.industry||'—'}</div></div>
+        <div class="df"><div class="df-l">Státusz</div><div class="df-v">${CUST_STATUS[item.status]||''}</div></div>
+        <div class="df"><div class="df-l">Összes bevétel</div><div class="df-v mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.revenue)}</div></div>
+        <div class="df"><div class="df-l">Ügyletek száma</div><div class="df-v mono">${item.deals} db</div></div>
+        <div class="df"><div class="df-l">Átl. ügylet</div><div class="df-v mono">${fM(item.revenue/item.deals)}</div></div>
+      </div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="ch"><span class="ct">Lehetőségek</span><span class="ca" onclick="nav('new-lead',null)">+ Új →</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Lehetőség</th><th>Fázis</th><th>Várható bevétel</th><th>Valószínűség</th><th>Határidő</th></tr></thead>
+          <tbody>${custLeads.map(l=>`
+            <tr onclick="showDetail('lead',${l.id})">
+              <td>${l.name}</td>
+              <td><span class="badge ${SBG[l.stage]||'bn'}">${l.stage}</span></td>
+              <td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(l.expected_revenue)}</td>
+              <td style="font-family:'DM Mono',monospace">${l.probability}%</td>
+              <td>${dateCell(l.date_deadline)}</td>
+            </tr>`).join('')||'<tr><td colspan="5" style="color:var(--mu);text-align:center;padding:1rem">Nincs lead</td></tr>'}</tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Aktivitások</span></div>
+        <div class="tl">
+          ${custActs.map(a=>`
+            <div class="tl-item">
+              <div class="tl-dot" style="background:${a.status==='overdue'?'var(--red)':a.status==='due'?'var(--orange)':'var(--cyan)'}"></div>
+              <div class="tl-info"><div class="tl-t">${a.type} ${a.summary}</div><div class="tl-m">${a.user} · határidő: ${a.deadline}</div></div>
+              <div>${ACT_STATUS[a.status]||''}</div>
+            </div>`).join('')||'<div style="padding:1rem;color:var(--mu);font-size:.8rem">Nincs aktivitás</div>'}
+        </div>
+      </div>`;
+
+  } else if (type==='act') {
+    const relLead = LEADS.find(l=>l.name===item.lead);
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div><div class="detail-title">${item.type} ${item.summary}</div><div class="detail-sub">${item.partner} · ${item.user}</div></div>
+          <div style="display:flex;gap:.6rem;align-items:center">
+            ${ACT_STATUS[item.status]||''}
+            <button class="bpp" style="font-size:.74rem;background:var(--green)" onclick="showToast('✓ Teendő elvégzettnek jelölve')">✅ Elvégzett</button>
+          </div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="df"><div class="df-l">Típus</div><div class="df-v">${item.type} ${item.type_name}</div></div>
+        <div class="df"><div class="df-l">Felelős</div><div class="df-v">${item.user}</div></div>
+        <div class="df"><div class="df-l">Határidő</div><div class="df-v mono" style="color:${isOverdue(item.deadline)?'var(--red)':'var(--tx)'}">${item.deadline}${isOverdue(item.deadline)?' ⚠':''}</div></div>
+        <div class="df"><div class="df-l">Partner</div><div class="df-v">${item.partner}</div></div>
+        <div class="df"><div class="df-l">Kapcsolódó lead</div><div class="df-v" style="color:var(--cyan);cursor:pointer" onclick="${relLead?`showDetail('lead',${relLead.id})`:'void(0)'}">${item.lead}</div></div>
+        <div class="df"><div class="df-l">Állapot</div><div class="df-v">${ACT_STATUS[item.status]||''}</div></div>
+      </div>
+      ${item.notes?`<div class="card"><div class="ch"><span class="ct">Megjegyzés / Napirend</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}`;
+
+  } else if (type==='member') {
+    const memberLeads = LEADS.filter(l=>l.user===item.name);
+    const memberActs  = ACTS.filter(a=>a.user===item.name);
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+          <div class="av" style="width:52px;height:52px;font-size:1.1rem;background:${AVC[item.name]||'#555'}">${item.name.split(' ').map(w=>w[0]).join('')}</div>
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">Értékesítő · Win Rate: ${item.winrate}%</div></div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="df"><div class="df-l">Aktív leadek</div><div class="df-v mono" style="color:var(--cyan);font-size:1.2rem">${item.leads}</div></div>
+        <div class="df"><div class="df-l">Megnyert ügyletek</div><div class="df-v mono" style="color:var(--green);font-size:1.2rem">${item.won}</div></div>
+        <div class="df"><div class="df-l">Elveszett</div><div class="df-v mono" style="color:var(--red);font-size:1.2rem">${item.lost}</div></div>
+        <div class="df"><div class="df-l">Win Rate</div>
+          <div class="df-v">
+            <div class="prob-bar"><div class="prob-track" style="height:8px"><div class="prob-fill" style="width:${item.winrate}%;background:${item.winrate>=70?'var(--green)':item.winrate>=50?'var(--orange)':'var(--red)'}"></div></div>
+            <span style="font-family:'DM Mono',monospace">${item.winrate}%</span></div>
+          </div>
+        </div>
+        <div class="df"><div class="df-l">Összes bevétel</div><div class="df-v mono" style="color:var(--cyan)">${fM(item.revenue)}</div></div>
+        <div class="df"><div class="df-l">Átlagos ügylet</div><div class="df-v mono">${fM(item.avg_deal)}</div></div>
+      </div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="ch"><span class="ct">Aktív lehetőségek</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Lehetőség</th><th>Ügyfél</th><th>Fázis</th><th>Várható bev.</th><th>Határidő</th></tr></thead>
+          <tbody>${memberLeads.filter(l=>l.stage!=='Elveszett').map(l=>`
+            <tr onclick="showDetail('lead',${l.id})">
+              <td>${l.name}</td><td>${l.partner_name}</td>
+              <td><span class="badge ${SBG[l.stage]||'bn'}">${l.stage}</span></td>
+              <td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(l.expected_revenue)}</td>
+              <td>${dateCell(l.date_deadline)}</td>
+            </tr>`).join('')||'<tr><td colspan="5" style="color:var(--mu);text-align:center;padding:1rem">Nincs aktív lead</td></tr>'}</tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Teendők</span></div>
+        <div class="tl">
+          ${memberActs.map(a=>`
+            <div class="tl-item">
+              <div class="tl-dot" style="background:${a.status==='overdue'?'var(--red)':a.status==='due'?'var(--orange)':'var(--cyan)'}"></div>
+              <div class="tl-info"><div class="tl-t">${a.type} ${a.summary} — ${a.partner}</div><div class="tl-m">${a.deadline}</div></div>
+              <div>${ACT_STATUS[a.status]||''}</div>
+            </div>`).join('')||'<div style="padding:1rem;color:var(--mu);font-size:.8rem">Nincs teendő</div>'}
+        </div>
+      </div>`;
+  }
+
+  el('detailContent').innerHTML = html;
+  nav('detail', null);
+}
+
+function navBack() {
+  nav(detailBackPage, null);
+  document.querySelectorAll('.ni').forEach(n => {
+    if((n.getAttribute('onclick')||'').includes("'"+detailBackPage+"'")) n.classList.add('active');
+  });
+}
+
+/* ══ CHARTS ══ */
+const CH = {};
+function mkC(id,type,labels,datasets,extra={}) {
+  if(CH[id]){CH[id].destroy();delete CH[id];}
+  const e=el(id); if(!e) return;
+  const dk=document.documentElement.getAttribute('data-theme')==='dark';
+  const gc=dk?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)';
+  const tc=dk?'rgba(240,239,237,0.38)':'rgba(14,16,24,0.38)';
+  CH[id]=new Chart(e,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:tc,font:{family:'DM Sans',size:11},boxWidth:12}}},
+    scales:{x:{grid:{color:gc},ticks:{color:tc,font:{family:'DM Mono',size:10}}},y:{grid:{color:gc},ticks:{color:tc,font:{family:'DM Mono',size:10}}},...(extra.scales||{})},
+    ...extra}});
+}
+
+function updateDashChart(d) {
+  mkC('dChart','line',d.chart_l,[
+    {label:'Megnyert (M)',data:d.chart_in,borderColor:'#29acd9',backgroundColor:'rgba(41,172,217,0.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'},
+    {label:'Terv (M)',data:d.chart_plan,borderColor:'#af52de',backgroundColor:'rgba(175,82,222,0.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#af52de',borderDash:[4,3]},
+  ]);
+}
+
+function updateForecastChart(d) {
+  mkC('fChart','bar',d.chart_l,[
+    {label:'Terv',data:d.chart_plan,backgroundColor:'rgba(41,172,217,0.3)',borderRadius:4},
+    {label:'Tényleges',data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
+  ]);
+  mkC('sChart','doughnut',STAGES.map(s=>s.n),[{data:[284,156,89,44,34],backgroundColor:STAGES.map(s=>s.c),borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
+  mkC('tmChart','bar',TEAM.map(t=>t.name.split(' ')[0]),[{label:'Bevétel (M)',data:TEAM.map(t=>+(t.revenue/1e6).toFixed(1)),backgroundColor:Object.values(AVC),borderRadius:6}]);
+  mkC('wrChart','bar',TEAM.map(t=>t.name.split(' ')[0]),[{label:'Win Rate %',data:TEAM.map(t=>t.winrate),backgroundColor:TEAM.map(t=>t.winrate>=70?'rgba(52,199,89,0.7)':t.winrate>=50?'rgba(255,149,0,0.7)':'rgba(255,59,48,0.7)'),borderRadius:6}]);
+}
+
+/* ══ STAR RATING ══ */
+function setStars(n) {
+  document.querySelectorAll('#leadPriorityStars .star-btn').forEach((b,i) => {
+    b.textContent = i<n ? '★' : '☆';
+    b.classList.toggle('active', i<n);
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   ODOO API RÉTEG
+   Cursor-ban: cseréld az ODOO_CONFIG értékeket, a többi
+   függvény automatikusan az Odoo-ba ment/olvas.
+══════════════════════════════════════════════════════ */
+
+let ODOO_CONFIG = {
+  url:  localStorage.getItem('odoo_url')  || '',
+  db:   localStorage.getItem('odoo_db')   || '',
+  user: localStorage.getItem('odoo_user') || '',
+  key:  localStorage.getItem('odoo_key')  || '',
+  uid:  null,   // session_id bejelentkezés után
+  connected: false,
+};
+
+// Betöltéskor visszatöltjük a mentett konfigot a beállítások oldalra
+function loadCfgToForm() {
+  if(el('cfg-url'))  el('cfg-url').value  = ODOO_CONFIG.url;
+  if(el('cfg-db'))   el('cfg-db').value   = ODOO_CONFIG.db;
+  if(el('cfg-user')) el('cfg-user').value = ODOO_CONFIG.user;
+  // kulcsot ne töltsük vissza, biztonsági okokból
+}
+
+function connLog(msg, color='var(--mu)') {
+  const log = el('conn-log');
+  if(!log) return;
+  log.style.display = 'block';
+  log.innerHTML += `<div style="color:${color}">${new Date().toLocaleTimeString('hu-HU')} · ${msg}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+function setConnBadge(state) {
+  const b = el('conn-badge');
+  if(!b) return;
+  const map = {
+    ok:      ['badge bw', '🟢 Kapcsolódva'],
+    error:   ['badge bl', '🔴 Hiba'],
+    loading: ['badge bq', '🟡 Kapcsolódás...'],
+    none:    ['badge bdr','⚫ Nincs kapcsolat'],
+  };
+  b.className = map[state][0];
+  b.textContent = map[state][1];
+}
+
+/* ── Alap JSON-RPC hívó ── */
+async function odooRPC(endpoint, params) {
+  const resp = await fetch(ODOO_CONFIG.url + endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',  // session cookie
+    body: JSON.stringify({ jsonrpc:'2.0', method:'call', id:1, params }),
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.data?.message || data.error.message);
+  return data.result;
+}
+
+/* ── call_kw shorthand ── */
+async function odooCall(model, method, args=[], kwargs={}) {
+  return odooRPC('/web/dataset/call_kw', { model, method, args, kwargs });
+}
+
+/* ── Bejelentkezés ── */
+async function odooLogin() {
+  const result = await odooRPC('/web/session/authenticate', {
+    db: ODOO_CONFIG.db,
+    login: ODOO_CONFIG.user,
+    password: ODOO_CONFIG.key,
+  });
+  if (!result?.uid) throw new Error('Sikertelen bejelentkezés — ellenőrizd az adatokat.');
+  ODOO_CONFIG.uid = result.uid;
+  ODOO_CONFIG.connected = true;
+  return result.uid;
+}
+
+/* ── Kapcsolat tesztelése gombra ── */
+async function odooTestConn() {
+  ODOO_CONFIG.url  = el('cfg-url').value.trim().replace(/\/$/, '');
+  ODOO_CONFIG.db   = el('cfg-db').value.trim();
+  ODOO_CONFIG.user = el('cfg-user').value.trim();
+  ODOO_CONFIG.key  = el('cfg-key').value.trim();
+  el('conn-log').innerHTML = '';
+  setConnBadge('loading');
+  connLog('Kapcsolódás: ' + ODOO_CONFIG.url);
+  try {
+    const uid = await odooLogin();
+    connLog('✓ Bejelentkezve · uid: ' + uid, 'var(--green)');
+    // Verzió lekérés
+    const ver = await odooRPC('/web/webclient/version_info', {});
+    connLog('✓ Odoo verzió: ' + (ver.server_version||'?'), 'var(--green)');
+    setConnBadge('ok');
+    showToast('✓ Sikeres Odoo kapcsolat');
+  } catch(e) {
+    connLog('✗ Hiba: ' + e.message, 'var(--red)');
+    setConnBadge('error');
+  }
+}
+
+/* ── Kapcsolódás + adatok betöltése ── */
+async function odooConnect() {
+  ODOO_CONFIG.url  = el('cfg-url').value.trim().replace(/\/$/, '');
+  ODOO_CONFIG.db   = el('cfg-db').value.trim();
+  ODOO_CONFIG.user = el('cfg-user').value.trim();
+  ODOO_CONFIG.key  = el('cfg-key').value.trim();
+  // Mentés localStorage-ba (kulcs kivételével)
+  localStorage.setItem('odoo_url',  ODOO_CONFIG.url);
+  localStorage.setItem('odoo_db',   ODOO_CONFIG.db);
+  localStorage.setItem('odoo_user', ODOO_CONFIG.user);
+
+  el('conn-log').innerHTML = '';
+  setConnBadge('loading');
+  try {
+    await odooLogin();
+    connLog('✓ Bejelentkezés sikeres', 'var(--green)');
+    setConnBadge('ok');
+    await odooLoadAll();
+    showToast('✓ Odoo adatok betöltve!');
+  } catch(e) {
+    connLog('✗ ' + e.message, 'var(--red)');
+    setConnBadge('error');
+    showToast('✗ Kapcsolódási hiba — demo módban fut');
+  }
+}
+
+/* ── Összes adat betöltése Odoo-ból ── */
+async function odooLoadAll() {
+  connLog('Leadek betöltése...');
+  await odooLoadLeads();
+  connLog('Ügyfelek betöltése...');
+  await odooLoadCustomers();
+  connLog('Teendők betöltése...');
+  await odooLoadActivities();
+  connLog('✓ Minden adat betöltve', 'var(--green)');
+  renderPipeline(); renderLeads(); renderCust(); renderActs();
+}
+
+/* ── crm.lead betöltése ── */
+async function odooLoadLeads() {
+  // Odoo: crm.lead.search_read([['active','=',true]], fields, 0, 100)
+  const records = await odooCall('crm.lead', 'search_read',
+    [[['active','=',true]]],
+    { fields: ['name','partner_id','partner_name','email_from','phone',
+               'stage_id','user_id','expected_revenue','probability',
+               'priority','date_deadline','type','team_id'],
+      limit: 200 }
+  );
+  LEADS = records.map(r => ({
+    id:               r.id,
+    name:             r.name,
+    partner_name:     r.partner_id?.[1] || r.partner_name || '—',
+    email:            r.email_from || '—',
+    phone:            r.phone || '—',
+    stage:            r.stage_id?.[1] || 'Új Lead',
+    stage_id:         r.stage_id?.[0],
+    user:             r.user_id?.[1] || '—',
+    user_id:          r.user_id?.[0],
+    expected_revenue: r.expected_revenue || 0,
+    probability:      Math.round(r.probability || 0),
+    priority:         parseInt(r.priority || 0),
+    date_deadline:    r.date_deadline || '',
+    source:           '—',
+    notes:            '',
+  }));
+  connLog(`✓ ${LEADS.length} lead betöltve`, 'var(--green)');
+}
+
+/* ── res.partner (ügyfelek) betöltése ── */
+async function odooLoadCustomers() {
+  const records = await odooCall('res.partner', 'search_read',
+    [[['customer_rank','>',0],['is_company','=',true]]],
+    { fields: ['name','email','phone','city','commercial_partner_id'], limit: 200 }
+  );
+  CUST = records.map(r => ({
+    id: r.id, name: r.name,
+    email: r.email||'—', phone: r.phone||'—', city: r.city||'—',
+    revenue: 0, deals: 0, status: 'active', contact: '—', industry: '—',
+  }));
+}
+
+/* ── mail.activity betöltése ── */
+async function odooLoadActivities() {
+  const records = await odooCall('mail.activity', 'search_read',
+    [[['res_model','=','crm.lead']]],
+    { fields: ['summary','activity_type_id','res_id','res_name',
+               'user_id','date_deadline','state','note'], limit: 200 }
+  );
+  ACTS = records.map(r => ({
+    id: r.id,
+    type: activityEmoji(r.activity_type_id?.[1]),
+    type_name: r.activity_type_id?.[1] || '—',
+    summary: r.summary || r.activity_type_id?.[1] || '—',
+    lead: r.res_name || '—',
+    partner: '—',
+    user: r.user_id?.[1] || '—',
+    deadline: r.date_deadline || '—',
+    status: r.state === 'overdue' ? 'overdue' : r.state === 'today' ? 'due' : 'planned',
+    notes: r.note || '',
+  }));
+}
+
+function activityEmoji(typeName) {
+  if (!typeName) return '📋';
+  const t = typeName.toLowerCase();
+  if (t.includes('hívás') || t.includes('call'))    return '📞';
+  if (t.includes('email'))                           return '📧';
+  if (t.includes('meeting') || t.includes('tárgy')) return '📅';
+  if (t.includes('aláír') || t.includes('sign'))    return '✍️';
+  if (t.includes('emlékez'))                         return '🔔';
+  return '✅';
+}
+
+/* ── crm.lead MENTÉSE (create) ── */
+async function odooCreateLead(values) {
+  if (!ODOO_CONFIG.connected) {
+    // Demo mód: lokálisan adjuk hozzá
+    const newId = Math.max(...LEADS.map(l=>l.id), 0) + 1;
+    LEADS.push({ id: newId, source:'—', notes:'', ...values });
+    return newId;
+  }
+  // Odoo: crm.lead.create({name, partner_id, stage_id, expected_revenue, ...})
+  const id = await odooCall('crm.lead', 'create', [values]);
+  return id;
+}
+
+/* ── crm.lead FÁZIS MÓDOSÍTÁSA (drag & drop) ── */
+async function odooUpdateLeadStage(leadId, stageName) {
+  if (!ODOO_CONFIG.connected) return; // demo: LEADS már frissítve van
+  try {
+    // Először megkeressük a stage_id-t a nevéből
+    const stages = await odooCall('crm.stage', 'search_read',
+      [[['name','=',stageName]]], { fields: ['id','name'], limit:1 });
+    if (!stages.length) throw new Error('Stage nem található: ' + stageName);
+    const stageId = stages[0].id;
+    // Odoo: crm.lead.write([id], {stage_id: stageId})
+    await odooCall('crm.lead', 'write', [[leadId], { stage_id: stageId }]);
+  } catch(e) {
+    connLog('✗ Stage írási hiba: ' + e.message, 'var(--red)');
+  }
+}
+
+/* ── res.partner MENTÉSE ── */
+async function odooCreateCustomer(values) {
+  if (!ODOO_CONFIG.connected) {
+    const newId = Math.max(...CUST.map(c=>c.id), 0) + 1;
+    CUST.push({ id: newId, revenue:0, deals:0, ...values });
+    return newId;
+  }
+  return await odooCall('res.partner', 'create', [{ ...values, customer_rank: 1 }]);
+}
+
+/* ── mail.activity MENTÉSE ── */
+async function odooCreateActivity(values) {
+  if (!ODOO_CONFIG.connected) {
+    const newId = Math.max(...ACTS.map(a=>a.id), 0) + 1;
+    ACTS.push({ id: newId, ...values });
+    return newId;
+  }
+  return await odooCall('mail.activity', 'create', [values]);
+}
+
+/* ── Formok összegyűjt & ment ── */
+async function saveNewLead() {
+  const name    = document.querySelector('#pg-new-lead input[type=text]')?.value?.trim();
+  const partner = document.querySelector('#pg-new-lead select')?.value;
+  if (!name) { showToast('✗ Add meg a lehetőség nevét!'); return; }
+
+  const starCount = [...document.querySelectorAll('#leadPriorityStars .star-btn.active')].length;
+  const stageEl   = document.querySelectorAll('#pg-new-lead select')[3];
+  const userEl    = document.querySelectorAll('#pg-new-lead select')[2];
+  const revEl     = document.querySelector('#pg-new-lead input[type=number]');
+  const probEl    = document.querySelectorAll('#pg-new-lead input[type=number]')[1];
+  const deadlineEl= document.querySelector('#pg-new-lead input[type=date]');
+  const notesEl   = document.querySelector('#pg-new-lead textarea');
+
+  const values = {
+    name,
+    partner_name: partner || '—',
+    stage:    stageEl?.value  || 'Új Lead',
+    user:     userEl?.value   || '—',
+    expected_revenue: parseFloat(revEl?.value || 0),
+    probability:      parseInt(probEl?.value  || 0),
+    date_deadline:    deadlineEl?.value || '',
+    priority:         starCount,
+    notes:            notesEl?.value || '',
+    source:           document.querySelectorAll('#pg-new-lead select')[5]?.value || 'Web',
+    email: '—', phone: '—',
+  };
+
+  try {
+    const newId = await odooCreateLead(values);
+    values.id = newId;
+    if (ODOO_CONFIG.connected) LEADS.push(values);
+    showToast('✓ Lead mentve' + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
+    renderPipeline(); renderLeads();
+    navBack();
+  } catch(e) {
+    showToast('✗ Mentési hiba: ' + e.message);
+  }
+}
+
+async function saveNewCustomer() {
+  const inputs = document.querySelectorAll('#pg-new-customer input[type=text], #pg-new-customer input[type=email], #pg-new-customer input[type=tel]');
+  const name  = inputs[0]?.value?.trim();
+  const email = inputs[2]?.value?.trim();
+  const city  = inputs[6]?.value?.trim();
+  if (!name) { showToast('✗ Add meg a cégnév!'); return; }
+
+  const values = {
+    name,
+    email: email || '—',
+    phone: inputs[3]?.value || '—',
+    city:  city || '—',
+    contact: inputs[1]?.value || '—',
+    industry: document.querySelector('#pg-new-customer select')?.value || 'Egyéb',
+    status: 'prospect',
+  };
+  try {
+    const newId = await odooCreateCustomer(values);
+    values.id = newId; values.revenue = 0; values.deals = 0;
+    if (ODOO_CONFIG.connected) CUST.push(values);
+    showToast('✓ Ügyfél mentve' + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
+    renderCust();
+    navBack();
+  } catch(e) {
+    showToast('✗ Mentési hiba: ' + e.message);
+  }
+}
+
+async function saveNewActivity() {
+  const summaryEl = document.querySelectorAll('#pg-new-activity input[type=text]')[0];
+  const summary   = summaryEl?.value?.trim();
+  if (!summary) { showToast('✗ Add meg a leírást!'); return; }
+
+  const typeEl    = document.querySelector('#pg-new-activity select');
+  const leadEl    = document.querySelectorAll('#pg-new-activity select')[1];
+  const partnerEl = document.querySelectorAll('#pg-new-activity select')[2];
+  const userEl    = document.querySelectorAll('#pg-new-activity select')[3];
+  const deadlineEl= document.querySelector('#pg-new-activity input[type=date]');
+  const notesEl   = document.querySelector('#pg-new-activity textarea');
+  const typeVal   = typeEl?.value || 'todo';
+  const typeEmojis= {call:'📞',email:'📧',meeting:'📅',todo:'✅',sign:'✍️',reminder:'🔔'};
+
+  const values = {
+    type:      typeEmojis[typeVal] || '📋',
+    type_name: typeEl?.options[typeEl?.selectedIndex]?.text?.replace(/^../,'').trim() || typeVal,
+    summary,
+    lead:    leadEl?.value    || '—',
+    partner: partnerEl?.value || '—',
+    user:    userEl?.value    || '—',
+    deadline: deadlineEl?.value || '',
+    status:  'planned',
+    notes:   notesEl?.value || '',
+  };
+  try {
+    const newId = await odooCreateActivity(values);
+    values.id = newId;
+    if (ODOO_CONFIG.connected) ACTS.push(values);
+    showToast('✓ Teendő mentve' + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
+    renderActs();
+    navBack();
+  } catch(e) {
+    showToast('✗ Mentési hiba: ' + e.message);
+  }
+}
+
+/* ══ TOAST ══ */
+function showToast(msg) {
+  let t = document.querySelector('.toast');
+  if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ══ GLOBAL SEARCH ══ */
+function gSearchFn() {
+  const v = el('gSearch').value;
+  const pg = document.querySelector('.page.active')?.id?.replace('pg-','');
+  const map = {leads:'lSearch',customers:'cSearch',activities:'aSearch',team:'tmSearch',pipeline:'pSearch'};
+  const fnMap = {leads:renderLeads,customers:renderCust,activities:renderActs,team:renderTeam,pipeline:renderPipeline};
+  const sid = map[pg]; if(sid){const e=el(sid);if(e)e.value=v;}
+  fnMap[pg]?.();
+}
+
+/* ══ NAV ══ */
+const PT = {dashboard:'CRM Dashboard',pipeline:'Pipeline',customers:'Ügyfelek',leads:'Leadek',activities:'Teendők',forecast:'Előrejelzés',team:'Csapat Teljesítmény',settings:'Beállítások',detail:'Részletek','new-lead':'Új Lead / Lehetőség','new-customer':'Új ügyfél','new-activity':'Új teendő'};
+function nav(page, navEl) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+page)?.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  el('tbTitle').textContent = PT[page]||page;
+  if(['forecast','team'].includes(page)) setTimeout(()=>{updateForecastChart(PD[activePeriod]);renderFunnel();},60);
+  closeSB();
+}
+
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+function toggleTheme(){
+  const dk=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dk?'light':'dark');
+  document.querySelector('.tbb').textContent=dk?'🌙':'☀️';
+  setTimeout(()=>applyPeriod(activePeriod),50);
+}
+
+/* ══ INIT ══ */
+loadCfgToForm();
+renderPipeline(); renderCust(); renderLeads(); renderActs(); renderTeam(); renderFunnel();
+applyPeriod('Q1');
+</script>
+</body>
+</html>

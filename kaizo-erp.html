@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="hu" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaizo ERP</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--cyan:#29acd9;--cyan-dim:rgba(41,172,217,0.15);--green:#34c759;--orange:#ff9500;--red:#ff3b30;--purple:#af52de;--r:14px;--rs:8px;--sw:220px;}
+[data-theme="dark"]{--bg:#06070f;--sf:#0e1018;--s2:#151722;--bd:rgba(255,255,255,0.07);--tx:#f0efed;--dim:rgba(240,239,237,0.45);--mu:rgba(240,239,237,0.22);--sh:0 4px 24px rgba(0,0,0,0.4);}
+[data-theme="light"]{--bg:#f0f2f7;--sf:#fff;--s2:#f7f8fc;--bd:rgba(0,0,0,0.07);--tx:#0e1018;--dim:rgba(14,16,24,0.55);--mu:rgba(14,16,24,0.28);--sh:0 4px 24px rgba(0,0,0,0.08);}
+*{margin:0;padding:0;box-sizing:border-box;}html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);transition:background .3s,color .3s;overflow-x:hidden;}
+.app{display:flex;min-height:100vh;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:199;}.overlay.open{display:block;}
+.sidebar{width:var(--sw);flex-shrink:0;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:1.4rem 0;position:fixed;top:0;left:0;height:100vh;z-index:200;transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;}
+.sl{padding:0 1.4rem 1.2rem;border-bottom:1px solid var(--bd);margin-bottom:.8rem;}
+.lt{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--cyan);letter-spacing:.05em;}
+.ls{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);margin-top:.15rem;}
+.ns{padding:0 .8rem;margin-bottom:.4rem;}
+.nl{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mu);padding:0 .6rem;margin-bottom:.25rem;}
+.ni{display:flex;align-items:center;gap:.6rem;padding:.52rem .7rem;border-radius:var(--rs);font-size:.82rem;color:var(--dim);cursor:pointer;transition:all .18s;user-select:none;}
+.ni:hover{background:var(--s2);color:var(--tx);}.ni.active{background:var(--cyan-dim);color:var(--cyan);}
+.ni .ic{font-size:.95rem;width:1.15rem;text-align:center;}
+.sbb{margin-top:auto;padding:.8rem 1.4rem 0;border-top:1px solid var(--bd);}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.main{margin-left:0!important;}}
+@media(min-width:769px){.main{margin-left:var(--sw);}}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100;}
+.mb{display:none;background:none;border:none;color:var(--tx);font-size:1.3rem;cursor:pointer;padding:.2rem .4rem;border-radius:var(--rs);}
+@media(max-width:768px){.mb{display:block;}}
+.tt{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;white-space:nowrap;}
+.psw{display:flex;background:var(--s2);border:1px solid var(--bd);border-radius:100px;overflow:hidden;margin-left:.5rem;flex-shrink:0;}
+.pb{padding:.28rem .8rem;font-size:.7rem;font-family:'DM Sans',sans-serif;color:var(--dim);background:transparent;border:none;cursor:pointer;transition:all .2s;}
+.pb.active{background:var(--cyan-dim);color:var(--cyan);}
+.sw{flex:1;max-width:350px;position:relative;}
+.si-w{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.42rem 1rem .42rem 2.1rem;font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;transition:border-color .2s;}
+.si-w::placeholder{color:var(--mu);}.si-w:focus{border-color:var(--cyan);}
+.si{position:absolute;left:.72rem;top:50%;transform:translateY(-50%);font-size:.75rem;color:var(--mu);}
+.tr{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+.tbb{background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.28rem .75rem;font-size:.7rem;color:var(--dim);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.tbb:hover{border-color:var(--cyan);color:var(--cyan);}
+.bpp{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;}
+.bpp:hover{opacity:.85;}
+.content{padding:1.5rem;overflow-y:auto;flex:1;}
+.page{display:none;animation:fadeIn .22s ease;}.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* KPI */
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.2rem;}
+@media(max-width:900px){.kgrid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.kgrid{gap:.6rem;}}
+.kc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem 1.2rem;box-shadow:var(--sh);}
+.kl{font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem;}
+.kv{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;line-height:1;color:var(--tx);}
+.kd{margin-top:.35rem;font-size:.7rem;color:var(--mu);}
+.kd.up{color:var(--green);}.kd.dn{color:var(--red);}.kd.wa{color:var(--orange);}
+/* PAGE HEADER */
+.phd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.6rem;}
+.phd h1{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;}
+.phd-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+/* CARD */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:1rem;}
+.ch{padding:.9rem 1.2rem .75rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:.5rem;}
+.ct{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;}
+.ca{font-size:.68rem;color:var(--cyan);cursor:pointer;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.r12{display:grid;grid-template-columns:1fr 2fr;gap:1rem;}
+@media(max-width:768px){.r2,.r12{grid-template-columns:1fr;}}
+/* TABLE */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:500px;}
+th{text-align:left;font-size:.61rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);padding:.65rem 1rem;background:var(--s2);border-bottom:1px solid var(--bd);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s;}
+th:hover{color:var(--cyan);}
+th .si2{opacity:.4;margin-left:.3rem;font-size:.65rem;}
+th.sa .si2::after{content:'▲';}th.sd .si2::after{content:'▼';}th:not(.sa):not(.sd) .si2::after{content:'⇅';}
+td{padding:.68rem 1rem;font-size:.78rem;border-bottom:1px solid var(--bd);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:.15rem .55rem;border-radius:100px;font-size:.63rem;font-weight:500;white-space:nowrap;}
+.bdr{background:rgba(255,255,255,.07);color:var(--mu);}
+.bpo{background:rgba(41,172,217,.15);color:var(--cyan);}
+.bpa{background:rgba(52,199,89,.15);color:var(--green);}
+.bpr{background:rgba(255,149,0,.15);color:var(--orange);}
+.bca{background:rgba(255,59,48,.15);color:var(--red);}
+.bpu{background:rgba(175,82,222,.15);color:var(--purple);}
+/* SUMMARY BOXES */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.sb2{padding:1.1rem 1.2rem;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);}
+.sb2:nth-child(even){border-right:none;}.sb2:nth-child(n+5){border-bottom:none;}
+.sbl{font-size:.63rem;letter-spacing:.13em;text-transform:uppercase;color:var(--mu);margin-bottom:.35rem;}
+.sbv{font-family:'DM Mono',monospace;font-size:1.25rem;font-weight:500;}
+/* CHART */
+.cw{padding:.8rem 1.2rem 1.2rem;height:220px;position:relative;}
+/* SEARCH IN CARD */
+.cs{padding:.6rem 1.2rem;border-bottom:1px solid var(--bd);position:relative;}
+.cs input{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.38rem .9rem .38rem 1.9rem;font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;transition:border-color .2s;}
+.cs input:focus{border-color:var(--cyan);}.cs input::placeholder{color:var(--mu);}
+.cs .si{position:absolute;left:1.65rem;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--mu);}
+/* DETAIL PAGE */
+.detail-back{display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--cyan);font-size:.8rem;margin-bottom:1.2rem;width:fit-content;}
+.detail-back:hover{opacity:.75;}
+.detail-header{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:1.4rem 1.6rem;margin-bottom:1rem;box-shadow:var(--sh);}
+.detail-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.3rem;}
+.detail-sub{font-size:.78rem;color:var(--dim);}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem;}
+@media(max-width:768px){.detail-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.detail-grid{grid-template-columns:1fr;}}
+.detail-field{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);padding:.8rem 1rem;}
+.df-label{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);margin-bottom:.3rem;}
+.df-value{font-size:.84rem;color:var(--tx);font-weight:500;}
+.df-value.mono{font-family:'DM Mono',monospace;}
+.detail-lines{margin-bottom:1rem;}
+.timeline{padding:0 1.2rem;}
+.tl-item{display:flex;gap:.8rem;padding:.8rem 0;border-bottom:1px solid var(--bd);align-items:flex-start;}
+.tl-item:last-child{border-bottom:none;}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.28rem;}
+.tl-info{flex:1;}.tl-title{font-size:.8rem;font-weight:500;margin-bottom:.15rem;}
+.tl-meta{font-size:.7rem;color:var(--mu);}
+/* MOBILE TABLE CARDS */
+@media(max-width:600px){
+  .tw table{min-width:unset;}.tw table thead{display:none;}
+  .tw table tr{display:block;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);margin-bottom:.6rem;padding:.7rem;}
+  .tw table tr:hover{background:var(--sf);}
+  .tw table td{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border:none;font-size:.78rem;}
+  .tw table td::before{content:attr(data-label);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-right:.5rem;}
+}
+/* ── FORM STYLES ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1.4rem;}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.form-grid.cols1{grid-template-columns:1fr;}
+@media(max-width:700px){.form-grid,.form-grid.cols3{grid-template-columns:1fr;}}
+.form-group{display:flex;flex-direction:column;gap:.35rem;}
+.form-group.span2{grid-column:span 2;}
+.form-group.span3{grid-column:span 3;}
+@media(max-width:700px){.form-group.span2,.form-group.span3{grid-column:span 1;}}
+.form-label{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);font-weight:500;}
+.form-label .req{color:var(--red);margin-left:.2rem;}
+.form-input,.form-select,.form-textarea{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.55rem .8rem;font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;transition:border-color .22s,box-shadow .22s;width:100%;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,172,217,.12);}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--mu);}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.form-select option{background:var(--sf);}
+.form-divider{grid-column:1/-1;border:none;border-top:1px solid var(--bd);margin:.4rem 0;}
+.form-section-title{grid-column:1/-1;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;color:var(--tx);padding-top:.2rem;}
+.form-actions{padding:1rem 1.4rem;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:flex-end;gap:.7rem;flex-wrap:wrap;}
+.btn-cancel{background:transparent;border:1px solid var(--bd);border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;color:var(--dim);cursor:pointer;transition:all .2s;}
+.btn-cancel:hover{border-color:var(--tx);color:var(--tx);}
+.btn-save{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1.2rem;font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .2s;}
+.btn-save:hover{opacity:.85;}
+.btn-draft{background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;color:var(--dim);cursor:pointer;transition:all .2s;}
+.btn-draft:hover{border-color:var(--cyan);color:var(--cyan);}
+/* Tételsor a formban */
+.line-items{padding:0 1.4rem 1rem;}
+.line-table{width:100%;border-collapse:collapse;margin-bottom:.8rem;}
+.line-table th{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);padding:.5rem .6rem;background:var(--s2);border-bottom:1px solid var(--bd);}
+.line-table td{padding:.4rem .4rem;border-bottom:1px solid var(--bd);}
+.line-table td input,.line-table td select{background:var(--s2);border:1px solid transparent;border-radius:6px;padding:.32rem .5rem;font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;width:100%;transition:border-color .18s;}
+.line-table td input:focus,.line-table td select:focus{border-color:var(--cyan);}
+.line-table .line-total{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--cyan);text-align:right;padding-right:.6rem;}
+.add-line-btn{background:none;border:1px dashed var(--bd);border-radius:var(--rs);padding:.4rem 1rem;font-size:.74rem;color:var(--dim);cursor:pointer;transition:all .2s;width:100%;}
+.add-line-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.form-total-row{display:flex;justify-content:flex-end;gap:1.5rem;padding:.8rem 1.4rem;border-top:1px solid var(--bd);font-size:.8rem;}
+.form-total-row .t-label{color:var(--mu);}
+.form-total-row .t-val{font-family:'DM Mono',monospace;color:var(--tx);min-width:80px;text-align:right;}
+.form-total-row .t-val.grand{color:var(--cyan);font-size:1rem;font-weight:600;}
+/* Success toast */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--green);color:#fff;padding:.7rem 1.4rem;border-radius:100px;font-size:.82rem;font-weight:500;z-index:999;transform:translateY(4rem);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);}
+.toast.show{transform:translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSB()"></div>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="sl"><div class="lt">KAIZO</div><div class="ls">ERP</div></div>
+  <div class="ns">
+    <div class="nl">Pénzügy</div>
+    <div class="ni active" onclick="nav('dashboard',this)"><span class="ic">📊</span>Dashboard</div>
+    <div class="ni" onclick="nav('out-invoices',this)"><span class="ic">📤</span>Kimenő számlák</div>
+    <div class="ni" onclick="nav('in-invoices',this)"><span class="ic">📥</span>Bejövő számlák</div>
+    <div class="ni" onclick="nav('payments',this)"><span class="ic">💳</span>Fizetések</div>
+  </div>
+  <div class="ns" style="margin-top:.4rem">
+    <div class="nl">Beszerzés</div>
+    <div class="ni" onclick="nav('purchase',this)"><span class="ic">🛒</span>Rendelések</div>
+    <div class="ni" onclick="nav('vendors',this)"><span class="ic">🏭</span>Szállítók</div>
+    <div class="ni" onclick="nav('receipts',this)"><span class="ic">📦</span>Árubevétel</div>
+  </div>
+  <div class="ns" style="margin-top:.4rem">
+    <div class="nl">Riportok</div>
+    <div class="ni" onclick="nav('ledger',this)"><span class="ic">📉</span>Főkönyv</div>
+    <div class="ni" onclick="nav('cashflow',this)"><span class="ic">🔄</span>Cash Flow</div>
+  </div>
+  <div class="sbb"><div class="ni" onclick="nav('settings',this)"><span class="ic">⚙️</span>Beállítások</div></div>
+</aside>
+<div class="main">
+<header class="topbar">
+  <button class="mb" onclick="toggleSB()">☰</button>
+  <div class="tt" id="tbTitle">ERP Dashboard</div>
+  <div class="psw" id="topPsw">
+    <button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button>
+    <button class="pb" onclick="setPeriod(this,'Q2')">Q2</button>
+    <button class="pb" onclick="setPeriod(this,'YTD')">YTD</button>
+    <button class="pb" onclick="setPeriod(this,'12M')">12H</button>
+  </div>
+  <div class="sw"><span class="si">🔍</span><input class="si-w" type="text" placeholder="Keresés..." id="gSearch" oninput="gSearchFn()"></div>
+  <div class="tr">
+    <button class="tbb" onclick="toggleTheme()">🌙</button>
+  </div>
+</header>
+<div class="content">
+
+<!-- ══ DASHBOARD ══ -->
+<div class="page active" id="pg-dashboard">
+  <div class="kgrid" id="dash-kgrid">
+    <div class="kc"><div class="kl" id="dk0l">Bevétel</div><div class="kv" id="dk0v">—</div><div class="kd" id="dk0d">—</div></div>
+    <div class="kc"><div class="kl" id="dk1l">Kiadás</div><div class="kv" id="dk1v">—</div><div class="kd" id="dk1d">—</div></div>
+    <div class="kc"><div class="kl" id="dk2l">Kintlévőség</div><div class="kv" id="dk2v">—</div><div class="kd" id="dk2d">—</div></div>
+    <div class="kc"><div class="kl" id="dk3l">Cash Flow</div><div class="kv" id="dk3v">—</div><div class="kd" id="dk3d">—</div></div>
+  </div>
+  <div class="r12">
+    <div class="card"><div class="ch"><span class="ct">Pénzügyi összesítő</span></div><div class="sg" id="dSummary"></div></div>
+    <div class="card"><div class="ch"><span class="ct">Cash Flow trend</span></div><div class="cw"><canvas id="dChart"></canvas></div></div>
+  </div>
+  <div class="r2">
+    <div class="card">
+      <div class="ch"><span class="ct">📤 Kimenő számlák</span><span class="ca" onclick="nav('out-invoices',null)">Összes →</span></div>
+      <div class="tw"><table><thead><tr><th>Számlaszám</th><th>Ügyfél</th><th>Összeg</th><th>Státusz</th></tr></thead><tbody id="dOutBody"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">📥 Bejövő számlák</span><span class="ca" onclick="nav('in-invoices',null)">Összes →</span></div>
+      <div class="tw"><table><thead><tr><th>Számlaszám</th><th>Szállító</th><th>Összeg</th><th>Státusz</th></tr></thead><tbody id="dInBody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ KIMENŐ SZÁMLÁK ══ -->
+<div class="page" id="pg-out-invoices">
+  <div class="phd">
+    <h1>📤 Kimenő számlák</h1>
+    <div class="phd-right">
+      <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+      <button class="bpp" onclick="nav('new-out-invoice',null)">+ Új számla</button>
+    </div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Összes kimenő</div><div class="kv" id="oi-cnt">0</div><div class="kd">db</div></div>
+    <div class="kc"><div class="kl">Teljes összeg</div><div class="kv" id="oi-sum">0</div><div class="kd">Ft</div></div>
+    <div class="kc"><div class="kl">Fizetetlen</div><div class="kv" id="oi-unpaid">0</div><div class="kd wa">nyitott</div></div>
+    <div class="kc"><div class="kl">Lejárt</div><div class="kv" id="oi-over">0</div><div class="kd dn">azonnali</div></div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="oiSearch" oninput="renderOI()" placeholder="Keresés: számlaszám, ügyfél..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('oi','name',this)">Számlaszám <span class="si2"></span></th>
+        <th onclick="srt('oi','partner',this)">Ügyfél <span class="si2"></span></th>
+        <th onclick="srt('oi','invoice_date',this)">Kiállítva <span class="si2"></span></th>
+        <th onclick="srt('oi','invoice_date_due',this)">Esedékes <span class="si2"></span></th>
+        <th onclick="srt('oi','amount_untaxed',this)">Nettó <span class="si2"></span></th>
+        <th onclick="srt('oi','amount_total',this)">Bruttó <span class="si2"></span></th>
+        <th onclick="srt('oi','amount_residual',this)">Nyitott <span class="si2"></span></th>
+        <th onclick="srt('oi','payment_state',this)">Státusz <span class="si2"></span></th>
+      </tr></thead>
+      <tbody id="oiBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ BEJÖVŐ SZÁMLÁK ══ -->
+<div class="page" id="pg-in-invoices">
+  <div class="phd">
+    <h1>📥 Bejövő számlák</h1>
+    <div class="phd-right">
+      <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+      <button class="bpp" onclick="nav('new-in-invoice',null)">+ Számla rögzítése</button>
+    </div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Összes bejövő</div><div class="kv" id="ii-cnt">0</div><div class="kd">db</div></div>
+    <div class="kc"><div class="kl">Teljes összeg</div><div class="kv" id="ii-sum">0</div><div class="kd">Ft</div></div>
+    <div class="kc"><div class="kl">Fizetendő</div><div class="kv" id="ii-unpaid">0</div><div class="kd wa">nyitott</div></div>
+    <div class="kc"><div class="kl">Lejárt határidő</div><div class="kv" id="ii-over">0</div><div class="kd dn">figyelem</div></div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="iiSearch" oninput="renderII()" placeholder="Keresés: számlaszám, szállító..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('ii','name',this)">Számlaszám <span class="si2"></span></th>
+        <th onclick="srt('ii','partner',this)">Szállító <span class="si2"></span></th>
+        <th onclick="srt('ii','invoice_date',this)">Dátum <span class="si2"></span></th>
+        <th onclick="srt('ii','invoice_date_due',this)">Esedékes <span class="si2"></span></th>
+        <th onclick="srt('ii','amount_untaxed',this)">Nettó <span class="si2"></span></th>
+        <th onclick="srt('ii','amount_total',this)">Bruttó <span class="si2"></span></th>
+        <th onclick="srt('ii','amount_residual',this)">Fizetendő <span class="si2"></span></th>
+        <th onclick="srt('ii','payment_state',this)">Státusz <span class="si2"></span></th>
+      </tr></thead>
+      <tbody id="iiBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ FIZETÉSEK ══ -->
+<div class="page" id="pg-payments">
+  <div class="phd">
+    <h1>💳 Fizetések</h1>
+    <div class="phd-right">
+      <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+      <button class="bpp" onclick="nav('new-payment',null)">+ Fizetés rögzítése</button>
+    </div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Beérkezett</div><div class="kv" id="pay-in">—</div><div class="kd up">bevétel</div></div>
+    <div class="kc"><div class="kl">Kifizetett</div><div class="kv" id="pay-out">—</div><div class="kd dn">kiadás</div></div>
+    <div class="kc"><div class="kl">Feldolgozás alatt</div><div class="kv" id="pay-pend">—</div><div class="kd wa">pending</div></div>
+    <div class="kc"><div class="kl">Nettó egyenleg</div><div class="kv" id="pay-net">—</div><div class="kd up">nettó</div></div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="paySearch" oninput="renderPay()" placeholder="Keresés: partner, összeg..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('pay','name',this)">Hivatkozás <span class="si2"></span></th>
+        <th onclick="srt('pay','partner',this)">Partner <span class="si2"></span></th>
+        <th onclick="srt('pay','date',this)">Dátum <span class="si2"></span></th>
+        <th onclick="srt('pay','type',this)">Típus <span class="si2"></span></th>
+        <th onclick="srt('pay','journal',this)">Bank/Pénztár <span class="si2"></span></th>
+        <th onclick="srt('pay','amount',this)">Összeg <span class="si2"></span></th>
+        <th onclick="srt('pay','state',this)">Állapot <span class="si2"></span></th>
+      </tr></thead>
+      <tbody id="payBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ BESZERZÉSI RENDELÉSEK ══ -->
+<div class="page" id="pg-purchase">
+  <div class="phd">
+    <h1>🛒 Beszerzési rendelések</h1>
+    <div class="phd-right">
+      <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+      <button class="bpp" onclick="nav('new-purchase',null)">+ Új rendelés</button>
+    </div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Összes rendelés</div><div class="kv" id="po-cnt">0</div><div class="kd">db</div></div>
+    <div class="kc"><div class="kl">Teljes érték</div><div class="kv" id="po-sum">0</div><div class="kd">Ft</div></div>
+    <div class="kc"><div class="kl">Jóváhagyásra vár</div><div class="kv" id="po-pend">0</div><div class="kd wa">draft/sent</div></div>
+    <div class="kc"><div class="kl">Számlázandó</div><div class="kv" id="po-bill">0</div><div class="kd">teendő</div></div>
+  </div>
+  <div class="card">
+    <div class="ch">
+      <span class="ct">Rendelések</span>
+      <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+        <select id="poFilter" onchange="renderPO()" style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:.25rem .5rem;font-size:.72rem;color:var(--tx);font-family:'DM Sans',sans-serif;cursor:pointer;outline:none;">
+          <option value="all">Összes</option><option value="draft">Piszkozat</option><option value="sent">Elküldve</option><option value="purchase">Jóváhagyva</option><option value="done">Lezárt</option>
+        </select>
+        <input id="poSearch" oninput="renderPO()" type="text" placeholder="Keresés..." style="background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.25rem .7rem;font-size:.74rem;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;width:140px;">
+      </div>
+    </div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('po','name',this)">Rendelésszám <span class="si2"></span></th>
+        <th onclick="srt('po','partner',this)">Szállító <span class="si2"></span></th>
+        <th onclick="srt('po','date_order',this)">Dátum <span class="si2"></span></th>
+        <th onclick="srt('po','date_planned',this)">Várható szállítás <span class="si2"></span></th>
+        <th onclick="srt('po','amount_untaxed',this)">Nettó <span class="si2"></span></th>
+        <th onclick="srt('po','amount_total',this)">Bruttó <span class="si2"></span></th>
+        <th onclick="srt('po','invoice_status',this)">Számlázás <span class="si2"></span></th>
+        <th onclick="srt('po','state',this)">Státusz <span class="si2"></span></th>
+      </tr></thead>
+      <tbody id="poBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ SZÁLLÍTÓK ══ -->
+<div class="page" id="pg-vendors">
+  <div class="phd"><h1>🏭 Szállítók</h1><button class="bpp" onclick="nav('new-vendor',null)">+ Új szállító</button></div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="vnSearch" oninput="renderVN()" placeholder="Keresés..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('vn','name',this)">Szállító <span class="si2"></span></th>
+        <th onclick="srt('vn','country',this)">Ország <span class="si2"></span></th>
+        <th onclick="srt('vn','category',this)">Kategória <span class="si2"></span></th>
+        <th onclick="srt('vn','orders',this)">Rendelések <span class="si2"></span></th>
+        <th onclick="srt('vn','total_spend',this)">Kiadás <span class="si2"></span></th>
+        <th onclick="srt('vn','avg_delivery',this)">Átl. szállítás <span class="si2"></span></th>
+        <th>Státusz</th>
+      </tr></thead>
+      <tbody id="vnBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ BEÉRKEZÉSEK ══ -->
+<div class="page" id="pg-receipts">
+  <div class="phd"><h1>📦 Árubevétel</h1><button class="bpp" onclick="nav('new-receipt',null)">+ Árubevétel rögzítése</button></div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Várt beérkezések</div><div class="kv">8</div><div class="kd wa">ezen a héten</div></div>
+    <div class="kc"><div class="kl">Beérkezett (hó)</div><div class="kv">24</div><div class="kd up">▲ 20%</div></div>
+    <div class="kc"><div class="kl">Ellenőrzésre vár</div><div class="kv">3</div><div class="kd wa">⚠ pending</div></div>
+    <div class="kc"><div class="kl">Visszaküldve</div><div class="kv">1</div><div class="kd dn">eltérés</div></div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="rcSearch" oninput="renderRC()" placeholder="Keresés..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('rc','name',this)">Azonosító <span class="si2"></span></th>
+        <th onclick="srt('rc','partner',this)">Szállító <span class="si2"></span></th>
+        <th onclick="srt('rc','po_ref',this)">PO hivatkozás <span class="si2"></span></th>
+        <th onclick="srt('rc','scheduled_date',this)">Várható dátum <span class="si2"></span></th>
+        <th onclick="srt('rc','done_date',this)">Teljesítve <span class="si2"></span></th>
+        <th onclick="srt('rc','state',this)">Állapot <span class="si2"></span></th>
+      </tr></thead>
+      <tbody id="rcBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ FŐKÖNYV ══ -->
+<div class="page" id="pg-ledger">
+  <div class="phd">
+    <h1>📉 Főkönyv</h1>
+    <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Bevételek</div><div class="kv" id="ld-in">—</div><div class="kd up">▲</div></div>
+    <div class="kc"><div class="kl">Kiadások</div><div class="kv" id="ld-out">—</div><div class="kd dn">▲</div></div>
+    <div class="kc"><div class="kl">Eredmény</div><div class="kv" id="ld-res">—</div><div class="kd up">profit</div></div>
+    <div class="kc"><div class="kl">Nyitott tételek</div><div class="kv" id="ld-open">—</div><div class="kd">egyenlegezésre</div></div>
+  </div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="ldSearch" oninput="renderLD()" placeholder="Keresés..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('ld','date',this)">Dátum <span class="si2"></span></th>
+        <th onclick="srt('ld','ref',this)">Hivatkozás <span class="si2"></span></th>
+        <th onclick="srt('ld','account',this)">Főkönyvi számla <span class="si2"></span></th>
+        <th onclick="srt('ld','partner',this)">Partner <span class="si2"></span></th>
+        <th onclick="srt('ld','debit',this)">Terhelés <span class="si2"></span></th>
+        <th onclick="srt('ld','credit',this)">Jóváírás <span class="si2"></span></th>
+        <th onclick="srt('ld','balance',this)">Egyenleg <span class="si2"></span></th>
+      </tr></thead>
+      <tbody id="ldBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ CASH FLOW ══ -->
+<div class="page" id="pg-cashflow">
+  <div class="phd">
+    <h1>🔄 Cash Flow elemzés</h1>
+    <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
+  </div>
+  <div class="kgrid">
+    <div class="kc"><div class="kl">Beáramlás</div><div class="kv" id="cf-in">—</div><div class="kd up">bevétel</div></div>
+    <div class="kc"><div class="kl">Kiáramlás</div><div class="kv" id="cf-out">—</div><div class="kd dn">kiadás</div></div>
+    <div class="kc"><div class="kl">Nettó cash flow</div><div class="kv" id="cf-net">—</div><div class="kd up">nettó</div></div>
+    <div class="kc"><div class="kl">Likviditási mutató</div><div class="kv" id="cf-liq">—</div><div class="kd up">egészséges</div></div>
+  </div>
+  <div class="card"><div class="ch"><span class="ct">Havi Cash Flow</span></div><div class="cw" style="height:260px"><canvas id="cfBigChart"></canvas></div></div>
+  <div class="r2">
+    <div class="card"><div class="ch"><span class="ct">Cash Flow típusonként</span></div><div class="cw"><canvas id="cfTypeChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct">Kumulatív egyenleg</span></div><div class="cw"><canvas id="cfCumChart"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══ BEÁLLÍTÁSOK ══ -->
+<div class="page" id="pg-settings">
+  <div class="phd"><h1>Beállítások</h1></div>
+  <div class="r2">
+    <div class="card"><div class="ch"><span class="ct">Megjelenés</span></div>
+      <div style="padding:1.2rem;display:flex;flex-direction:column;gap:1rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.84rem">Téma</span><button class="tbb" onclick="toggleTheme()">Váltás</button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.84rem">Pénznem</span>
+          <select style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.3rem .6rem;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;"><option>HUF</option><option>EUR</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="ch"><span class="ct">Odoo API Kapcsolat</span></div>
+      <div style="padding:1.2rem;display:flex;flex-direction:column;gap:.8rem;">
+        <div><div style="font-size:.68rem;color:var(--mu);margin-bottom:.3rem;letter-spacing:.1em;text-transform:uppercase">Odoo URL</div><input type="text" placeholder="https://yourcompany.odoo.com" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.4rem .7rem;font-size:.8rem;color:var(--tx);font-family:'DM Mono',monospace;outline:none;"></div>
+        <div><div style="font-size:.68rem;color:var(--mu);margin-bottom:.3rem;letter-spacing:.1em;text-transform:uppercase">API Key</div><input type="password" placeholder="••••••••••" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.4rem .7rem;font-size:.8rem;color:var(--tx);font-family:'DM Mono',monospace;outline:none;"></div>
+        <button class="bpp" style="width:fit-content">Kapcsolat tesztelése</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DETAIL PAGES ══ -->
+<div class="page" id="pg-detail">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div id="detailContent"></div>
+</div>
+
+<!-- ══ ÚJ KIMENŐ SZÁMLA ══ -->
+<div class="page" id="pg-new-out-invoice">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>📤 Új kimenő számla</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Fejléc adatok</span><span style="font-size:.72rem;color:var(--mu)">account.move · move_type: out_invoice</span></div>
+    <div class="form-grid cols3">
+      <div class="form-group">
+        <label class="form-label">Ügyfél <span class="req">*</span></label>
+        <select class="form-select" id="oi-partner" onchange="oiUpdateHeader()">
+          <option value="">— Válassz ügyfelet —</option>
+          <option>Kovács Bt.</option><option>Tech Kft.</option><option>Gyártó Zrt.</option>
+          <option>Logisztika Kft.</option><option>Retail Zrt.</option><option>Holding Group</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Számla dátuma <span class="req">*</span></label>
+        <input class="form-input" type="date" id="oi-date" value="2025-03-20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Esedékesség <span class="req">*</span></label>
+        <input class="form-input" type="date" id="oi-due" value="2025-04-19">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fizetési feltétel</label>
+        <select class="form-select">
+          <option>30 nap nettó</option><option>15 nap nettó</option><option>Azonnali</option><option>45 nap nettó</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hivatkozás / Megbízás száma</label>
+        <input class="form-input" type="text" placeholder="pl. PROJ-2025-042">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pénznem</label>
+        <select class="form-select"><option>HUF — Magyar Forint</option><option>EUR — Euro</option><option>USD — Dollar</option></select>
+      </div>
+      <hr class="form-divider">
+      <div class="form-group span3">
+        <label class="form-label">Megjegyzés (számlán megjelenik)</label>
+        <textarea class="form-textarea" placeholder="pl. Az összeg tartalmazza az éves szoftver támogatás díját..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Tételsor</span><span style="font-size:.72rem;color:var(--mu)">account.move.line</span></div>
+    <div class="line-items">
+      <table class="line-table" id="oi-lines">
+        <thead><tr><th style="width:35%">Termék / Szolgáltatás</th><th>Mennyiség</th><th>Egység</th><th>Egységár (nettó)</th><th>ÁFA</th><th style="text-align:right">Összesen</th><th></th></tr></thead>
+        <tbody id="oi-lines-body"></tbody>
+      </table>
+      <button class="add-line-btn" onclick="addLine('oi')">+ Tétel hozzáadása</button>
+    </div>
+    <div class="form-total-row" id="oi-totals">
+      <div><span class="t-label">Nettó összesen: </span><span class="t-val" id="oi-t-net">0 Ft</span></div>
+      <div><span class="t-label">ÁFA (27%): </span><span class="t-val" id="oi-t-tax">0 Ft</span></div>
+      <div><span class="t-label">Bruttó összesen: </span><span class="t-val grand" id="oi-t-gross">0 Ft</span></div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-draft" onclick="showToast('Mentve piszkozatként')">Piszkozat mentése</button>
+    <button class="btn-save" onclick="showToast('✓ Számla kiállítva és elmentve')">Számla kiállítása</button>
+  </div>
+</div>
+
+<!-- ══ ÚJ BEJÖVŐ SZÁMLA ══ -->
+<div class="page" id="pg-new-in-invoice">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>📥 Bejövő számla rögzítése</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Szállítói számla adatai</span><span style="font-size:.72rem;color:var(--mu)">account.move · move_type: in_invoice</span></div>
+    <div class="form-grid cols3">
+      <div class="form-group">
+        <label class="form-label">Szállító <span class="req">*</span></label>
+        <select class="form-select">
+          <option value="">— Válassz szállítót —</option>
+          <option>AWS Hungary Kft.</option><option>Microsoft Kft.</option><option>Office Pro Kft.</option>
+          <option>Telecom Zrt.</option><option>Szerver Bt.</option><option>LogiTrans Zrt.</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Szállítói számlaszám <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="pl. SZ-2025-0042">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Számla dátuma <span class="req">*</span></label>
+        <input class="form-input" type="date" value="2025-03-20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Esedékesség <span class="req">*</span></label>
+        <input class="form-input" type="date" value="2025-04-19">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fizetési feltétel</label>
+        <select class="form-select"><option>30 nap nettó</option><option>15 nap nettó</option><option>Azonnali</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pénznem</label>
+        <select class="form-select"><option>HUF</option><option>EUR</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kapcsolódó PO</label>
+        <select class="form-select">
+          <option value="">— Kapcsolódó rendelés (opcionális) —</option>
+          <option>PO/2025/00201</option><option>PO/2025/00200</option><option>PO/2025/00199</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Főkönyvi számla</label>
+        <select class="form-select"><option>454 — Szállítók</option><option>529 — Egyéb kiadás</option><option>581 — Szolgáltatások</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Számla fájl (PDF)</label>
+        <input class="form-input" type="file" accept=".pdf,.jpg,.png" style="padding:.38rem .8rem">
+      </div>
+      <hr class="form-divider">
+      <div class="form-group span3">
+        <label class="form-label">Megjegyzés</label>
+        <textarea class="form-textarea" placeholder="Belső megjegyzés..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Tételsor</span></div>
+    <div class="line-items">
+      <table class="line-table">
+        <thead><tr><th style="width:35%">Leírás</th><th>Mennyiség</th><th>Egység</th><th>Egységár (nettó)</th><th>ÁFA</th><th style="text-align:right">Összesen</th><th></th></tr></thead>
+        <tbody id="ii-lines-body"></tbody>
+      </table>
+      <button class="add-line-btn" onclick="addLine('ii')">+ Tétel hozzáadása</button>
+    </div>
+    <div class="form-total-row">
+      <div><span class="t-label">Nettó: </span><span class="t-val" id="ii-t-net">0 Ft</span></div>
+      <div><span class="t-label">ÁFA: </span><span class="t-val" id="ii-t-tax">0 Ft</span></div>
+      <div><span class="t-label">Bruttó: </span><span class="t-val grand" id="ii-t-gross">0 Ft</span></div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-draft" onclick="showToast('Mentve piszkozatként')">Piszkozat mentése</button>
+    <button class="btn-save" onclick="showToast('✓ Bejövő számla rögzítve')">Rögzítés & Könyvelés</button>
+  </div>
+</div>
+
+<!-- ══ ÚJ FIZETÉS ══ -->
+<div class="page" id="pg-new-payment">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>💳 Fizetés rögzítése</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Fizetés adatai</span><span style="font-size:.72rem;color:var(--mu)">account.payment</span></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Fizetés iránya <span class="req">*</span></label>
+        <select class="form-select" id="pay-direction" onchange="payDirectionChange()">
+          <option value="in">Beérkezett fizetés (vevőtől)</option>
+          <option value="out">Kifizetett (szállítónak)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Partner <span class="req">*</span></label>
+        <select class="form-select" id="pay-partner">
+          <option value="">— Válassz partnert —</option>
+          <option>Kovács Bt.</option><option>Tech Kft.</option><option>Gyártó Zrt.</option>
+          <option>AWS Hungary Kft.</option><option>Microsoft Kft.</option><option>LogiTrans Zrt.</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Összeg <span class="req">*</span></label>
+        <input class="form-input" type="number" placeholder="0" id="pay-amount" oninput="payCalc()" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pénznem</label>
+        <select class="form-select"><option>HUF</option><option>EUR</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fizetés dátuma <span class="req">*</span></label>
+        <input class="form-input" type="date" value="2025-03-20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bank / Pénztár <span class="req">*</span></label>
+        <select class="form-select"><option>OTP Bank</option><option>K&H Bank</option><option>Pénztár</option><option>Raiffeisen Bank</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fizetési mód</label>
+        <select class="form-select"><option>Banki átutalás</option><option>Bankkártya</option><option>Készpénz</option><option>Csekk</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kapcsolódó számla</label>
+        <select class="form-select" id="pay-invoice">
+          <option value="">— Nyitott számlák —</option>
+          <option>INV/2025/00124 · Kovács Bt. · 3.048M Ft</option>
+          <option>INV/2025/00121 · Logisztika Kft. · 3.937M Ft</option>
+          <option>INV/2025/00119 · Holding Group · 10.795M Ft</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tranzakció azonosító</label>
+        <input class="form-input" type="text" placeholder="Banki referenciaszám">
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">Megjegyzés</label>
+        <textarea class="form-textarea" placeholder="Belső megjegyzés..."></textarea>
+      </div>
+    </div>
+    <div id="pay-preview" style="padding:0 1.4rem 1.2rem;display:none">
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:1rem 1.2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+        <div style="font-size:.8rem;color:var(--dim)">Rögzítendő összeg</div>
+        <div style="font-family:'DM Mono',monospace;font-size:1.4rem;color:var(--cyan)" id="pay-preview-amt">0 Ft</div>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-draft" onclick="showToast('Mentve piszkozatként')">Piszkozat mentése</button>
+    <button class="btn-save" onclick="showToast('✓ Fizetés könyvelve')">Könyvelés & Mentés</button>
+  </div>
+</div>
+
+<!-- ══ ÚJ RENDELÉS ══ -->
+<div class="page" id="pg-new-purchase">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>🛒 Új beszerzési rendelés</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Rendelés fejléce</span><span style="font-size:.72rem;color:var(--mu)">purchase.order</span></div>
+    <div class="form-grid cols3">
+      <div class="form-group">
+        <label class="form-label">Szállító <span class="req">*</span></label>
+        <select class="form-select" onchange="poFillTerms(this)">
+          <option value="">— Válassz szállítót —</option>
+          <option data-term="30 nap nettó">AWS Hungary Kft.</option>
+          <option data-term="30 nap nettó">Microsoft Kft.</option>
+          <option data-term="15 nap nettó">Office Pro Kft.</option>
+          <option data-term="45 nap nettó">Szerver Bt.</option>
+          <option data-term="30 nap nettó">LogiTrans Zrt.</option>
+          <option data-term="60 nap nettó">Épület Kft.</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rendelés dátuma <span class="req">*</span></label>
+        <input class="form-input" type="date" value="2025-03-20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Várható szállítás <span class="req">*</span></label>
+        <input class="form-input" type="date" value="2025-04-03" id="po-planned">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fizetési feltétel</label>
+        <input class="form-input" type="text" id="po-term" value="30 nap nettó" readonly style="color:var(--dim)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Szállítási cím</label>
+        <input class="form-input" type="text" placeholder="pl. 1234 Budapest, Fő u. 1.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pénznem</label>
+        <select class="form-select"><option>HUF</option><option>EUR</option></select>
+      </div>
+      <hr class="form-divider">
+      <div class="form-group span3">
+        <label class="form-label">Megjegyzés a szállítónak</label>
+        <textarea class="form-textarea" placeholder="Szállítási instrukciók, különleges feltételek..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Rendelési tételek</span></div>
+    <div class="line-items">
+      <table class="line-table">
+        <thead><tr><th style="width:32%">Termék</th><th>Mennyiség</th><th>Egység</th><th>Egységár (nettó)</th><th>ÁFA</th><th style="text-align:right">Összesen</th><th></th></tr></thead>
+        <tbody id="po-lines-body"></tbody>
+      </table>
+      <button class="add-line-btn" onclick="addLine('po')">+ Tétel hozzáadása</button>
+    </div>
+    <div class="form-total-row">
+      <div><span class="t-label">Nettó: </span><span class="t-val" id="po-t-net">0 Ft</span></div>
+      <div><span class="t-label">ÁFA: </span><span class="t-val" id="po-t-tax">0 Ft</span></div>
+      <div><span class="t-label">Bruttó: </span><span class="t-val grand" id="po-t-gross">0 Ft</span></div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-draft" onclick="showToast('Rendelés piszkozatként mentve')">Piszkozat mentése</button>
+    <button class="btn-save" onclick="showToast('✓ Rendelés elküldve jóváhagyásra')">Küldés jóváhagyásra</button>
+  </div>
+</div>
+
+<!-- ══ ÚJ SZÁLLÍTÓ ══ -->
+<div class="page" id="pg-new-vendor">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>🏭 Új szállító rögzítése</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Alapadatok</span><span style="font-size:.72rem;color:var(--mu)">res.partner · supplier_rank &gt; 0</span></div>
+    <div class="form-grid cols3">
+      <div class="form-group span2">
+        <label class="form-label">Cégnév <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="pl. Acme Kft.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adószám <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="12345678-2-42" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kapcsolattartó neve</label>
+        <input class="form-input" type="text" placeholder="pl. Kovács János">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email <span class="req">*</span></label>
+        <input class="form-input" type="email" placeholder="szamla@ceg.hu">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon</label>
+        <input class="form-input" type="tel" placeholder="+36 1 234 5678" style="font-family:'DM Mono',monospace">
+      </div>
+      <hr class="form-divider">
+      <div class="form-section-title">Cím</div>
+      <div class="form-group span2">
+        <label class="form-label">Utca, házszám <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="pl. Fő utca 12.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Irányítószám</label>
+        <input class="form-input" type="text" placeholder="1234" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Város <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="Budapest">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ország</label>
+        <select class="form-select"><option>Magyarország</option><option>Ausztria</option><option>Németország</option><option>Románia</option><option>Szlovákia</option></select>
+      </div>
+      <hr class="form-divider">
+      <div class="form-section-title">Pénzügyi beállítások</div>
+      <div class="form-group">
+        <label class="form-label">Kategória</label>
+        <select class="form-select">
+          <option>IT szolgáltatás</option><option>IT licenc</option><option>Hardware</option>
+          <option>Irodaszer</option><option>Logisztika</option><option>Telekommunikáció</option>
+          <option>Ingatlan</option><option>Berendezés</option><option>Egyéb</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fizetési feltétel</label>
+        <select class="form-select"><option>15 nap nettó</option><option>30 nap nettó</option><option>45 nap nettó</option><option>60 nap nettó</option><option>Azonnali</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pénznem</label>
+        <select class="form-select"><option>HUF</option><option>EUR</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bankszámlaszám</label>
+        <input class="form-input" type="text" placeholder="HU12 3456 7890 1234 5678 0000 0000" style="font-family:'DM Mono',monospace;font-size:.76rem">
+      </div>
+      <div class="form-group">
+        <label class="form-label">IBAN / SWIFT</label>
+        <input class="form-input" type="text" placeholder="OTPVHUHB" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Átl. szállítási idő (nap)</label>
+        <input class="form-input" type="number" placeholder="3" min="0">
+      </div>
+      <div class="form-group span3">
+        <label class="form-label">Megjegyzés</label>
+        <textarea class="form-textarea" placeholder="Speciális feltételek, megjegyzések..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-save" onclick="showToast('✓ Szállító sikeresen rögzítve')">Szállító mentése</button>
+  </div>
+</div>
+
+<!-- ══ ÚJ ÁRUBEVÉTEL ══ -->
+<div class="page" id="pg-new-receipt">
+  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="phd"><h1>📦 Árubevétel rögzítése</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Bevételi adatok</span><span style="font-size:.72rem;color:var(--mu)">stock.picking · picking_type: incoming</span></div>
+    <div class="form-grid cols3">
+      <div class="form-group">
+        <label class="form-label">Szállító <span class="req">*</span></label>
+        <select class="form-select" onchange="rcFillPO(this)">
+          <option value="">— Válassz szállítót —</option>
+          <option>AWS Hungary Kft.</option><option>Microsoft Kft.</option>
+          <option>Szerver Bt.</option><option>Office Pro Kft.</option>
+          <option>LogiTrans Zrt.</option><option>Bútor Zrt.</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kapcsolódó rendelés (PO)</label>
+        <select class="form-select" id="rc-po">
+          <option value="">— Válassz PO-t —</option>
+          <option>PO/2025/00201 · AWS · 609.600 Ft</option>
+          <option>PO/2025/00200 · Microsoft · 406.400 Ft</option>
+          <option>PO/2025/00199 · Szerver Bt. · 1.574.800 Ft</option>
+          <option>PO/2025/00197 · Bútor Zrt. · 482.600 Ft</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bevétel dátuma <span class="req">*</span></label>
+        <input class="form-input" type="date" value="2025-03-20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Szállítólevél száma</label>
+        <input class="form-input" type="text" placeholder="pl. SZL-2025-0042" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Raktár / Célhely</label>
+        <select class="form-select"><option>Főraktár / Stock</option><option>Külső raktár</option><option>Minőségellenőrzés</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Felelős személy</label>
+        <select class="form-select"><option>Nagy Ádám</option><option>Balogh Éva</option><option>Fekete Péter</option></select>
+      </div>
+      <hr class="form-divider">
+      <div class="form-group span3">
+        <label class="form-label">Megjegyzés / Eltérés jelzése</label>
+        <textarea class="form-textarea" placeholder="pl. A szállítmány sérülésmentes, minden tétel megérkezett. / Eltérés: 2 db hiányzik..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Átvett tételek</span></div>
+    <div class="line-items">
+      <table class="line-table">
+        <thead><tr><th style="width:30%">Termék</th><th>Rendelt menny.</th><th>Átvett menny.</th><th>Egység</th><th>Tétel / LOT</th><th>Megjegyzés</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><input class="form-input" style="font-size:.76rem" type="text" placeholder="Termék neve"></td>
+            <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="number" placeholder="0" value="10"></td>
+            <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="number" placeholder="0" value="10"></td>
+            <td><select class="form-select" style="font-size:.76rem"><option>db</option><option>kg</option><option>l</option><option>m</option></select></td>
+            <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="text" placeholder="LOT-001"></td>
+            <td><input class="form-input" style="font-size:.76rem" type="text" placeholder="—"></td>
+          </tr>
+          <tr>
+            <td><input class="form-input" style="font-size:.76rem" type="text" placeholder="Termék neve"></td>
+            <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="number" placeholder="0" value="5"></td>
+            <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="number" placeholder="0" value="3"></td>
+            <td><select class="form-select" style="font-size:.76rem"><option>db</option><option>kg</option></select></td>
+            <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="text" placeholder="LOT-002"></td>
+            <td><input class="form-input" style="font-size:.76rem" type="text" placeholder="2 db hiányzik"></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="add-line-btn" onclick="this.previousElementSibling.querySelector('tbody').insertRow().innerHTML=rcEmptyRow()">+ Tétel hozzáadása</button>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
+    <button class="btn-draft" onclick="showToast('Vázlat mentve')">Vázlat mentése</button>
+    <button class="btn-save" onclick="showToast('✓ Árubevétel rögzítve és raktárba könyvelve')">Rögzítés & Raktárba könyvelés</button>
+  </div>
+</div>
+
+</div></div></div>
+<script>
+const TODAY = '2025-03-20';
+let activePeriod = 'Q1';
+let detailBackPage = 'out-invoices';
+
+/* ══ PERIOD DATA ══ */
+const PD = {
+  Q1:  {lbl:'Q1 2025',bev:63.9,kiad:46.9,kint:18,cf:17,cf_liq:'1.4×',
+         ld:{in:'82M',out:'64M',res:'18M',open:'58'},
+         pay:{in:'42.1M',out:'31.4M',pend:'2',net:'10.7M'},
+         chart_l:['Jan','Feb','Már'],chart_in:[19.8,24.3,23.9],chart_out:[16.4,18.7,11.9],chart_net:[3.4,5.6,12.0]},
+  Q2:  {lbl:'Q2 2025',bev:124,kiad:87,kint:23,cf:37,cf_liq:'1.8×',
+         ld:{in:'148M',out:'116M',res:'32M',open:'84'},
+         pay:{in:'86.8M',out:'62.4M',pend:'3',net:'24.4M'},
+         chart_l:['Ápr','Máj','Jún'],chart_in:[38.2,42.1,43.7],chart_out:[28.4,29.8,28.8],chart_net:[9.8,12.3,14.9]},
+  YTD: {lbl:'YTD 2025',bev:192,kiad:134,kint:41,cf:58,cf_liq:'1.6×',
+         ld:{in:'230M',out:'180M',res:'50M',open:'142'},
+         pay:{in:'128.9M',out:'93.8M',pend:'3',net:'35.1M'},
+         chart_l:['Jan','Feb','Már','Ápr','Máj','Jún'],chart_in:[19.8,24.3,23.9,38.2,42.1,43.7],chart_out:[16.4,18.7,11.9,28.4,29.8,28.8],chart_net:[3.4,5.6,12.0,9.8,12.3,14.9]},
+  '12M':{lbl:'Utolsó 12H',bev:386,kiad:271,kint:55,cf:115,cf_liq:'2.1×',
+         ld:{in:'524M',out:'412M',res:'112M',open:'286'},
+         pay:{in:'298.4M',out:'214.2M',pend:'5',net:'84.2M'},
+         chart_l:["Ápr'24",'Jún','Aug','Okt','Dec',"Feb'25"],chart_in:[28.4,31.2,35.6,38.1,42.8,24.3],chart_out:[20.1,22.4,25.8,27.2,30.4,18.7],chart_net:[8.3,8.8,9.8,10.9,12.4,5.6]},
+};
+
+/* ══ DATA ══ */
+let OI=[
+  {id:1,name:'INV/2025/00124',partner:'Kovács Bt.',invoice_date:'2025-03-01',invoice_date_due:'2025-03-31',amount_untaxed:2400000,amount_total:3048000,amount_residual:3048000,payment_state:'not_paid',currency:'HUF',ref:'ERP-001',notes:'Első részlet'},
+  {id:2,name:'INV/2025/00123',partner:'Tech Kft.',invoice_date:'2025-02-28',invoice_date_due:'2025-03-28',amount_untaxed:1850000,amount_total:2349500,amount_residual:0,payment_state:'paid',currency:'HUF',ref:'ERP-002',notes:''},
+  {id:3,name:'INV/2025/00122',partner:'Gyártó Zrt.',invoice_date:'2025-02-20',invoice_date_due:'2025-03-20',amount_untaxed:6200000,amount_total:7874000,amount_residual:3000000,payment_state:'partial',currency:'HUF',ref:'ERP-003',notes:'Részleges fizetés érkezett'},
+  {id:4,name:'INV/2025/00121',partner:'Logisztika Kft.',invoice_date:'2025-02-15',invoice_date_due:'2025-03-10',amount_untaxed:3100000,amount_total:3937000,amount_residual:3937000,payment_state:'not_paid',currency:'HUF',ref:'ERP-004',notes:'Lejárt!'},
+  {id:5,name:'INV/2025/00120',partner:'Retail Zrt.',invoice_date:'2025-02-10',invoice_date_due:'2025-03-10',amount_untaxed:980000,amount_total:1244600,amount_residual:0,payment_state:'paid',currency:'HUF',ref:'ERP-005',notes:''},
+  {id:6,name:'INV/2025/00119',partner:'Holding Group',invoice_date:'2025-02-05',invoice_date_due:'2025-03-05',amount_untaxed:8500000,amount_total:10795000,amount_residual:10795000,payment_state:'not_paid',currency:'HUF',ref:'ERP-006',notes:'Éves szerződés'},
+];
+let II=[
+  {id:10,name:'BILL/2025/00088',partner:'AWS Hungary Kft.',invoice_date:'2025-03-01',invoice_date_due:'2025-03-31',amount_untaxed:480000,amount_total:609600,amount_residual:609600,payment_state:'not_paid',currency:'HUF',ref:'AWS-2025-03',notes:'Felhőszolgáltatás'},
+  {id:11,name:'BILL/2025/00087',partner:'Microsoft Kft.',invoice_date:'2025-02-28',invoice_date_due:'2025-03-28',amount_untaxed:320000,amount_total:406400,amount_residual:0,payment_state:'paid',currency:'HUF',ref:'MSFT-2025-02',notes:'M365 licencek'},
+  {id:12,name:'BILL/2025/00086',partner:'Office Pro Kft.',invoice_date:'2025-02-20',invoice_date_due:'2025-03-15',amount_untaxed:125000,amount_total:158750,amount_residual:158750,payment_state:'not_paid',currency:'HUF',ref:'OPK-86',notes:'Lejárt!'},
+  {id:13,name:'BILL/2025/00085',partner:'Telecom Zrt.',invoice_date:'2025-02-15',invoice_date_due:'2025-03-15',amount_untaxed:85000,amount_total:107950,amount_residual:0,payment_state:'paid',currency:'HUF',ref:'TEL-85',notes:''},
+  {id:14,name:'BILL/2025/00084',partner:'Épület Kft.',invoice_date:'2025-02-10',invoice_date_due:'2025-02-28',amount_untaxed:650000,amount_total:825500,amount_residual:825500,payment_state:'not_paid',currency:'HUF',ref:'EK-84',notes:'Lejárt!'},
+  {id:15,name:'BILL/2025/00083',partner:'LogiTrans Zrt.',invoice_date:'2025-02-05',invoice_date_due:'2025-02-20',amount_untaxed:290000,amount_total:368300,amount_residual:368300,payment_state:'not_paid',currency:'HUF',ref:'LTZ-83',notes:'Lejárt!'},
+];
+let PO_DATA=[
+  {id:20,name:'PO/2025/00201',partner:'AWS Hungary Kft.',date_order:'2025-03-10',date_planned:'2025-03-25',amount_untaxed:480000,amount_total:609600,state:'purchase',invoice_status:'invoiced',notes:'Éves keretszerződés alapján'},
+  {id:21,name:'PO/2025/00200',partner:'Microsoft Kft.',date_order:'2025-03-08',date_planned:'2025-03-22',amount_untaxed:320000,amount_total:406400,state:'purchase',invoice_status:'to invoice',notes:''},
+  {id:22,name:'PO/2025/00199',partner:'Szerver Bt.',date_order:'2025-03-05',date_planned:'2025-03-20',amount_untaxed:1240000,amount_total:1574800,state:'sent',invoice_status:'nothing',notes:'Ajánlat elfogadva'},
+  {id:23,name:'PO/2025/00198',partner:'Office Pro Kft.',date_order:'2025-03-01',date_planned:'2025-03-15',amount_untaxed:125000,amount_total:158750,state:'done',invoice_status:'invoiced',notes:''},
+  {id:24,name:'PO/2025/00197',partner:'Bútor Zrt.',date_order:'2025-02-28',date_planned:'2025-03-14',amount_untaxed:380000,amount_total:482600,state:'draft',invoice_status:'nothing',notes:'Jóváhagyásra vár'},
+  {id:25,name:'PO/2025/00196',partner:'Telecom Zrt.',date_order:'2025-02-25',date_planned:'2025-03-10',amount_untaxed:85000,amount_total:107950,state:'done',invoice_status:'invoiced',notes:''},
+  {id:26,name:'PO/2025/00195',partner:'Eszköz Kft.',date_order:'2025-02-20',date_planned:'2025-03-05',amount_untaxed:760000,amount_total:965200,state:'purchase',invoice_status:'to invoice',notes:'Részleges szállítás'},
+];
+let VN=[
+  {id:1,name:'AWS Hungary Kft.',email:'billing@aws.hu',phone:'+36 1 234 5678',country:'Magyarország',category:'IT szolgáltatás',orders:8,total_spend:3840000,avg_delivery:2,payment_term:'30 nap',status:'active'},
+  {id:2,name:'Microsoft Kft.',email:'sales@microsoft.hu',phone:'+36 1 345 6789',country:'Magyarország',category:'IT licenc',orders:12,total_spend:3840000,avg_delivery:1,payment_term:'30 nap',status:'active'},
+  {id:3,name:'Office Pro Kft.',email:'info@officepro.hu',phone:'+36 20 456 7890',country:'Magyarország',category:'Irodaszer',orders:5,total_spend:625000,avg_delivery:3,payment_term:'15 nap',status:'active'},
+  {id:4,name:'Telecom Zrt.',email:'szamlazas@telecom.hu',phone:'+36 70 567 8901',country:'Magyarország',category:'Telekommunikáció',orders:6,total_spend:510000,avg_delivery:1,payment_term:'15 nap',status:'active'},
+  {id:5,name:'Szerver Bt.',email:'sales@szerver.hu',phone:'+36 30 678 9012',country:'Magyarország',category:'Hardware',orders:3,total_spend:3724800,avg_delivery:7,payment_term:'45 nap',status:'active'},
+  {id:6,name:'LogiTrans Zrt.',email:'info@logitrans.hu',phone:'+36 20 789 0123',country:'Magyarország',category:'Logisztika',orders:9,total_spend:3314700,avg_delivery:2,payment_term:'30 nap',status:'active'},
+  {id:7,name:'Épület Kft.',email:'iroda@epulet.hu',phone:'+36 1 890 1234',country:'Magyarország',category:'Ingatlan',orders:2,total_spend:1651000,avg_delivery:14,payment_term:'60 nap',status:'inactive'},
+  {id:8,name:'Bútor Zrt.',email:'rend@butor.hu',phone:'+36 30 901 2345',country:'Magyarország',category:'Berendezés',orders:1,total_spend:482600,avg_delivery:10,payment_term:'30 nap',status:'active'},
+];
+let PAY=[
+  {id:1,name:'PAY/2025/00045',partner:'Kovács Bt.',date:'2025-03-18',type:'Beérkezett',journal:'OTP Bank',amount:2349500,state:'posted'},
+  {id:2,name:'PAY/2025/00044',partner:'Microsoft Kft.',date:'2025-03-17',type:'Kifizetett',journal:'OTP Bank',amount:406400,state:'posted'},
+  {id:3,name:'PAY/2025/00043',partner:'Tech Kft.',date:'2025-03-15',type:'Beérkezett',journal:'K&H Bank',amount:1244600,state:'posted'},
+  {id:4,name:'PAY/2025/00042',partner:'Telecom Zrt.',date:'2025-03-14',type:'Kifizetett',journal:'Pénztár',amount:107950,state:'posted'},
+  {id:5,name:'PAY/2025/00041',partner:'E-com Kft.',date:'2025-03-12',type:'Beérkezett',journal:'OTP Bank',amount:1524000,state:'posted'},
+  {id:6,name:'PAY/2025/00040',partner:'AWS Hungary Kft.',date:'2025-03-10',type:'Kifizetett',journal:'K&H Bank',amount:609600,state:'draft'},
+];
+let RC=[
+  {id:1,name:'WH/IN/00234',partner:'Szerver Bt.',po_ref:'PO/2025/00199',scheduled_date:'2025-03-20',done_date:null,state:'ready'},
+  {id:2,name:'WH/IN/00233',partner:'AWS Hungary Kft.',po_ref:'PO/2025/00201',scheduled_date:'2025-03-18',done_date:'2025-03-18',state:'done'},
+  {id:3,name:'WH/IN/00232',partner:'Office Pro Kft.',po_ref:'PO/2025/00198',scheduled_date:'2025-03-15',done_date:'2025-03-15',state:'done'},
+  {id:4,name:'WH/IN/00231',partner:'Bútor Zrt.',po_ref:'PO/2025/00197',scheduled_date:'2025-03-14',done_date:null,state:'ready'},
+  {id:5,name:'WH/IN/00230',partner:'Eszköz Kft.',po_ref:'PO/2025/00195',scheduled_date:'2025-03-10',done_date:'2025-03-09',state:'done'},
+  {id:6,name:'WH/IN/00229',partner:'LogiTrans Zrt.',po_ref:'PO/2025/00190',scheduled_date:'2025-03-08',done_date:null,state:'waiting'},
+];
+let LD=[
+  {id:1,date:'2025-03-18',ref:'INV/2025/00123',account:'311 Vevők',partner:'Tech Kft.',debit:0,credit:2349500,balance:2349500},
+  {id:2,date:'2025-03-17',ref:'BILL/2025/00087',account:'454 Szállítók',partner:'Microsoft Kft.',debit:406400,credit:0,balance:-406400},
+  {id:3,date:'2025-03-15',ref:'INV/2025/00120',account:'311 Vevők',partner:'Retail Zrt.',debit:0,credit:1244600,balance:1244600},
+  {id:4,date:'2025-03-14',ref:'BILL/2025/00085',account:'454 Szállítók',partner:'Telecom Zrt.',debit:107950,credit:0,balance:-107950},
+  {id:5,date:'2025-03-12',ref:'INV/2025/00118',account:'311 Vevők',partner:'E-com Kft.',debit:0,credit:1524000,balance:1524000},
+  {id:6,date:'2025-03-10',ref:'BILL/2025/00088',account:'454 Szállítók',partner:'AWS Hungary Kft.',debit:609600,credit:0,balance:-609600},
+];
+
+/* ══ HELPERS ══ */
+const fM = n => (n/1000000).toFixed(2)+'M Ft';
+const fK = n => n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'E':n;
+const q  = id => (document.getElementById(id)||{value:''}).value.toLowerCase();
+const el = id => document.getElementById(id);
+const isOverdue = d => d && d < TODAY;
+
+const PAY_STATE = {
+  not_paid:'<span class="badge bca">Fizetetlen</span>',
+  paid:'<span class="badge bpa">Fizetve</span>',
+  partial:'<span class="badge bpr">Részleges</span>',
+  in_payment:'<span class="badge bpo">Folyamatban</span>'
+};
+const PO_STATE_B = {draft:'<span class="badge bdr">Piszkozat</span>',sent:'<span class="badge bpo">Elküldve</span>',purchase:'<span class="badge bpa">Jóváhagyva</span>',done:'<span class="badge bpu">Lezárt</span>',cancel:'<span class="badge bca">Törölve</span>'};
+const IS_LBL = {nothing:'—','to invoice':'Számlázandó',invoiced:'Számlázva'};
+const REC_STATE = {ready:'<span class="badge bpo">Kész</span>',done:'<span class="badge bpa">Teljesítve</span>',waiting:'<span class="badge bpr">Vár</span>'};
+
+/* dátum szín: piros ha lejárt, sima ha nem */
+function dateCell(d, label='') {
+  const ov = isOverdue(d);
+  return `<span style="font-family:'DM Mono',monospace;font-size:.74rem;color:${ov?'var(--red)':'var(--tx)'}">${d||'—'}${ov?' ⚠':''}</span>`;
+}
+
+/* delta szín: zöld ha pozitív, piros ha mínusz */
+function deltaHtml(val, suffix='%') {
+  const n = parseFloat(val);
+  const cls = n > 0 ? 'up' : n < 0 ? 'dn' : '';
+  const arrow = n > 0 ? '▲' : n < 0 ? '▼' : '';
+  return `<div class="kd ${cls}">${arrow} ${Math.abs(n)}${suffix}</div>`;
+}
+
+/* ══ SORT ══ */
+const SS = {};
+function srt(ds,field,th) {
+  const k=ds+'.'+field, asc=SS[k]!=='asc'; SS[k]=asc?'asc':'desc';
+  th.closest('table').querySelectorAll('th').forEach(t=>t.classList.remove('sa','sd'));
+  th.classList.add(asc?'sa':'sd');
+  const map={oi:OI,ii:II,po:PO_DATA,vn:VN,pay:PAY,rc:RC,ld:LD};
+  map[ds].sort((a,b)=>{let va=a[field],vb=b[field];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return asc?(va>vb?1:va<vb?-1:0):(va<vb?1:va>vb?-1:0);});
+  ({oi:renderOI,ii:renderII,po:renderPO,vn:renderVN,pay:renderPay,rc:renderRC,ld:renderLD})[ds]();
+}
+
+/* ══ PERIOD ══ */
+function setPeriod(btn, p) {
+  activePeriod = p;
+  // Szinkronizál MINDEN psw-beli .pb gombot az egész dokumentumban
+  document.querySelectorAll('.psw .pb').forEach(b => {
+    const bPeriod = b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+    b.classList.toggle('active', bPeriod === p);
+  });
+  applyPeriod(p);
+}
+
+function applyPeriod(p) {
+  const d = PD[p]; if (!d) return;
+
+  // Dashboard KPI-k
+  const pctBev  = p==='Q1'?11.4:p==='Q2'?18.2:p==='YTD'?15.8:24.1;
+  const pctKiad = p==='Q1'?7.2:p==='Q2'?9.4:p==='YTD'?8.3:16.7;
+  el('dk0l').textContent = 'Bevétel ('+d.lbl+')';
+  el('dk0v').textContent = d.bev+'M';
+  el('dk0d').className = 'kd up'; el('dk0d').textContent = '▲ '+pctBev+'%';
+  el('dk1v').textContent = d.kiad+'M';
+  el('dk1d').className = 'kd dn'; el('dk1d').textContent = '▲ '+pctKiad+'%';
+  el('dk2v').textContent = d.kint+'M';
+  el('dk3v').textContent = d.cf+'M';
+
+  // Dashboard summary
+  const ds = el('dSummary');
+  if (ds) ds.innerHTML =
+    `<div class="sb2"><div class="sbl">Kimenő számlák</div><div class="sbv" style="color:var(--green)">${d.bev}M Ft</div></div>`+
+    `<div class="sb2"><div class="sbl">Ebből beérkezett</div><div class="sbv">${Math.round(d.bev*0.77)}M Ft</div></div>`+
+    `<div class="sb2"><div class="sbl">Bejövő számlák</div><div class="sbv" style="color:var(--red)">${d.kiad}M Ft</div></div>`+
+    `<div class="sb2"><div class="sbl">Fizetendő</div><div class="sbv" style="color:var(--orange)">${Math.round(d.kiad*0.44)}M Ft</div></div>`+
+    `<div class="sb2" style="grid-column:span 2;border-bottom:none"><div class="sbl">⚠ Lejárt kintlévőség</div><div class="sbv" style="font-size:1rem;color:var(--red)">${Math.round(d.kint*0.27)}M Ft</div></div>`;
+
+  // Kimenő számla KPI-k (nincs render felülírva, ezeket közvetlenül frissítjük)
+  const oiList = OI; // lehetne periódus alapján szűrni is
+  el('oi-cnt').textContent = oiList.length;
+  el('oi-sum').textContent = fK(oiList.reduce((s,i)=>s+i.amount_total,0));
+  el('oi-unpaid').textContent = oiList.filter(i=>i.payment_state!=='paid').length;
+  el('oi-over').textContent = oiList.filter(i=>isOverdue(i.invoice_date_due)&&i.payment_state!=='paid').length;
+
+  // Bejövő számla KPI-k
+  const iiList = II;
+  el('ii-cnt').textContent = iiList.length;
+  el('ii-sum').textContent = fK(iiList.reduce((s,i)=>s+i.amount_total,0));
+  el('ii-unpaid').textContent = iiList.filter(i=>i.payment_state!=='paid').length;
+  el('ii-over').textContent = iiList.filter(i=>isOverdue(i.invoice_date_due)&&i.payment_state!=='paid').length;
+
+  // PO KPI-k
+  el('po-cnt').textContent = PO_DATA.length;
+  el('po-sum').textContent = fK(PO_DATA.reduce((s,p)=>s+p.amount_total,0));
+  el('po-pend').textContent = PO_DATA.filter(p=>['draft','sent'].includes(p.state)).length;
+  el('po-bill').textContent = PO_DATA.filter(p=>p.invoice_status==='to invoice').length;
+
+  // Fizetések
+  el('pay-in').textContent  = d.pay.in;
+  el('pay-out').textContent = d.pay.out;
+  el('pay-pend').textContent= d.pay.pend;
+  el('pay-net').textContent = d.pay.net;
+
+  // Főkönyv
+  if(el('ld-in'))  el('ld-in').textContent  = d.ld.in;
+  if(el('ld-out')) el('ld-out').textContent = d.ld.out;
+  if(el('ld-res')) el('ld-res').textContent = d.ld.res;
+  if(el('ld-open'))el('ld-open').textContent= d.ld.open;
+
+  // Cash flow
+  if(el('cf-in'))  el('cf-in').textContent  = d.bev+'M';
+  if(el('cf-out')) el('cf-out').textContent = d.kiad+'M';
+  if(el('cf-net')) el('cf-net').textContent = d.cf+'M';
+  if(el('cf-liq')) el('cf-liq').textContent = d.cf_liq;
+
+  // Chart frissítés
+  updateDashChart(d);
+  renderCFCharts(d);
+}
+
+/* ══ RENDER FÜGGVÉNYEK ══ */
+function renderOI() {
+  const qs = q('oiSearch');
+  const list = OI.filter(i=>!qs||i.name.toLowerCase().includes(qs)||i.partner.toLowerCase().includes(qs));
+  el('oiBody').innerHTML = list.map(i => `<tr onclick="showDetail('oi',${i.id})">
+    <td data-label="Számlaszám"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${i.name}</span></td>
+    <td data-label="Ügyfél">${i.partner}</td>
+    <td data-label="Kiállítva">${dateCell(i.invoice_date)}</td>
+    <td data-label="Esedékes">${dateCell(i.invoice_date_due)}</td>
+    <td data-label="Nettó" style="font-family:'DM Mono',monospace">${fM(i.amount_untaxed)}</td>
+    <td data-label="Bruttó" style="font-family:'DM Mono',monospace;color:var(--green)">${fM(i.amount_total)}</td>
+    <td data-label="Nyitott" style="font-family:'DM Mono',monospace;color:${i.amount_residual>0?'var(--orange)':'var(--mu)'}">${fM(i.amount_residual)}</td>
+    <td data-label="Státusz">${PAY_STATE[i.payment_state]||''}</td>
+  </tr>`).join('');
+  // dashboard mini
+  const db = el('dOutBody');
+  if(db) db.innerHTML = OI.slice(0,4).map(i=>`<tr onclick="nav('out-invoices',null)">
+    <td style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--cyan)">${i.name}</td>
+    <td>${i.partner}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--green)">${fM(i.amount_total)}</td>
+    <td>${PAY_STATE[i.payment_state]||''}</td>
+  </tr>`).join('');
+}
+
+function renderII() {
+  const qs = q('iiSearch');
+  const list = II.filter(i=>!qs||i.name.toLowerCase().includes(qs)||i.partner.toLowerCase().includes(qs));
+  el('iiBody').innerHTML = list.map(i => `<tr onclick="showDetail('ii',${i.id})">
+    <td data-label="Számlaszám"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--orange)">${i.name}</span></td>
+    <td data-label="Szállító">${i.partner}</td>
+    <td data-label="Dátum">${dateCell(i.invoice_date)}</td>
+    <td data-label="Esedékes">${dateCell(i.invoice_date_due)}</td>
+    <td data-label="Nettó" style="font-family:'DM Mono',monospace">${fM(i.amount_untaxed)}</td>
+    <td data-label="Bruttó" style="font-family:'DM Mono',monospace;color:var(--red)">${fM(i.amount_total)}</td>
+    <td data-label="Fizetendő" style="font-family:'DM Mono',monospace;color:${i.amount_residual>0?'var(--orange)':'var(--mu)'}">${fM(i.amount_residual)}</td>
+    <td data-label="Státusz">${PAY_STATE[i.payment_state]||''}</td>
+  </tr>`).join('');
+  const db = el('dInBody');
+  if(db) db.innerHTML = II.slice(0,4).map(i=>`<tr onclick="nav('in-invoices',null)">
+    <td style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--orange)">${i.name}</td>
+    <td>${i.partner}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--red)">${fM(i.amount_total)}</td>
+    <td>${PAY_STATE[i.payment_state]||''}</td>
+  </tr>`).join('');
+}
+
+function renderPO() {
+  const qs = q('poSearch');
+  const flt = (el('poFilter')||{value:'all'}).value;
+  const list = PO_DATA.filter(p=>(flt==='all'||p.state===flt)&&(!qs||p.name.toLowerCase().includes(qs)||p.partner.toLowerCase().includes(qs)));
+  el('poBody').innerHTML = list.map(p => `<tr onclick="showDetail('po',${p.id})">
+    <td data-label="Rendelésszám"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${p.name}</span></td>
+    <td data-label="Szállító">${p.partner}</td>
+    <td data-label="Dátum">${dateCell(p.date_order)}</td>
+    <td data-label="Várható szállítás">${dateCell(p.date_planned)}</td>
+    <td data-label="Nettó" style="font-family:'DM Mono',monospace">${fM(p.amount_untaxed)}</td>
+    <td data-label="Bruttó" style="font-family:'DM Mono',monospace">${fM(p.amount_total)}</td>
+    <td data-label="Számlázás" style="font-size:.74rem;color:var(--dim)">${IS_LBL[p.invoice_status]||'—'}</td>
+    <td data-label="Státusz">${PO_STATE_B[p.state]||''}</td>
+  </tr>`).join('');
+}
+
+function renderVN() {
+  const qs = q('vnSearch');
+  const list = VN.filter(v=>!qs||v.name.toLowerCase().includes(qs)||v.category.toLowerCase().includes(qs));
+  el('vnBody').innerHTML = list.map(v => `<tr onclick="showDetail('vn',${v.id})">
+    <td data-label="Szállító"><strong>${v.name}</strong></td>
+    <td data-label="Ország">${v.country}</td>
+    <td data-label="Kategória" style="font-size:.74rem;color:var(--dim)">${v.category}</td>
+    <td data-label="Rendelések" style="font-family:'DM Mono',monospace">${v.orders}</td>
+    <td data-label="Kiadás" style="font-family:'DM Mono',monospace;color:var(--red)">${fM(v.total_spend)}</td>
+    <td data-label="Átl. szállítás" style="font-family:'DM Mono',monospace">${v.avg_delivery} nap</td>
+    <td data-label="Státusz"><span class="badge ${v.status==='active'?'bpa':'bdr'}">${v.status==='active'?'Aktív':'Inaktív'}</span></td>
+  </tr>`).join('');
+}
+
+function renderPay() {
+  const qs = q('paySearch');
+  const list = PAY.filter(p=>!qs||p.partner.toLowerCase().includes(qs)||p.name.toLowerCase().includes(qs));
+  el('payBody').innerHTML = list.map(p => `<tr onclick="showDetail('pay',${p.id})">
+    <td data-label="Hivatkozás"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${p.name}</span></td>
+    <td data-label="Partner">${p.partner}</td>
+    <td data-label="Dátum">${dateCell(p.date)}</td>
+    <td data-label="Típus"><span class="badge ${p.type==='Beérkezett'?'bpa':'bca'}">${p.type}</span></td>
+    <td data-label="Bank" style="font-size:.76rem;color:var(--dim)">${p.journal}</td>
+    <td data-label="Összeg" style="font-family:'DM Mono',monospace;color:${p.type==='Beérkezett'?'var(--green)':'var(--red)'}">${fM(p.amount)}</td>
+    <td data-label="Állapot"><span class="badge ${p.state==='posted'?'bpa':'bdr'}">${p.state==='posted'?'Könyvelve':'Piszkozat'}</span></td>
+  </tr>`).join('');
+}
+
+function renderRC() {
+  const qs = q('rcSearch');
+  const list = RC.filter(r=>!qs||r.name.toLowerCase().includes(qs)||r.partner.toLowerCase().includes(qs));
+  el('rcBody').innerHTML = list.map(r => `<tr onclick="showDetail('rc',${r.id})">
+    <td data-label="Azonosító"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${r.name}</span></td>
+    <td data-label="Szállító">${r.partner}</td>
+    <td data-label="PO" style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--dim)">${r.po_ref}</td>
+    <td data-label="Várható">${dateCell(r.scheduled_date)}</td>
+    <td data-label="Teljesítve" style="font-family:'DM Mono',monospace;font-size:.74rem">${r.done_date||'—'}</td>
+    <td data-label="Állapot">${REC_STATE[r.state]||''}</td>
+  </tr>`).join('');
+}
+
+function renderLD() {
+  const qs = q('ldSearch');
+  const list = LD.filter(l=>!qs||l.ref.toLowerCase().includes(qs)||l.partner.toLowerCase().includes(qs));
+  el('ldBody').innerHTML = list.map(l => `<tr>
+    <td data-label="Dátum">${dateCell(l.date)}</td>
+    <td data-label="Hivatkozás"><span style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--cyan)">${l.ref}</span></td>
+    <td data-label="Főkönyv" style="font-size:.76rem;color:var(--dim)">${l.account}</td>
+    <td data-label="Partner">${l.partner}</td>
+    <td data-label="Terhelés" style="font-family:'DM Mono',monospace;color:${l.debit>0?'var(--red)':'var(--mu)'}">${l.debit>0?fM(l.debit):'—'}</td>
+    <td data-label="Jóváírás" style="font-family:'DM Mono',monospace;color:${l.credit>0?'var(--green)':'var(--mu)'}">${l.credit>0?fM(l.credit):'—'}</td>
+    <td data-label="Egyenleg" style="font-family:'DM Mono',monospace;color:${l.balance>0?'var(--green)':'var(--red)'}">${fM(Math.abs(l.balance))}</td>
+  </tr>`).join('');
+}
+
+/* ══ DETAIL NÉZET ══ */
+function showDetail(type, id) {
+  const maps = {oi:OI,ii:II,po:PO_DATA,vn:VN,pay:PAY,rc:RC};
+  const item = maps[type]?.find(x=>x.id===id);
+  if (!item) return;
+  detailBackPage = {oi:'out-invoices',ii:'in-invoices',po:'purchase',vn:'vendors',pay:'payments',rc:'receipts'}[type];
+
+  let html = '';
+  if (type==='oi'||type==='ii') {
+    const isOut = type==='oi';
+    const taxAmt = item.amount_total - item.amount_untaxed;
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div>
+            <div class="detail-title">${item.name}</div>
+            <div class="detail-sub">${isOut?'Kimenő számla':'Bejövő számla'} · ${item.partner}</div>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:center">
+            ${PAY_STATE[item.payment_state]||''}
+            <button class="bpp" style="font-size:.74rem">📥 Fizetés rögzítése</button>
+            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">🖨 Nyomtatás</button>
+          </div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="df-label">Számlaszám</div><div class="df-value mono">${item.name}</div></div>
+        <div class="detail-field"><div class="df-label">${isOut?'Ügyfél':'Szállító'}</div><div class="df-value">${item.partner}</div></div>
+        <div class="detail-field"><div class="df-label">Hivatkozás</div><div class="df-value mono">${item.ref||'—'}</div></div>
+        <div class="detail-field"><div class="df-label">Kiállítás dátuma</div><div class="df-value mono">${item.invoice_date}</div></div>
+        <div class="detail-field"><div class="df-label">Esedékesség</div><div class="df-value mono" style="color:${isOverdue(item.invoice_date_due)?'var(--red)':'var(--tx)'}">${item.invoice_date_due}${isOverdue(item.invoice_date_due)?' ⚠':''}</div></div>
+        <div class="detail-field"><div class="df-label">Pénznem</div><div class="df-value">${item.currency}</div></div>
+        <div class="detail-field"><div class="df-label">Nettó összeg</div><div class="df-value mono" style="color:var(--tx)">${fM(item.amount_untaxed)}</div></div>
+        <div class="detail-field"><div class="df-label">ÁFA (27%)</div><div class="df-value mono">${fM(taxAmt)}</div></div>
+        <div class="detail-field"><div class="df-label">Bruttó összeg</div><div class="df-value mono" style="color:${isOut?'var(--green)':'var(--red)'};font-size:1.1rem">${fM(item.amount_total)}</div></div>
+        <div class="detail-field" style="grid-column:span ${item.amount_residual>0?'2':'1'}"><div class="df-label">Nyitott egyenleg</div><div class="df-value mono" style="color:${item.amount_residual>0?'var(--orange)':'var(--green)'}">${fM(item.amount_residual)}</div></div>
+        ${item.amount_residual>0?`<div class="detail-field"><div class="df-label">Státusz</div><div class="df-value">${PAY_STATE[item.payment_state]||''}</div></div>`:''}
+      </div>
+      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">Megjegyzés</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
+      <div class="card">
+        <div class="ch"><span class="ct">Tételsor</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Termék/Szolgáltatás</th><th>Mennyiség</th><th>Egységár</th><th>Nettó</th><th>ÁFA</th><th>Összesen</th></tr></thead>
+          <tbody>
+            <tr><td>Szoftver implementáció</td><td>1 db</td><td style="font-family:'DM Mono',monospace">${fM(item.amount_untaxed*0.6)}</td><td style="font-family:'DM Mono',monospace">${fM(item.amount_untaxed*0.6)}</td><td>27%</td><td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(item.amount_untaxed*0.6*1.27)}</td></tr>
+            <tr><td>Support & karbantartás</td><td>1 db</td><td style="font-family:'DM Mono',monospace">${fM(item.amount_untaxed*0.4)}</td><td style="font-family:'DM Mono',monospace">${fM(item.amount_untaxed*0.4)}</td><td>27%</td><td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(item.amount_untaxed*0.4*1.27)}</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Aktivitás log</span></div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot" style="background:var(--green)"></div><div class="tl-info"><div class="tl-title">Számla kiállítva</div><div class="tl-meta">${item.invoice_date} · Rendszer</div></div></div>
+          ${item.payment_state==='paid'?`<div class="tl-item"><div class="tl-dot" style="background:var(--cyan)"></div><div class="tl-info"><div class="tl-title">Fizetés beérkezett — ${fM(item.amount_total)}</div><div class="tl-meta">Banki átutalás · OTP Bank</div></div></div>`:''}
+          ${item.payment_state==='partial'?`<div class="tl-item"><div class="tl-dot" style="background:var(--orange)"></div><div class="tl-info"><div class="tl-title">Részleges fizetés — ${fM(item.amount_total-item.amount_residual)}</div><div class="tl-meta">Nyitott: ${fM(item.amount_residual)}</div></div></div>`:''}
+          ${isOverdue(item.invoice_date_due)&&item.payment_state!=='paid'?`<div class="tl-item"><div class="tl-dot" style="background:var(--red)"></div><div class="tl-info"><div class="tl-title">⚠ Lejárt határidő</div><div class="tl-meta">${item.invoice_date_due} óta nyitott</div></div></div>`:''}
+        </div>
+      </div>`;
+  } else if (type==='po') {
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">Beszerzési rendelés · ${item.partner}</div></div>
+          <div style="display:flex;gap:.6rem;align-items:center">
+            ${PO_STATE_B[item.state]||''}
+            <button class="bpp" style="font-size:.74rem">✅ Jóváhagyás</button>
+            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">📧 Küldés</button>
+          </div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="df-label">Rendelésszám</div><div class="df-value mono">${item.name}</div></div>
+        <div class="detail-field"><div class="df-label">Szállító</div><div class="df-value">${item.partner}</div></div>
+        <div class="detail-field"><div class="df-label">Számlázás állapota</div><div class="df-value">${IS_LBL[item.invoice_status]||'—'}</div></div>
+        <div class="detail-field"><div class="df-label">Rendelés dátuma</div><div class="df-value mono">${item.date_order}</div></div>
+        <div class="detail-field"><div class="df-label">Várható szállítás</div><div class="df-value mono" style="color:${isOverdue(item.date_planned)?'var(--red)':'var(--tx)'}">${item.date_planned}${isOverdue(item.date_planned)?' ⚠':''}</div></div>
+        <div class="detail-field"><div class="df-label">Státusz</div><div class="df-value">${PO_STATE_B[item.state]||''}</div></div>
+        <div class="detail-field"><div class="df-label">Nettó összeg</div><div class="df-value mono">${fM(item.amount_untaxed)}</div></div>
+        <div class="detail-field"><div class="df-label">ÁFA (27%)</div><div class="df-value mono">${fM(item.amount_total-item.amount_untaxed)}</div></div>
+        <div class="detail-field"><div class="df-label">Bruttó összeg</div><div class="df-value mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.amount_total)}</div></div>
+      </div>
+      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">Megjegyzés</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
+      <div class="card">
+        <div class="ch"><span class="ct">Tételsor</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Termék</th><th>Mennyiség</th><th>Egységár</th><th>Összesen</th><th>Szállítás várható</th></tr></thead>
+          <tbody>
+            <tr><td>Hardver egység</td><td>1 db</td><td style="font-family:'DM Mono',monospace">${fM(item.amount_untaxed*0.7)}</td><td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(item.amount_untaxed*0.7)}</td><td>${dateCell(item.date_planned)}</td></tr>
+            <tr><td>Szállítás & telepítés</td><td>1 db</td><td style="font-family:'DM Mono',monospace">${fM(item.amount_untaxed*0.3)}</td><td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(item.amount_untaxed*0.3)}</td><td>${dateCell(item.date_planned)}</td></tr>
+          </tbody>
+        </table></div>
+      </div>`;
+  } else if (type==='vn') {
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">${item.category} · ${item.country}</div></div>
+          <span class="badge ${item.status==='active'?'bpa':'bdr'}" style="font-size:.78rem;padding:.3rem .8rem">${item.status==='active'?'Aktív szállító':'Inaktív'}</span>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="df-label">Email</div><div class="df-value">${item.email}</div></div>
+        <div class="detail-field"><div class="df-label">Telefon</div><div class="df-value mono">${item.phone}</div></div>
+        <div class="detail-field"><div class="df-label">Ország</div><div class="df-value">${item.country}</div></div>
+        <div class="detail-field"><div class="df-label">Kategória</div><div class="df-value">${item.category}</div></div>
+        <div class="detail-field"><div class="df-label">Fizetési feltétel</div><div class="df-value">${item.payment_term}</div></div>
+        <div class="detail-field"><div class="df-label">Átl. szállítás</div><div class="df-value mono">${item.avg_delivery} nap</div></div>
+        <div class="detail-field"><div class="df-label">Rendelések száma</div><div class="df-value mono">${item.orders} db</div></div>
+        <div class="detail-field"><div class="df-label">Összes kiadás</div><div class="df-value mono" style="color:var(--red)">${fM(item.total_spend)}</div></div>
+        <div class="detail-field"><div class="df-label">Átl. rendelés</div><div class="df-value mono">${fM(item.total_spend/item.orders)}</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Kapcsolódó rendelések</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Rendelésszám</th><th>Dátum</th><th>Összeg</th><th>Státusz</th></tr></thead>
+          <tbody>${PO_DATA.filter(p=>p.partner===item.name).map(p=>`
+            <tr onclick="showDetail('po',${p.id})">
+              <td style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${p.name}</td>
+              <td>${dateCell(p.date_order)}</td>
+              <td style="font-family:'DM Mono',monospace">${fM(p.amount_total)}</td>
+              <td>${PO_STATE_B[p.state]||''}</td>
+            </tr>`).join('')||'<tr><td colspan="4" style="color:var(--mu);text-align:center;padding:1rem">Nincs rendelés</td></tr>'}</tbody>
+        </table></div>
+      </div>`;
+  } else if (type==='pay') {
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">Fizetés · ${item.partner}</div></div>
+          <span class="badge ${item.type==='Beérkezett'?'bpa':'bca'}" style="font-size:.78rem;padding:.3rem .8rem">${item.type}</span>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="df-label">Partner</div><div class="df-value">${item.partner}</div></div>
+        <div class="detail-field"><div class="df-label">Dátum</div><div class="df-value mono">${item.date}</div></div>
+        <div class="detail-field"><div class="df-label">Bank/Pénztár</div><div class="df-value">${item.journal}</div></div>
+        <div class="detail-field"><div class="df-label">Összeg</div><div class="df-value mono" style="color:${item.type==='Beérkezett'?'var(--green)':'var(--red)'};font-size:1.2rem">${fM(item.amount)}</div></div>
+        <div class="detail-field"><div class="df-label">Állapot</div><div class="df-value"><span class="badge ${item.state==='posted'?'bpa':'bdr'}">${item.state==='posted'?'Könyvelve':'Piszkozat'}</span></div></div>
+        <div class="detail-field"><div class="df-label">Típus</div><div class="df-value">${item.type}</div></div>
+      </div>`;
+  } else if (type==='rc') {
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">Beérkezés · ${item.partner}</div></div>
+          ${REC_STATE[item.state]||''}
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="df-label">Szállító</div><div class="df-value">${item.partner}</div></div>
+        <div class="detail-field"><div class="df-label">PO hivatkozás</div><div class="df-value mono" style="color:var(--cyan)">${item.po_ref}</div></div>
+        <div class="detail-field"><div class="df-label">Várható dátum</div><div class="df-value mono">${dateCell(item.scheduled_date)}</div></div>
+        <div class="detail-field"><div class="df-label">Teljesítve</div><div class="df-value mono">${item.done_date||'—'}</div></div>
+        <div class="detail-field"><div class="df-label">Állapot</div><div class="df-value">${REC_STATE[item.state]||''}</div></div>
+        <div class="detail-field"><div class="df-label">Azonosító</div><div class="df-value mono">${item.name}</div></div>
+      </div>`;
+  }
+
+  el('detailContent').innerHTML = html;
+  const pg = document.querySelector('.page.active');
+  if (pg && pg.id !== 'pg-detail') detailBackPage = pg.id.replace('pg-','');
+  nav('detail', null);
+}
+
+function navBack() {
+  nav(detailBackPage, null);
+  // Visszaállítjuk a sidebar aktív elemét
+  document.querySelectorAll('.ni').forEach(n => {
+    const onclick = n.getAttribute('onclick')||'';
+    if (onclick.includes("'"+detailBackPage+"'")) n.classList.add('active');
+  });
+}
+
+/* ══ CHARTS ══ */
+const CH = {};
+function mkC(id,type,labels,datasets,extra={}) {
+  if(CH[id]){CH[id].destroy();delete CH[id];}
+  const e=document.getElementById(id);if(!e)return;
+  const dk=document.documentElement.getAttribute('data-theme')==='dark';
+  const gc=dk?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)';
+  const tc=dk?'rgba(240,239,237,0.38)':'rgba(14,16,24,0.38)';
+  CH[id]=new Chart(e,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:tc,font:{family:'DM Sans',size:11},boxWidth:12}}},
+    scales:{x:{grid:{color:gc},ticks:{color:tc,font:{family:'DM Mono',size:10}}},y:{grid:{color:gc},ticks:{color:tc,font:{family:'DM Mono',size:10}}},...(extra.scales||{})},
+    ...extra}});
+}
+
+function updateDashChart(d) {
+  mkC('dChart','bar',d.chart_l,[
+    {label:'Bevétel (M)',data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
+    {label:'Kiadás (M)',data:d.chart_out,backgroundColor:'rgba(255,59,48,0.6)',borderRadius:4},
+    {label:'Nettó (M)',data:d.chart_net,type:'line',borderColor:'#29acd9',backgroundColor:'transparent',tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'},
+  ]);
+}
+
+function renderCFCharts(d) {
+  mkC('cfBigChart','bar',d.chart_l,[
+    {label:'Beáramlás',data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
+    {label:'Kiáramlás',data:d.chart_out,backgroundColor:'rgba(255,59,48,0.6)',borderRadius:4},
+  ]);
+  mkC('cfTypeChart','doughnut',['Vevők','Szállítók','Bérköltség','Egyéb'],[{
+    data:[45.2,28.4,18.6,7.8],backgroundColor:['#34c759','#ff3b30','#ff9500','#29acd9'],borderWidth:0
+  }],{scales:{x:{display:false},y:{display:false}}});
+  const cum=[]; let s=0;
+  d.chart_net.forEach(v=>{s+=v;cum.push(+s.toFixed(1));});
+  mkC('cfCumChart','line',d.chart_l,[{
+    label:'Kumulatív (M)',data:cum,borderColor:'#29acd9',backgroundColor:'rgba(41,172,217,0.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'
+  }]);
+}
+
+/* ══ GLOBAL SEARCH ══ */
+function gSearchFn() {
+  const v = el('gSearch').value;
+  const pg = document.querySelector('.page.active')?.id?.replace('pg-','').replace('-','');
+  const map={'outinvoices':'oiSearch','ininvoices':'iiSearch',purchase:'poSearch',vendors:'vnSearch',payments:'paySearch',receipts:'rcSearch',ledger:'ldSearch'};
+  const fnMap={'outinvoices':renderOI,'ininvoices':renderII,purchase:renderPO,vendors:renderVN,payments:renderPay,receipts:renderRC,ledger:renderLD};
+  const sid=map[pg]; if(sid){const e=el(sid);if(e)e.value=v;}
+  fnMap[pg]?.();
+}
+
+/* ══ NAV ══ */
+const PT={dashboard:'ERP Dashboard','out-invoices':'Kimenő számlák','in-invoices':'Bejövő számlák',payments:'Fizetések',purchase:'Rendelések',vendors:'Szállítók',receipts:'Árubevétel',ledger:'Főkönyv',cashflow:'Cash Flow',settings:'Beállítások',detail:'Részletek','new-out-invoice':'Új kimenő számla','new-in-invoice':'Bejövő számla rögzítése','new-payment':'Fizetés rögzítése','new-purchase':'Új rendelés','new-vendor':'Új szállító','new-receipt':'Árubevétel rögzítése'};
+function nav(page, navEl) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+page).classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  el('tbTitle').textContent = PT[page]||page;
+  if(page==='cashflow') setTimeout(()=>renderCFCharts(PD[activePeriod]),60);
+  closeSB();
+}
+
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+function toggleTheme(){
+  const dk=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dk?'light':'dark');
+  document.querySelector('.tbb').textContent=dk?'🌙':'☀️';
+  setTimeout(()=>applyPeriod(activePeriod),50);
+}
+
+/* ══ FORM JS ══ */
+// Tételsor kezelés
+const lineData = {oi:[], ii:[], po:[]};
+
+function addLine(type) {
+  const id = Date.now();
+  lineData[type].push({id, desc:'', qty:1, unit:'db', price:0, tax:27});
+  renderLines(type);
+}
+
+function removeLine(type, id) {
+  lineData[type] = lineData[type].filter(l => l.id !== id);
+  renderLines(type);
+}
+
+function renderLines(type) {
+  const tbody = document.getElementById(type+'-lines-body');
+  if (!tbody) return;
+  tbody.innerHTML = lineData[type].map(l => `
+    <tr>
+      <td><input class="form-input" style="font-size:.76rem" type="text" value="${l.desc}" placeholder="Termék/szolgáltatás neve" oninput="lineData['${type}'].find(x=>x.id===${l.id}).desc=this.value"></td>
+      <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem;width:70px" type="number" value="${l.qty}" min="0" step="0.01" oninput="lineData['${type}'].find(x=>x.id===${l.id}).qty=+this.value;calcTotals('${type}')"></td>
+      <td><select class="form-select" style="font-size:.76rem;width:60px"><option>db</option><option>óra</option><option>kg</option><option>m</option><option>l</option></select></td>
+      <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="number" value="${l.price}" min="0" placeholder="0" oninput="lineData['${type}'].find(x=>x.id===${l.id}).price=+this.value;calcTotals('${type}')"></td>
+      <td><select class="form-select" style="font-size:.76rem;width:70px" onchange="lineData['${type}'].find(x=>x.id===${l.id}).tax=+this.value;calcTotals('${type}')"><option value="27">27%</option><option value="18">18%</option><option value="5">5%</option><option value="0">0%</option></select></td>
+      <td class="line-total">${fmtFt(l.qty*l.price)}</td>
+      <td><button onclick="removeLine('${type}',${l.id})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0 .3rem">×</button></td>
+    </tr>`).join('');
+  calcTotals(type);
+}
+
+function calcTotals(type) {
+  const lines = lineData[type];
+  const net = lines.reduce((s,l) => s + l.qty*l.price, 0);
+  const tax = lines.reduce((s,l) => s + l.qty*l.price*(l.tax/100), 0);
+  const gross = net + tax;
+  const fmt = n => n.toLocaleString('hu-HU') + ' Ft';
+  const ne = document.getElementById(type+'-t-net');
+  const te = document.getElementById(type+'-t-tax');
+  const ge = document.getElementById(type+'-t-gross');
+  if (ne) ne.textContent = fmt(Math.round(net));
+  if (te) te.textContent = fmt(Math.round(tax));
+  if (ge) ge.textContent = fmt(Math.round(gross));
+  // Sorokban is frissítjük a total oszlopot
+  const tbody = document.getElementById(type+'-lines-body');
+  if (tbody) {
+    tbody.querySelectorAll('.line-total').forEach((td, i) => {
+      if (lines[i]) td.textContent = fmtFt(lines[i].qty * lines[i].price);
+    });
+  }
+}
+
+function fmtFt(n) { return Math.round(n).toLocaleString('hu-HU') + ' Ft'; }
+
+// Fizetés preview
+function payCalc() {
+  const amt = +document.getElementById('pay-amount').value;
+  const preview = document.getElementById('pay-preview');
+  const previewAmt = document.getElementById('pay-preview-amt');
+  if (amt > 0) {
+    preview.style.display = 'block';
+    previewAmt.textContent = amt.toLocaleString('hu-HU') + ' Ft';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+// PO fizetési feltétel autokitöltés
+function poFillTerms(sel) {
+  const term = sel.options[sel.selectedIndex].getAttribute('data-term') || '30 nap nettó';
+  const termEl = document.getElementById('po-term');
+  if (termEl) termEl.value = term;
+}
+
+// Toast értesítés
+function showToast(msg) {
+  let t = document.querySelector('.toast');
+  if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Árubevétel üres sor
+function rcEmptyRow() {
+  return `<td><input class="form-input" style="font-size:.76rem" type="text" placeholder="Termék neve"></td>
+    <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="number" placeholder="0"></td>
+    <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="number" placeholder="0"></td>
+    <td><select class="form-select" style="font-size:.76rem"><option>db</option><option>kg</option></select></td>
+    <td><input class="form-input" style="font-family:'DM Mono',monospace;font-size:.76rem" type="text" placeholder="LOT-001"></td>
+    <td><input class="form-input" style="font-size:.76rem" type="text" placeholder="—"></td>`;
+}
+
+/* ══ INIT ══ */
+renderOI(); renderII(); renderPO(); renderVN(); renderPay(); renderRC(); renderLD();
+// Kezdő tételsorok a formokhoz
+addLine('oi'); addLine('oi');
+addLine('ii'); addLine('ii');
+addLine('po'); addLine('po');
+applyPeriod('Q1');
+</script>
+</body>
+</html>
