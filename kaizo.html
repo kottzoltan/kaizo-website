@@ -380,110 +380,88 @@
     50%      { opacity: 0.85; }
   }
 
-  /* ── DEMO MODAL ── */
-  .demo-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(0,0,10,0.88);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+  /* ── DEMO SZEKCIÓ ── */
+  .demo-section {
+    padding: 14vh 10vw;
+    display: flex;
     align-items: center;
     justify-content: center;
   }
-  .demo-overlay.open { display: flex; animation: fadeInBg .25s ease; }
-  @keyframes fadeInBg { from{opacity:0} to{opacity:1} }
+  .demo-inner {
+    max-width: 1100px;
+    width: 100%;
+    text-align: center;
+  }
+  .demo-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+  @media (max-width: 640px) { .demo-cards { grid-template-columns: 1fr; } }
 
-  .demo-modal {
-    position: relative;
-    width: 96vw;
-    height: 92vh;
-    max-width: 1480px;
-    border-radius: 18px;
-    overflow: hidden;
-    border: 1px solid rgba(41,172,217,0.2);
-    box-shadow: 0 40px 120px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
-    animation: modalIn .35s cubic-bezier(.16,1,.3,1);
+  .demo-card {
     display: flex;
     flex-direction: column;
-    background: #06070f;
-  }
-  @keyframes modalIn { from{opacity:0;transform:scale(.96) translateY(20px)} to{opacity:1;transform:none} }
-
-  .demo-topbar {
-    background: rgba(10,12,20,0.98);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    padding: .65rem 1.2rem;
-    display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 1rem;
-    flex-shrink: 0;
-  }
-  .demo-topbar-logo {
-    font-family: 'Syne', sans-serif;
-    font-size: .82rem;
-    font-weight: 700;
-    color: var(--cyan);
-    letter-spacing: .08em;
-    margin-right: .4rem;
-  }
-  .demo-tabs {
-    display: flex;
-    gap: .25rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 100px;
-    padding: .18rem;
-  }
-  .demo-tab {
-    padding: .28rem 1rem;
-    border-radius: 100px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .7rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: rgba(240,239,237,0.38);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .demo-tab.active { background: rgba(41,172,217,0.16); color: #29acd9; }
-  .demo-tab:hover:not(.active) { color: rgba(240,239,237,0.65); }
-  .demo-badge {
-    font-size: .62rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: rgba(240,239,237,0.25);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 100px;
-    padding: .18rem .65rem;
-  }
-  .demo-close {
-    margin-left: auto;
-    background: rgba(255,255,255,0.05);
+    padding: 2.2rem 2.4rem;
+    background: rgba(255,255,255,0.025);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 100px;
-    width: 30px; height: 30px;
-    display: flex; align-items: center; justify-content: center;
-    color: rgba(240,239,237,0.4);
-    font-size: .95rem;
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--white);
+    transition: background .3s, border-color .3s, transform .25s;
     cursor: pointer;
-    transition: all .18s;
+    text-align: left;
   }
-  .demo-close:hover { background: rgba(255,59,48,0.14); color: #ff3b30; border-color: rgba(255,59,48,0.3); }
-
-  .demo-frame-wrap { flex: 1; position: relative; overflow: hidden; }
-  .demo-frame {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    border: none; display: none;
-    background: #06070f;
+  .demo-card:hover {
+    background: rgba(41,172,217,0.07);
+    border-color: rgba(41,172,217,0.35);
+    transform: translateY(-4px);
   }
-  .demo-frame.active { display: block; }
+  .demo-card-icon {
+    font-size: 2rem;
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(41,172,217,0.1);
+    border: 1px solid rgba(41,172,217,0.2);
+    border-radius: 14px;
+  }
+  .demo-card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    margin-bottom: .2rem;
+  }
+  .demo-card-sub {
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .demo-card-desc {
+    font-size: .9rem;
+    line-height: 1.7;
+    color: var(--dim);
+    flex: 1;
+  }
+  .demo-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-top: .5rem;
+  }
+  .demo-card:hover .demo-card-cta { gap: .8rem; }
+  .demo-card-cta::after { content: '→'; transition: transform .2s; }
+  .demo-card:hover .demo-card-cta::after { transform: translateX(3px); }
 
-  /* ── CONTACT SECTION ── */
+  /* ── CONTACT SZEKCIÓ ── */
   .contact-section {
     padding: 14vh 10vw;
     display: flex;
@@ -499,87 +477,49 @@
     align-items: start;
   }
   @media (max-width: 768px) { .contact-inner { grid-template-columns: 1fr; gap: 3rem; } }
-
   .contact-label {
-    font-size: .64rem;
-    letter-spacing: .32em;
-    text-transform: uppercase;
-    color: var(--cyan);
-    opacity: .65;
-    margin-bottom: 1.4rem;
+    font-size: .64rem; letter-spacing: .32em; text-transform: uppercase;
+    color: var(--cyan); opacity: .65; margin-bottom: 1.4rem;
   }
   .contact-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    line-height: 1.1;
-    margin-bottom: 1.4rem;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.1; margin-bottom: 1.4rem;
   }
-  .contact-body {
-    font-size: .96rem;
-    line-height: 1.8;
-    color: var(--dim);
-    margin-bottom: 2.2rem;
+  .contact-body { font-size: .96rem; line-height: 1.8; color: var(--dim); margin-bottom: 2.2rem; }
+  .contact-company {
+    font-size: .72rem; letter-spacing: .08em; color: rgba(240,239,237,0.22);
+    text-transform: uppercase; margin-bottom: 1.6rem; font-family: 'DM Mono', monospace;
   }
   .contact-info { display: flex; flex-direction: column; gap: 1.2rem; }
   .contact-row { display: flex; align-items: flex-start; gap: .9rem; }
   .contact-icon {
-    width: 34px; height: 34px;
-    border-radius: 9px;
-    background: rgba(41,172,217,0.08);
-    border: 1px solid rgba(41,172,217,0.18);
+    width: 34px; height: 34px; border-radius: 9px;
+    background: rgba(41,172,217,0.08); border: 1px solid rgba(41,172,217,0.18);
     display: flex; align-items: center; justify-content: center;
-    font-size: .88rem;
-    flex-shrink: 0;
-    margin-top: .05rem;
+    font-size: .88rem; flex-shrink: 0; margin-top: .05rem;
   }
   .contact-detail-label {
-    font-size: .6rem;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: rgba(240,239,237,0.28);
-    margin-bottom: .2rem;
+    font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+    color: rgba(240,239,237,0.28); margin-bottom: .2rem;
   }
   .contact-detail-val { font-size: .86rem; color: var(--dim); line-height: 1.55; }
   .contact-detail-val a { color: var(--cyan); text-decoration: none; }
   .contact-detail-val a:hover { text-decoration: underline; }
-  .contact-company {
-    font-size: .72rem;
-    letter-spacing: .08em;
-    color: rgba(240,239,237,0.22);
-    text-transform: uppercase;
-    margin-bottom: 1.6rem;
-    font-family: 'DM Mono', monospace;
-  }
-
   .contact-form-card {
     background: rgba(255,255,255,0.025);
     border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 18px;
-    padding: 2rem;
-    backdrop-filter: blur(12px);
+    border-radius: 18px; padding: 2rem; backdrop-filter: blur(12px);
   }
   .contact-form-title {
-    font-family: 'Syne', sans-serif;
-    font-size: .9rem;
-    font-weight: 700;
-    margin-bottom: 1.4rem;
-    color: var(--white);
+    font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700;
+    margin-bottom: 1.4rem; color: var(--white);
   }
   .cf-label { font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: rgba(240,239,237,0.32); margin-bottom: .35rem; display: block; }
   .cf-input, .cf-textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    padding: .65rem .9rem;
-    font-size: .84rem;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 300;
-    color: var(--white);
-    outline: none;
-    transition: border-color .2s;
-    margin-bottom: 1rem;
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: .65rem .9rem; font-size: .84rem;
+    font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--white);
+    outline: none; transition: border-color .2s; margin-bottom: 1rem;
   }
   .cf-input::placeholder, .cf-textarea::placeholder { color: rgba(240,239,237,0.18); }
   .cf-input:focus, .cf-textarea:focus { border-color: rgba(41,172,217,0.45); }
@@ -603,6 +543,7 @@
         <li><a href="#robots" data-hu="Robotok" data-en="Robots">Robotok</a></li>
         <li><a href="#crm">CRM</a></li>
         <li><a href="#erp">ERP</a></li>
+        <li><a href="#demo" data-hu="Demo" data-en="Demo">Demo</a></li>
         <li><a href="#contact" data-hu="Kapcsolat" data-en="Contact">Kapcsolat</a></li>
       </ul>
       <div class="lang-switcher">
@@ -629,9 +570,9 @@
       <span data-hu="Integrálva" data-en="Integrated">Integrálva</span>
     </p>
     <div class="hero-cta">
-      <button onclick="openDemo('crm')" class="btn btn-cyan"
+      <a href="#demo" class="btn btn-cyan"
          data-hu="Fedezd fel a platformot"
-         data-en="Explore the Platform">Fedezd fel a platformot</button>
+         data-en="Explore the Platform">Fedezd fel a platformot</a>
     </div>
     <div class="scroll-hint">
       <span data-hu="Görgess" data-en="Scroll">Görgess</span>
@@ -747,10 +688,59 @@
 
   <div class="divider"></div>
 
-  <!-- CONTACT -->
+  <!-- DEMO SZEKCIÓ -->
+  <section class="demo-section" id="demo">
+    <div class="demo-inner">
+      <p class="section-number reveal" style="text-align:center"
+         data-hu="04 — Interaktív demo" data-en="04 — Interactive Demo">
+        04 — Interaktív demo
+      </p>
+      <h2 class="section-title reveal d1" style="text-align:center;font-size:clamp(2rem,4.5vw,4rem)"
+          data-hu="Próbáld ki élőben."
+          data-en="Try it live.">
+        Próbáld ki élőben.
+      </h2>
+      <p class="section-body reveal d2" style="text-align:center;max-width:560px;margin:0 auto"
+         data-hu="Kattints az alábbi modulra, és fedezd fel a Kaizo platformot interaktív demóban — valódi adatokkal, valódi funkcionalitással."
+         data-en="Click a module below and explore the Kaizo platform in an interactive demo — real data, real functionality.">
+        Kattints az alábbi modulra, és fedezd fel a Kaizo platformot interaktív demóban — valódi adatokkal, valódi funkcionalitással.
+      </p>
+      <div class="demo-cards reveal d3">
+        <a class="demo-card" href="kaizo-crm.html" target="_blank">
+          <div class="demo-card-icon">👥</div>
+          <div>
+            <div class="demo-card-title" data-hu="CRM Dashboard" data-en="CRM Dashboard">CRM Dashboard</div>
+            <div class="demo-card-sub" data-hu="Leadek · Pipeline · Ügyfelek · Teendők" data-en="Leads · Pipeline · Customers · Tasks">Leadek · Pipeline · Ügyfelek · Teendők</div>
+          </div>
+          <p class="demo-card-desc"
+             data-hu="Kezeld az értékesítési pipeline-t, kövesd a leadeket és ügyfeleket, rögzíts aktivitásokat — drag & drop Kanban táblával."
+             data-en="Manage your sales pipeline, track leads and customers, log activities — with drag & drop Kanban board.">
+            Kezeld az értékesítési pipeline-t, kövesd a leadeket és ügyfeleket, rögzíts aktivitásokat — drag &amp; drop Kanban táblával.
+          </p>
+          <span class="demo-card-cta" data-hu="CRM megnyitása" data-en="Open CRM">CRM megnyitása</span>
+        </a>
+        <a class="demo-card" href="kaizo-erp.html" target="_blank">
+          <div class="demo-card-icon">📊</div>
+          <div>
+            <div class="demo-card-title" data-hu="ERP Dashboard" data-en="ERP Dashboard">ERP Dashboard</div>
+            <div class="demo-card-sub" data-hu="Pénzügy · Számlák · Rendelések · Szállítók" data-en="Finance · Invoices · Orders · Vendors">Pénzügy · Számlák · Rendelések · Szállítók</div>
+          </div>
+          <p class="demo-card-desc"
+             data-hu="Kövesd a pénzügyi folyamatokat, kezeld a ki- és bejövő számlákat, beszerzési rendeléseket és szállítókat."
+             data-en="Track financial flows, manage outgoing and incoming invoices, purchase orders and vendors.">
+            Kövesd a pénzügyi folyamatokat, kezeld a ki- és bejövő számlákat, beszerzési rendeléseket és szállítókat.
+          </p>
+          <span class="demo-card-cta" data-hu="ERP megnyitása" data-en="Open ERP">ERP megnyitása</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CONTACT SZEKCIÓ -->
   <section class="contact-section" id="contact">
     <div class="contact-inner">
-      <!-- Bal: info -->
       <div class="reveal">
         <p class="contact-label" data-hu="Kapcsolat" data-en="Contact">Kapcsolat</p>
         <h2 class="contact-title"
@@ -777,19 +767,8 @@
               <div class="contact-detail-val"><a href="mailto:info@kaizo.hu">info@kaizo.hu</a></div>
             </div>
           </div>
-          <div class="contact-row">
-            <div class="contact-icon">🖥️</div>
-            <div>
-              <div class="contact-detail-label">Demo</div>
-              <div class="contact-detail-val">
-                <span style="cursor:pointer;color:var(--cyan)" onclick="openDemo('crm')" data-hu="Próbáld ki a CRM demót →" data-en="Try the CRM demo →">Próbáld ki a CRM demót →</span><br>
-                <span style="cursor:pointer;color:var(--cyan)" onclick="openDemo('erp')" data-hu="Próbáld ki az ERP demót →" data-en="Try the ERP demo →">Próbáld ki az ERP demót →</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-      <!-- Jobb: form -->
       <div class="contact-form-card reveal d1">
         <div class="contact-form-title" data-hu="Küldj üzenetet" data-en="Send a message">Küldj üzenetet</div>
         <div class="cf-row">
@@ -799,9 +778,8 @@
         <label class="cf-label">Email</label>
         <input class="cf-input" type="email" placeholder="janos@acme.hu">
         <label class="cf-label" data-hu="Üzenet" data-en="Message">Üzenet</label>
-        <textarea class="cf-textarea" placeholder="Miről szeretnél többet tudni?&#10;Milyen modulok érdekelnének?"></textarea>
-        <button onclick="submitContact(this)" class="btn btn-cyan" style="width:100%;text-align:center;display:block;cursor:pointer;"
-                data-hu="Üzenet küldése" data-en="Send message">Üzenet küldése</button>
+        <textarea class="cf-textarea" placeholder="Miről szeretnél többet tudni?"></textarea>
+        <button onclick="this.textContent='✓ Elküldve!';this.style.color='#34c759';this.style.borderColor='rgba(52,199,89,0.4)';setTimeout(()=>{this.textContent=this.dataset.orig;this.style.color='';this.style.borderColor='';},3000)" data-orig="Üzenet küldése" class="btn btn-cyan" style="width:100%;text-align:center;display:block;cursor:pointer;" data-hu="Üzenet küldése" data-en="Send message">Üzenet küldése</button>
       </div>
     </div>
   </section>
@@ -814,25 +792,6 @@
     </span>
   </footer>
 
-</div><!-- /scroll-wrap -->
-
-<!-- ══ DEMO MODAL ══ -->
-<div class="demo-overlay" id="demoOverlay" onclick="handleOverlayClick(event)">
-  <div class="demo-modal">
-    <div class="demo-topbar">
-      <span class="demo-topbar-logo">KAIZO</span>
-      <div class="demo-tabs">
-        <button class="demo-tab active" onclick="switchDemo('crm',this)" data-hu="CRM Demo" data-en="CRM Demo">CRM Demo</button>
-        <button class="demo-tab" onclick="switchDemo('erp',this)" data-hu="ERP Demo" data-en="ERP Demo">ERP Demo</button>
-      </div>
-      <span class="demo-badge" data-hu="Interaktív demo" data-en="Interactive demo">Interaktív demo</span>
-      <button class="demo-close" onclick="closeDemo()" title="Bezárás">✕</button>
-    </div>
-    <div class="demo-frame-wrap">
-      <iframe class="demo-frame active" id="frame-crm" src="kaizo-crm.html" loading="lazy"></iframe>
-      <iframe class="demo-frame"        id="frame-erp" src="kaizo-erp.html" loading="lazy"></iframe>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -932,7 +891,8 @@ function applyLang(lang) {
   document.querySelectorAll('[data-hu]').forEach(el => {
     const val = el.getAttribute('data-' + lang);
     if (!val) return;
-    if (['H1','H2','H3'].includes(el.tagName) || (el.tagName === 'P' && el.closest('.section-title'))) {
+    // Use innerHTML for elements that contain markup (br, em)
+    if (['H1','H2','H3'].includes(el.tagName) || el.tagName === 'P' && el.closest('.section-title')) {
       el.innerHTML = val;
     } else {
       el.textContent = val;
@@ -943,58 +903,10 @@ function applyLang(lang) {
   });
   document.documentElement.lang = lang;
 }
+
 document.querySelectorAll('.lang-btn').forEach(btn => {
   btn.addEventListener('click', () => applyLang(btn.dataset.lang));
 });
-
-/* ── DEMO MODAL ── */
-  document.getElementById('demoOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  switchDemo(which, document.querySelector(`.demo-tab:${which==='crm'?'first':'last'}-child`));
-}
-
-function closeDemo() {
-  document.getElementById('demoOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function switchDemo(which, btn) {
-  // Frame-ek
-  document.querySelectorAll('.demo-frame').forEach(f => f.classList.remove('active'));
-  document.getElementById('frame-' + which).classList.add('active');
-  // Tab-ok
-  document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  else {
-    document.querySelectorAll('.demo-tab').forEach(t => {
-      if ((which==='crm'&&t.textContent.includes('CRM'))||(which==='erp'&&t.textContent.includes('ERP')))
-        t.classList.add('active');
-    });
-  }
-}
-
-function handleOverlayClick(e) {
-  // Csak az overlay háttérre kattintva záródjon be, a modálra ne
-  if (e.target === document.getElementById('demoOverlay')) closeDemo();
-}
-
-// ESC gomb
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDemo(); });
-
-/* ── CONTACT FORM ── */
-function submitContact(btn) {
-  const orig = btn.textContent;
-  btn.textContent = '✓ Elküldve!';
-  btn.style.background = 'rgba(52,199,89,0.15)';
-  btn.style.borderColor = 'rgba(52,199,89,0.4)';
-  btn.style.color = '#34c759';
-  setTimeout(() => {
-    btn.textContent = orig;
-    btn.style.background = '';
-    btn.style.borderColor = '';
-    btn.style.color = '';
-  }, 3000);
-}
 </script>
 </body>
 </html>
