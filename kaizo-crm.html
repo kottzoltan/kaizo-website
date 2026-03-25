@@ -27,18 +27,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);trans
 @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.main{margin-left:0!important;}}
 @media(min-width:769px){.main{margin-left:var(--sw);}}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;}
-.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100;}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100;flex-wrap:wrap;}
 .mb{display:none;background:none;border:none;color:var(--tx);font-size:1.3rem;cursor:pointer;padding:.2rem .4rem;border-radius:var(--rs);}
 @media(max-width:768px){.mb{display:block;}}
-.tt{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;white-space:nowrap;}
+.tt{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;white-space:nowrap;min-width:0;}
 .psw{display:flex;background:var(--s2);border:1px solid var(--bd);border-radius:100px;overflow:hidden;flex-shrink:0;}
 .pb{padding:.28rem .8rem;font-size:.7rem;font-family:'DM Sans',sans-serif;color:var(--dim);background:transparent;border:none;cursor:pointer;transition:all .2s;}
 .pb.active{background:var(--cyan-dim);color:var(--cyan);}
-.sw{flex:1;max-width:380px;position:relative;}
+.sw{flex:1;max-width:380px;min-width:0;position:relative;}
 .si-w{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.42rem 1rem .42rem 2.1rem;font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;transition:border-color .2s;}
 .si-w::placeholder{color:var(--mu);}.si-w:focus{border-color:var(--cyan);}
 .si{position:absolute;left:.72rem;top:50%;transform:translateY(-50%);font-size:.75rem;color:var(--mu);}
 .tr{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+.lang-switcher{display:flex;border:1px solid var(--bd);border-radius:100px;overflow:hidden;background:var(--s2);}
+.lang-btn{padding:.28rem .75rem;font-size:.65rem;letter-spacing:.1em;font-family:'DM Sans',sans-serif;color:var(--dim);background:transparent;border:none;cursor:pointer;transition:background .2s,color .2s;}
+.lang-btn.active{background:var(--cyan-dim);color:var(--cyan);}
 .tbb{background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.28rem .75rem;font-size:.7rem;color:var(--dim);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .tbb:hover{border-color:var(--cyan);color:var(--cyan);}
 .bpp{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
@@ -204,27 +207,38 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <aside class="sidebar" id="sidebar">
   <div class="sl"><div class="lt">KAIZO</div><div class="ls">CRM</div></div>
   <div class="ns">
-    <div class="nl">Értékesítés</div>
-    <div class="ni active" onclick="nav('dashboard',this)"><span class="ic">📊</span>Dashboard</div>
-    <div class="ni" onclick="nav('pipeline',this)"><span class="ic">🔀</span>Pipeline</div>
-    <div class="ni" onclick="nav('customers',this)"><span class="ic">👥</span>Ügyfelek</div>
-    <div class="ni" onclick="nav('leads',this)"><span class="ic">📋</span>Leadek</div>
-    <div class="ni" onclick="nav('activities',this)"><span class="ic">📅</span>Teendők</div>
+    <div class="nl" data-i18n="sidebar_sales">Értékesítés</div>
+    <div class="ni active" onclick="nav('dashboard',this)"><span class="ic">📊</span><span data-i18n="nav_dashboard">Dashboard</span></div>
+    <div class="ni" onclick="nav('pipeline',this)"><span class="ic">🔀</span><span data-i18n="nav_pipeline">Pipeline</span></div>
+    <div class="ni" onclick="nav('customers',this)"><span class="ic">👥</span><span data-i18n="nav_customers">Ügyfelek</span></div>
+    <div class="ni" onclick="nav('leads',this)"><span class="ic">📋</span><span data-i18n="nav_leads">Leadek</span></div>
+    <div class="ni" onclick="nav('activities',this)"><span class="ic">📅</span><span data-i18n="nav_activities">Teendők</span></div>
   </div>
   <div class="ns" style="margin-top:.4rem">
-    <div class="nl">Riportok</div>
-    <div class="ni" onclick="nav('forecast',this)"><span class="ic">📈</span>Előrejelzés</div>
-    <div class="ni" onclick="nav('team',this)"><span class="ic">🏆</span>Csapat telj.</div>
+    <div class="nl" data-i18n="sidebar_reports">Riportok</div>
+    <div class="ni" onclick="nav('forecast',this)"><span class="ic">📈</span><span data-i18n="nav_forecast">Előrejelzés</span></div>
+    <div class="ni" onclick="nav('team',this)"><span class="ic">🏆</span><span data-i18n="nav_team">Csapat telj.</span></div>
   </div>
-  <div class="sbb"><div class="ni" onclick="nav('settings',this)"><span class="ic">⚙️</span>Beállítások</div></div>
 </aside>
 
 <div class="main">
 <header class="topbar">
   <button class="mb" onclick="toggleSB()">☰</button>
   <div class="tt" id="tbTitle">CRM Dashboard</div>
-  <div class="sw"><span class="si">🔍</span><input class="si-w" type="text" placeholder="Keresés..." id="gSearch" oninput="gSearchFn()"></div>
-  <div class="tr"><button class="tbb" onclick="toggleTheme()">🌙</button></div>
+  <div class="psw" id="topPsw">
+    <button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button>
+    <button class="pb" onclick="setPeriod(this,'Q2')">Q2</button>
+    <button class="pb" onclick="setPeriod(this,'YTD')">YTD</button>
+    <button class="pb" onclick="setPeriod(this,'12M')">12H</button>
+  </div>
+  <div class="sw"><span class="si">🔍</span><input class="si-w" type="text" data-i18n-placeholder="search_ph" placeholder="Keresés..." id="gSearch" oninput="gSearchFn()"></div>
+  <div class="tr">
+    <div class="lang-switcher">
+      <button type="button" class="lang-btn active" data-lang="hu" onclick="setLang('hu')">HU</button>
+      <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="tbb" onclick="toggleTheme()">🌙</button>
+  </div>
 </header>
 <div class="content">
 
@@ -237,16 +251,16 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     <div class="kc"><div class="kl">Átl. zárási idő</div><div class="kv" id="dk-close">18n</div><div class="kd dn">▼ 2 nap lassabb</div></div>
   </div>
   <div class="r2">
-    <div class="card"><div class="ch"><span class="ct">Értékesítési Funnel</span></div><div class="funnel-wrap" id="dFunnel"></div></div>
-    <div class="card"><div class="ch"><span class="ct">Havi Bevétel Trend</span></div><div class="cw"><canvas id="dChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="dash_funnel">Értékesítési Funnel</span></div><div class="funnel-wrap" id="dFunnel"></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="dash_trend">Havi Bevétel Trend</span></div><div class="cw"><canvas id="dChart"></canvas></div></div>
   </div>
-  <div class="card"><div class="ch"><span class="ct">Legutóbbi teendők</span><span class="ca" onclick="nav('activities',null)">Összes →</span></div><div class="act-list" id="dActs"></div></div>
+  <div class="card"><div class="ch"><span class="ct" data-i18n="dash_recent">Legutóbbi teendők</span><span class="ca" onclick="nav('activities',null)" data-i18n="dash_all">Összes →</span></div><div class="act-list" id="dActs"></div></div>
 </div>
 
 <!-- ══ PIPELINE ══ -->
 <div class="page" id="pg-pipeline">
   <div class="phd">
-    <h1>Pipeline — Kanban</h1>
+    <h1 data-i18n="pipe_title">Pipeline — Kanban</h1>
     <div class="phd-right">
       <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
       <button class="bpp" onclick="nav('new-lead',null)">+ Új lehetőség</button>
@@ -259,8 +273,8 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     <div class="kc"><div class="kl">Megnyert (30 nap)</div><div class="kv" id="pipe-won">34</div><div class="kd up">▲ 12%</div></div>
   </div>
   <div class="card">
-    <div class="ch"><span class="ct">Kanban tábla</span>
-      <input id="pSearch" oninput="renderPipeline()" type="text" placeholder="Szűrés..." style="background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.28rem .7rem;font-size:.74rem;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;width:140px;">
+    <div class="ch"><span class="ct" data-i18n="pipe_kanban">Kanban tábla</span>
+      <input id="pSearch" oninput="renderPipeline()" type="text" data-i18n-placeholder="pipe_filter_ph" placeholder="Szűrés..." style="background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.28rem .7rem;font-size:.74rem;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;width:140px;">
     </div>
     <div class="kanban-board" id="pBoard"></div>
   </div>
@@ -269,7 +283,7 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ ÜGYFELEK ══ -->
 <div class="page" id="pg-customers">
   <div class="phd">
-    <h1>Ügyfelek</h1>
+    <h1 data-i18n="cust_title">Ügyfelek</h1>
     <div class="phd-right">
       <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
       <button class="bpp" onclick="nav('new-customer',null)">+ Új ügyfél</button>
@@ -295,7 +309,7 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ LEADEK ══ -->
 <div class="page" id="pg-leads">
   <div class="phd">
-    <h1>Leadek & Lehetőségek</h1>
+    <h1 data-i18n="leads_title">Leadek & Lehetőségek</h1>
     <div class="phd-right">
       <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
       <button class="bpp" onclick="nav('new-lead',null)">+ Új lead</button>
@@ -314,7 +328,7 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
         <th onclick="srt('leads','partner_name',this)">Ügyfél <span class="si2"></span></th>
         <th onclick="srt('leads','name',this)">Lehetőség <span class="si2"></span></th>
         <th onclick="srt('leads','user',this)">Értékesítő <span class="si2"></span></th>
-        <th onclick="srt('leads','stage',this)">Fázis <span class="si2"></span></th>
+        <th onclick="srt('leads','stageId',this)">Fázis <span class="si2"></span></th>
         <th onclick="srt('leads','expected_revenue',this)">Várható bev. <span class="si2"></span></th>
         <th onclick="srt('leads','probability',this)">Valószínűség <span class="si2"></span></th>
         <th onclick="srt('leads','date_deadline',this)">Határidő <span class="si2"></span></th>
@@ -328,7 +342,7 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ TEENDŐK ══ -->
 <div class="page" id="pg-activities">
   <div class="phd">
-    <h1>Teendők & Aktivitások</h1>
+    <h1 data-i18n="act_title">Teendők & Aktivitások</h1>
     <div class="phd-right">
       <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
       <button class="bpp" onclick="nav('new-activity',null)">+ Új teendő</button>
@@ -359,7 +373,7 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ ELŐREJELZÉS ══ -->
 <div class="page" id="pg-forecast">
   <div class="phd">
-    <h1>Értékesítési Előrejelzés</h1>
+    <h1 data-i18n="fc_title">Értékesítési Előrejelzés</h1>
     <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
   </div>
   <div class="kgrid">
@@ -369,16 +383,16 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     <div class="kc"><div class="kl" id="fc-l3">YTD teljesítés</div><div class="kv" id="fc-v3">26%</div><div class="kd up" id="fc-d3">▲ ütemterv szerint</div></div>
   </div>
   <div class="r2">
-    <div class="card"><div class="ch"><span class="ct">Forecast vs Tényleges</span></div><div class="cw"><canvas id="fChart"></canvas></div></div>
-    <div class="card"><div class="ch"><span class="ct">Pipeline fázisonként</span></div><div class="cw"><canvas id="sChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="fc_chart1">Forecast vs Tényleges</span></div><div class="cw"><canvas id="fChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="fc_chart2">Pipeline fázisonként</span></div><div class="cw"><canvas id="sChart"></canvas></div></div>
   </div>
-  <div class="card"><div class="ch"><span class="ct">Valószínűsített bevétel — értékesítőnként</span></div><div class="funnel-wrap" id="fByUser"></div></div>
+  <div class="card"><div class="ch"><span class="ct" data-i18n="fc_by_user">Valószínűsített bevétel — értékesítőnként</span></div><div class="funnel-wrap" id="fByUser"></div></div>
 </div>
 
 <!-- ══ CSAPAT ══ -->
 <div class="page" id="pg-team">
   <div class="phd">
-    <h1>Csapat Teljesítmény</h1>
+    <h1 data-i18n="team_title">Csapat Teljesítmény</h1>
     <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
   </div>
   <div class="kgrid">
@@ -403,8 +417,8 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     </table></div>
   </div>
   <div class="r2">
-    <div class="card"><div class="ch"><span class="ct">Bevétel értékesítőnként</span></div><div class="cw"><canvas id="tmChart"></canvas></div></div>
-    <div class="card"><div class="ch"><span class="ct">Win Rate összehasonlítás</span></div><div class="cw"><canvas id="wrChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="team_chart1">Bevétel értékesítőnként</span></div><div class="cw"><canvas id="tmChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="team_chart2">Win Rate összehasonlítás</span></div><div class="cw"><canvas id="wrChart"></canvas></div></div>
   </div>
 </div>
 
@@ -524,8 +538,8 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
       </div>
       <div class="fg">
         <label class="form-label">Értékesítési fázis <span class="req">*</span></label>
-        <select class="form-select">
-          <option>Új Lead</option><option>Minősített</option><option>Ajánlat</option><option>Tárgyalás</option><option>Megnyert</option>
+        <select class="form-select" id="nl-stage">
+          <option value="1">Új Lead</option><option value="2">Minősített</option><option value="3">Ajánlat</option><option value="4">Tárgyalás</option><option value="5">Megnyert</option>
         </select>
       </div>
       <div class="fg">
@@ -569,7 +583,7 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
   </div>
   <div class="form-actions">
     <button class="btn-cancel" onclick="navBack()">Mégsem</button>
-    <button class="btn-draft" onclick="showToast('Lead piszkozatként mentve')">Piszkozat</button>
+    <button class="btn-draft" onclick="showToastDraftLead()">Piszkozat</button>
     <button class="btn-save" onclick="saveNewLead()">Mentés & Megnyitás</button>
   </div>
 </div>
@@ -734,26 +748,78 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 
 </div></div></div>
 
+<script src="kaizo-crm-i18n.js"></script>
 <script>
+const I18N = window.KaizoCRM_i18n || { hu: {}, en: {} };
+let LANG = localStorage.getItem('kaizo-crm-lang') || 'hu';
+let currentNavPage = 'dashboard';
+let connBadgeState = 'none';
+function t(k) {
+  if (I18N[LANG] && I18N[LANG][k] !== undefined) return I18N[LANG][k];
+  if (I18N.hu[k] !== undefined) return I18N.hu[k];
+  return k;
+}
+const PAGE_KEY = { dashboard:'page_dashboard', pipeline:'page_pipeline', customers:'page_customers', leads:'page_leads', activities:'page_activities', forecast:'page_forecast', team:'page_team', settings:'page_settings', detail:'page_detail', 'new-lead':'page_new_lead', 'new-customer':'page_new_customer', 'new-activity':'page_new_activity' };
+function applyStaticI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n'); if (!k) return;
+    const v = t(k);
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      if (el.hasAttribute('data-i18n-placeholder')) el.placeholder = v;
+      else el.value = v;
+    } else el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const k = el.getAttribute('data-i18n-placeholder'); if (k) el.placeholder = t(k);
+  });
+}
+function i18nStageSelect() {
+  const sel = el('nl-stage'); if (!sel) return;
+  [...sel.options].forEach(o => { if (o.value) o.textContent = t('crm_stage_'+o.value); });
+}
+function setLang(lang) {
+  LANG = lang;
+  document.documentElement.lang = lang === 'en' ? 'en' : 'hu';
+  localStorage.setItem('kaizo-crm-lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  applyStaticI18n();
+  i18nStageSelect();
+  el('tbTitle').textContent = t(PAGE_KEY[currentNavPage] || 'page_dashboard');
+  applyPeriod(activePeriod);
+  renderPipeline(); renderCust(); renderLeads(); renderActs(); renderTeam(); renderFunnel();
+  const d = PD[activePeriod];
+  if (d) { updateDashChart(d); updateForecastChart(d); }
+  setConnBadge(connBadgeState);
+}
 const TODAY = '2025-03-20';
 const AVC = {'Nagy Ádám':'#29acd9','Balogh Éva':'#af52de','Fekete Péter':'#ff9500','Szabó Rita':'#34c759'};
-const STAGES = [{n:'Új Lead',c:'#29acd9'},{n:'Minősített',c:'#ff9500'},{n:'Ajánlat',c:'#af52de'},{n:'Tárgyalás',c:'#ff6b35'},{n:'Megnyert',c:'#34c759'}];
-const SBG = {'Új Lead':'bn','Minősített':'bq','Ajánlat':'bp2','Tárgyalás':'bng','Megnyert':'bw','Elveszett':'bl'};
+const STAGE_COL = {1:'#29acd9',2:'#ff9500',3:'#af52de',4:'#ff6b35',5:'#34c759'};
+const STAGE_ODOO_HU = ['Új Lead','Minősített','Ajánlat','Tárgyalás','Megnyert','Elveszett'];
+function stageName(id) { return t('crm_stage_'+id); }
+function stageBadgeClass(id) { const m = {1:'bn',2:'bq',3:'bp2',4:'bng',5:'bw',6:'bl'}; return m[id]||'bn'; }
+function kanbanStages() { return [1,2,3,4,5].map(id => ({ id, c: STAGE_COL[id] })); }
+function stageIdFromHuName(name) {
+  const i = STAGE_ODOO_HU.indexOf(name);
+  if (i >= 0) return i + 1;
+  const m = {'Új Lead':1,'Minősített':2,'Ajánlat':3,'Tárgyalás':4,'Megnyert':5,'Elveszett':6,
+    'New lead':1,'Qualified':2,'Proposal':3,'Negotiation':4,'Won':5,'Lost':6};
+  return m[name] || 1;
+}
 let activePeriod = 'Q1';
 let detailBackPage = 'leads';
 
 /* ══ DATA ══ */
 let LEADS = [
-  {id:1,name:'ERP bevezetés',partner_name:'Kovács Bt.',email:'info@kovacs.hu',phone:'+36 1 234 5678',stage:'Új Lead',user:'Nagy Ádám',expected_revenue:2400000,probability:20,priority:1,date_deadline:'2025-03-28',source:'Web',notes:'Érdeklődnek az ERP modulok iránt, elsősorban pénzügy és HR.'},
-  {id:2,name:'CRM integráció',partner_name:'Tech Kft.',email:'sales@tech.hu',phone:'+36 20 345 6789',stage:'Minősített',user:'Balogh Éva',expected_revenue:1850000,probability:45,priority:2,date_deadline:'2025-03-22',source:'Ajánlás',notes:'Meglévő Salesforce rendszerüket szeretnék lecserélni.'},
-  {id:3,name:'Robot automatizálás',partner_name:'Gyártó Zrt.',email:'ceo@gyarto.hu',phone:'+36 30 456 7890',stage:'Ajánlat',user:'Nagy Ádám',expected_revenue:6200000,probability:65,priority:3,date_deadline:'2025-03-25',source:'Esemény',notes:'Gyártósori automatizálás, 3 robot egység, implementáció Q2.'},
-  {id:4,name:'HR rendszer',partner_name:'Logisztika Kft.',email:'hr@logisztika.hu',phone:'+36 70 567 8901',stage:'Tárgyalás',user:'Fekete Péter',expected_revenue:3100000,probability:80,priority:2,date_deadline:'2025-03-30',source:'Hideg megkeresés',notes:'250 fős cég, bérszámfejtés + jelenléti nyilvántartás.'},
-  {id:5,name:'Készletkezelés',partner_name:'Retail Zrt.',email:'info@retail.hu',phone:'+36 1 678 9012',stage:'Új Lead',user:'Balogh Éva',expected_revenue:980000,probability:15,priority:0,date_deadline:'2025-04-05',source:'Web',notes:''},
-  {id:6,name:'Pénzügyi modul',partner_name:'Holding Group',email:'cfo@holding.hu',phone:'+36 30 789 0123',stage:'Megnyert',user:'Nagy Ádám',expected_revenue:8500000,probability:100,priority:3,date_deadline:'2025-03-20',source:'Ajánlás',notes:'Szerződés aláírva, implementáció megkezdve.'},
-  {id:7,name:'Webshop integráció',partner_name:'E-com Kft.',email:'dev@ecom.hu',phone:'+36 20 890 1234',stage:'Minősített',user:'Fekete Péter',expected_revenue:1200000,probability:40,priority:1,date_deadline:'2025-04-10',source:'Email kampány',notes:''},
-  {id:8,name:'Projekt mgmt',partner_name:'Builder Zrt.',email:'pm@builder.hu',phone:'+36 1 901 2345',stage:'Ajánlat',user:'Balogh Éva',expected_revenue:2750000,probability:60,priority:2,date_deadline:'2025-04-02',source:'Web',notes:''},
-  {id:9,name:'Adatmigrálás',partner_name:'Legacy Corp',email:'it@legacy.hu',phone:'+36 70 012 3456',stage:'Elveszett',user:'Szabó Rita',expected_revenue:1500000,probability:0,priority:1,date_deadline:'2025-03-15',source:'Web',notes:'Az ügyfél a versenytársat választotta.'},
-  {id:10,name:'IoT platform',partner_name:'Smart Zrt.',email:'cto@smart.hu',phone:'+36 30 123 4567',stage:'Tárgyalás',user:'Szabó Rita',expected_revenue:4800000,probability:70,priority:3,date_deadline:'2025-04-15',source:'Esemény',notes:'Gyártósori IoT szenzorok + dashboard integráció.'},
+  {id:1,name:'ERP bevezetés',partner_name:'Kovács Bt.',email:'info@kovacs.hu',phone:'+36 1 234 5678',stageId:1,user:'Nagy Ádám',expected_revenue:2400000,probability:20,priority:1,date_deadline:'2025-03-28',source:'Web',notes:'Érdeklődnek az ERP modulok iránt, elsősorban pénzügy és HR.'},
+  {id:2,name:'CRM integráció',partner_name:'Tech Kft.',email:'sales@tech.hu',phone:'+36 20 345 6789',stageId:2,user:'Balogh Éva',expected_revenue:1850000,probability:45,priority:2,date_deadline:'2025-03-22',source:'Ajánlás',notes:'Meglévő Salesforce rendszerüket szeretnék lecserélni.'},
+  {id:3,name:'Robot automatizálás',partner_name:'Gyártó Zrt.',email:'ceo@gyarto.hu',phone:'+36 30 456 7890',stageId:3,user:'Nagy Ádám',expected_revenue:6200000,probability:65,priority:3,date_deadline:'2025-03-25',source:'Esemény',notes:'Gyártósori automatizálás, 3 robot egység, implementáció Q2.'},
+  {id:4,name:'HR rendszer',partner_name:'Logisztika Kft.',email:'hr@logisztika.hu',phone:'+36 70 567 8901',stageId:4,user:'Fekete Péter',expected_revenue:3100000,probability:80,priority:2,date_deadline:'2025-03-30',source:'Hideg megkeresés',notes:'250 fős cég, bérszámfejtés + jelenléti nyilvántartás.'},
+  {id:5,name:'Készletkezelés',partner_name:'Retail Zrt.',email:'info@retail.hu',phone:'+36 1 678 9012',stageId:1,user:'Balogh Éva',expected_revenue:980000,probability:15,priority:0,date_deadline:'2025-04-05',source:'Web',notes:''},
+  {id:6,name:'Pénzügyi modul',partner_name:'Holding Group',email:'cfo@holding.hu',phone:'+36 30 789 0123',stageId:5,user:'Nagy Ádám',expected_revenue:8500000,probability:100,priority:3,date_deadline:'2025-03-20',source:'Ajánlás',notes:'Szerződés aláírva, implementáció megkezdve.'},
+  {id:7,name:'Webshop integráció',partner_name:'E-com Kft.',email:'dev@ecom.hu',phone:'+36 20 890 1234',stageId:2,user:'Fekete Péter',expected_revenue:1200000,probability:40,priority:1,date_deadline:'2025-04-10',source:'Email kampány',notes:''},
+  {id:8,name:'Projekt mgmt',partner_name:'Builder Zrt.',email:'pm@builder.hu',phone:'+36 1 901 2345',stageId:3,user:'Balogh Éva',expected_revenue:2750000,probability:60,priority:2,date_deadline:'2025-04-02',source:'Web',notes:''},
+  {id:9,name:'Adatmigrálás',partner_name:'Legacy Corp',email:'it@legacy.hu',phone:'+36 70 012 3456',stageId:6,user:'Szabó Rita',expected_revenue:1500000,probability:0,priority:1,date_deadline:'2025-03-15',source:'Web',notes:'Az ügyfél a versenytársat választotta.'},
+  {id:10,name:'IoT platform',partner_name:'Smart Zrt.',email:'cto@smart.hu',phone:'+36 30 123 4567',stageId:4,user:'Szabó Rita',expected_revenue:4800000,probability:70,priority:3,date_deadline:'2025-04-15',source:'Esemény',notes:'Gyártósori IoT szenzorok + dashboard integráció.'},
 ];
 let CUST = [
   {id:1,name:'Kovács Bt.',email:'info@kovacs.hu',phone:'+36 1 234 5678',city:'Budapest',revenue:12400000,deals:3,status:'active',contact:'Kovács János',industry:'IT / Technológia'},
@@ -784,24 +850,29 @@ let TEAM = [
 ];
 
 /* ══ HELPERS ══ */
-const fM  = n => (n/1000000).toFixed(2)+'M Ft';
+const fM  = n => (n/1000000).toFixed(2)+'M '+(LANG==='en'?'HUF':'Ft');
 const fK  = n => n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'E':n;
 const q   = id => (document.getElementById(id)||{value:''}).value.toLowerCase();
 const el  = id => document.getElementById(id);
 const isOverdue = d => d && d < TODAY;
 const dateCell  = d => `<span style="font-family:'DM Mono',monospace;font-size:.74rem;color:${isOverdue(d)?'var(--red)':'var(--tx)'}">${d||'—'}${isOverdue(d)?' ⚠':''}</span>`;
 
-const ACT_STATUS = {
-  due:     '<span class="badge bq">Esedékes</span>',
-  planned: '<span class="badge bn">Tervezett</span>',
-  overdue: '<span class="badge bl">Lejárt</span>',
-  done:    '<span class="badge bw">Kész</span>',
-};
-const CUST_STATUS = {
-  active:  '<span class="badge bw">Aktív</span>',
-  prospect:'<span class="badge bn">Prospect</span>',
-  lost:    '<span class="badge bl">Elveszett</span>',
-};
+function actStatusHtml(s) {
+  const cls = { due:'bq', planned:'bn', overdue:'bl', done:'bw' };
+  const key = { due:'act_status_due', planned:'act_status_planned', overdue:'act_status_overdue', done:'act_status_done' };
+  return `<span class="badge ${cls[s]||'bn'}">${t(key[s]||'act_status_planned')}</span>`;
+}
+function custStatusHtml(s) {
+  const cls = { active:'bw', prospect:'bn', lost:'bl' };
+  const key = { active:'cust_status_active', prospect:'cust_status_prospect', lost:'cust_status_lost' };
+  return `<span class="badge ${cls[s]||'bn'}">${t(key[s]||'cust_status_prospect')}</span>`;
+}
+const HU_MONTH_TO_KEY = {Jan:'month_jan',Feb:'month_feb',Már:'month_mar',Mar:'month_mar',Ápr:'month_apr',Máj:'month_may',Jún:'month_jun',Aug:'month_aug',Okt:'month_oct',Dec:'month_dec'};
+function chartLabels(d) {
+  if (!d || !d.chart_l) return [];
+  return d.chart_l.map(lab => { const k = HU_MONTH_TO_KEY[lab]; return k && LANG === 'en' ? t(k) : lab; });
+}
+function pdKey(p) { return ({ Q1:'q1', Q2:'q2', YTD:'ytd', '12M':'12m' })[p] || 'q1'; }
 
 /* ══ SORT ══ */
 const SS = {};
@@ -837,6 +908,7 @@ function setPeriod(btn, p) {
 
 function applyPeriod(p) {
   const d = PD[p]; if (!d) return;
+  const pk = pdKey(p);
   // Pipeline
   if(el('pipe-cnt'))  el('pipe-cnt').textContent  = d.leads;
   if(el('pipe-val'))  el('pipe-val').textContent  = d.pipe;
@@ -846,20 +918,20 @@ function applyPeriod(p) {
   if(el('lCnt'))  el('lCnt').textContent  = d.leads;
   if(el('lVal'))  el('lVal').textContent  = d.pipe;
   if(el('lProb')) el('lProb').textContent = d.prob;
-  // Forecast KPI-k
-  ['l0','v0','d0','l1','v1','d1','l3','v3','d3'].forEach(k => {
-    const e = el('fc-'+k); if(e) e.textContent = d.fc[k]||'';
-  });
-  // Delta osztályok a forecast-on
+  // Forecast KPI-k — címkék és delták i18n, értékek számból
+  ['l0','l1','l3'].forEach(k => { const e = el('fc-'+k); if(e) e.textContent = t('pd_'+pk+'_fc_'+k); });
+  ['v0','v1','v3'].forEach(k => { const e = el('fc-'+k); if(e) e.textContent = d.fc[k]||''; });
   ['d0','d1','d3'].forEach(k => {
     const e = el('fc-'+k); if(!e) return;
-    const txt = d.fc[k]||'';
+    e.textContent = t('pd_'+pk+'_fc_'+k);
+    const txt = e.textContent||'';
     e.className = 'kd ' + (txt.startsWith('▲')?'up':txt.startsWith('▼')?'dn':'');
   });
   // Csapat KPI-k
   ['v0','v1','v2','v3'].forEach(k => { const e=el('tm-'+k); if(e) e.textContent=d.tm[k]; });
   // Dashboard KPI-k
-  if(el('dk-leads')) el('dk-leads').textContent = d.leads.toLocaleString('hu-HU');
+  const loc = LANG === 'en' ? 'en-US' : 'hu-HU';
+  if(el('dk-leads')) el('dk-leads').textContent = d.leads.toLocaleString(loc);
   if(el('dk-pipe'))  el('dk-pipe').textContent  = d.pipe;
   if(el('dk-win'))   el('dk-win').textContent   = d.won+'/'+Math.round(d.won*0.35);
   // Charts
@@ -877,33 +949,33 @@ function renderPipeline() {
   const ls = LEADS.filter(l=>!qs||l.name.toLowerCase().includes(qs)||l.partner_name.toLowerCase().includes(qs));
   const b = el('pBoard'); if(!b) return; b.innerHTML='';
 
-  STAGES.forEach(st => {
-    const sl = ls.filter(l=>l.stage===st.n);
+  kanbanStages().forEach(st => {
+    const sl = ls.filter(l=>l.stageId===st.id);
     const col = document.createElement('div');
     col.className = 'k-col';
-    col.dataset.stage = st.n;
+    col.dataset.stageId = st.id;
 
+    const label = stageName(st.id);
     col.innerHTML = `
       <div class="k-head">
-        <span class="k-name">${st.n}</span>
-        <span class="k-cnt" id="kcnt-${st.n.replace(/\s/g,'_')}">${sl.length}</span>
+        <span class="k-name">${label}</span>
+        <span class="k-cnt" id="kcnt-${st.id}">${sl.length}</span>
       </div>
       <div class="k-bar" style="background:${st.c}"></div>
-      <div class="k-drop-zone" id="kdrop-${st.n.replace(/\s/g,'_')}"></div>`;
+      <div class="k-drop-zone" id="kdrop-${st.id}"></div>`;
 
     b.appendChild(col);
 
     const dropZone = col.querySelector('.k-drop-zone');
 
-    // Kártyák renderelése a drop zone-ba
     sl.forEach(l => {
       const card = document.createElement('div');
       card.className = 'k-card';
       card.draggable = true;
       card.dataset.leadId = l.id;
-      card.dataset.stage = st.n;
+      card.dataset.stageId = String(st.id);
       card.innerHTML = `
-        <span class="k-drag-handle" title="Húzd át">⣿</span>
+        <span class="k-drag-handle" title="${t('drag_hint')}">⣿</span>
         <div class="k-card-name">${l.name}</div>
         <div class="k-card-co">${l.partner_name}</div>
         <div class="k-card-ft">
@@ -911,26 +983,22 @@ function renderPipeline() {
           <span class="k-card-stars">${'★'.repeat(l.priority)}${'☆'.repeat(3-l.priority)}</span>
         </div>`;
 
-      // Klikk: detail nézet (csak ha nem drag volt)
       card.addEventListener('click', () => {
         if (!card.classList.contains('was-dragging')) showDetail('lead', l.id);
         card.classList.remove('was-dragging');
       });
 
-      // Drag start
       card.addEventListener('dragstart', e => {
         dragLeadId = l.id;
-        dragSourceStage = st.n;
+        dragSourceStage = st.id;
         card.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', l.id);
-        // Ghost kép: kissé átlátszó
         setTimeout(() => card.classList.add('was-dragging'), 0);
       });
 
       card.addEventListener('dragend', () => {
         card.classList.remove('dragging');
-        // Drop zone highlight törlése
         document.querySelectorAll('.k-col').forEach(c => c.classList.remove('drag-over'));
         document.querySelectorAll('.k-card.drag-placeholder').forEach(p => p.remove());
         dragLeadId = null;
@@ -940,13 +1008,11 @@ function renderPipeline() {
       dropZone.appendChild(card);
     });
 
-    // Drop zone events az oszlopon
     dropZone.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       col.classList.add('drag-over');
 
-      // Placeholder pozícionálás
       const existing = dropZone.querySelector('.drag-placeholder');
       if (!existing) {
         const ph = document.createElement('div');
@@ -954,7 +1020,6 @@ function renderPipeline() {
         dropZone.appendChild(ph);
       }
 
-      // Rendezés: kurzor helyzete alapján placeholder mozgatása
       const afterEl = getDragAfterElement(dropZone, e.clientY);
       const ph = dropZone.querySelector('.drag-placeholder');
       if (afterEl) dropZone.insertBefore(ph, afterEl);
@@ -962,7 +1027,6 @@ function renderPipeline() {
     });
 
     dropZone.addEventListener('dragleave', e => {
-      // Csak akkor távolítjuk el ha tényleg elhagyjuk az oszlopot
       if (!col.contains(e.relatedTarget)) {
         col.classList.remove('drag-over');
         dropZone.querySelector('.drag-placeholder')?.remove();
@@ -976,21 +1040,16 @@ function renderPipeline() {
 
       const id = parseInt(e.dataTransfer.getData('text/plain'));
       const lead = LEADS.find(l => l.id === id);
-      if (!lead || lead.stage === st.n) return;
+      if (!lead || lead.stageId === st.id) return;
 
-      const oldStage = lead.stage;
-      lead.stage = st.n;
+      lead.stageId = st.id;
 
-      // Odoo API hívás (ha kapcsolódva)
-      odooUpdateLeadStage(lead.id, st.n);
+      odooUpdateLeadStage(lead.id, st.id);
 
-      // Toast visszajelzés
-      showToast(`✓ ${lead.name} → ${st.n}`);
+      showToast(`${t('toast_stage')} ${lead.name} → ${stageName(st.id)}`);
 
-      // Csak a pipeline-t frissítjük, nem az egész oldalt
       renderPipeline();
 
-      // KPI-k frissítése
       updatePipelineKPIs();
     });
   });
@@ -1010,9 +1069,9 @@ function getDragAfterElement(container, y) {
 
 function updatePipelineKPIs() {
   const ls = LEADS;
-  if(el('pipe-cnt'))  el('pipe-cnt').textContent  = ls.filter(l=>l.stage!=='Elveszett').length;
-  if(el('pipe-val'))  el('pipe-val').textContent  = fK(ls.filter(l=>l.stage!=='Elveszett').reduce((s,l)=>s+l.expected_revenue,0));
-  const pp = ls.filter(l=>l.probability>0&&l.stage!=='Elveszett');
+  if(el('pipe-cnt'))  el('pipe-cnt').textContent  = ls.filter(l=>l.stageId!==6).length;
+  if(el('pipe-val'))  el('pipe-val').textContent  = fK(ls.filter(l=>l.stageId!==6).reduce((s,l)=>s+l.expected_revenue,0));
+  const pp = ls.filter(l=>l.probability>0&&l.stageId!==6);
   if(el('pipe-prob')) el('pipe-prob').textContent = Math.round(pp.reduce((s,l)=>s+l.probability,0)/(pp.length||1))+'%';
 }
 
@@ -1020,14 +1079,15 @@ function renderCust() {
   const qs = q('cSearch');
   const list = CUST.filter(c=>!qs||c.name.toLowerCase().includes(qs)||c.email.toLowerCase().includes(qs)||c.city.toLowerCase().includes(qs));
   const colors=['#29acd9','#af52de','#ff9500','#34c759'];
+  const L = { n:t('th_cust_name'), e:t('th_email'), p:t('th_phone'), c:t('th_city'), r:t('th_revenue'), d:t('th_deals'), s:t('th_status') };
   el('cBody').innerHTML = list.map((c,i)=>`<tr onclick="showDetail('cust',${c.id})">
-    <td data-label="Ügyfél"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${colors[i%4]}">${c.name.substring(0,2)}</div><div><div>${c.name}</div><div style="font-size:.68rem;color:var(--mu)">${c.contact}</div></div></div></td>
-    <td data-label="Email" style="font-size:.75rem;color:var(--dim)">${c.email}</td>
-    <td data-label="Telefon" style="font-family:'DM Mono',monospace;font-size:.74rem">${c.phone}</td>
-    <td data-label="Város">${c.city}</td>
-    <td data-label="Bevétel" style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(c.revenue)}</td>
-    <td data-label="Ügyletek" style="font-family:'DM Mono',monospace">${c.deals}</td>
-    <td data-label="Státusz">${CUST_STATUS[c.status]||''}</td>
+    <td data-label="${L.n}"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${colors[i%4]}">${c.name.substring(0,2)}</div><div><div>${c.name}</div><div style="font-size:.68rem;color:var(--mu)">${c.contact}</div></div></div></td>
+    <td data-label="${L.e}" style="font-size:.75rem;color:var(--dim)">${c.email}</td>
+    <td data-label="${L.p}" style="font-family:'DM Mono',monospace;font-size:.74rem">${c.phone}</td>
+    <td data-label="${L.c}">${c.city}</td>
+    <td data-label="${L.r}" style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(c.revenue)}</td>
+    <td data-label="${L.d}" style="font-family:'DM Mono',monospace">${c.deals}</td>
+    <td data-label="${L.s}">${custStatusHtml(c.status)}</td>
   </tr>`).join('');
 }
 
@@ -1038,35 +1098,37 @@ function renderLeads() {
   el('lVal').textContent = fK(list.reduce((s,l)=>s+l.expected_revenue,0));
   const pp = list.filter(l=>l.probability>0);
   el('lProb').textContent = Math.round(pp.reduce((s,l)=>s+l.probability,0)/(pp.length||1))+'%';
-  el('lOver').textContent = list.filter(l=>isOverdue(l.date_deadline)&&l.stage!=='Megnyert'&&l.stage!=='Elveszett').length;
+  el('lOver').textContent = list.filter(l=>isOverdue(l.date_deadline)&&l.stageId!==5&&l.stageId!==6).length;
+  const L = { u:t('th_lead_partner'), o:t('th_opportunity'), s:t('th_salesperson'), st:t('th_stage'), e:t('th_exp_rev'), pr:t('th_prob'), dl:t('th_deadline'), pi:t('th_prio') };
   el('lBody').innerHTML = list.map(l=>`<tr onclick="showDetail('lead',${l.id})">
-    <td data-label="Ügyfél"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${AVC[l.user]||'#555'}">${l.partner_name.substring(0,2)}</div>
+    <td data-label="${L.u}"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${AVC[l.user]||'#555'}">${l.partner_name.substring(0,2)}</div>
     <div><div>${l.partner_name}</div><div style="font-size:.68rem;color:var(--mu)">${l.email}</div></div></div></td>
-    <td data-label="Lehetőség">${l.name}</td>
-    <td data-label="Értékesítő" style="font-size:.76rem">${l.user}</td>
-    <td data-label="Fázis"><span class="badge ${SBG[l.stage]||'bn'}">${l.stage}</span></td>
-    <td data-label="Várható bev." style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(l.expected_revenue)}</td>
-    <td data-label="Valószínűség">
+    <td data-label="${L.o}">${l.name}</td>
+    <td data-label="${L.s}" style="font-size:.76rem">${l.user}</td>
+    <td data-label="${L.st}"><span class="badge ${stageBadgeClass(l.stageId)}">${stageName(l.stageId)}</span></td>
+    <td data-label="${L.e}" style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(l.expected_revenue)}</td>
+    <td data-label="${L.pr}">
       <div class="prob-bar">
         <div class="prob-track"><div class="prob-fill" style="width:${l.probability}%;background:${l.probability>=70?'var(--green)':l.probability>=40?'var(--orange)':'var(--red)'}"></div></div>
         <span style="font-family:'DM Mono',monospace;font-size:.7rem;width:2.2rem">${l.probability}%</span>
       </div>
     </td>
-    <td data-label="Határidő">${dateCell(l.date_deadline)}</td>
-    <td data-label="Prio" style="font-size:.72rem">${'★'.repeat(l.priority)}${'☆'.repeat(3-l.priority)}</td>
+    <td data-label="${L.dl}">${dateCell(l.date_deadline)}</td>
+    <td data-label="${L.pi}" style="font-size:.72rem">${'★'.repeat(l.priority)}${'☆'.repeat(3-l.priority)}</td>
   </tr>`).join('');
 }
 
 function renderActs() {
   const qs = q('aSearch');
   const list = ACTS.filter(a=>!qs||a.summary.toLowerCase().includes(qs)||a.partner.toLowerCase().includes(qs)||a.lead.toLowerCase().includes(qs));
+  const L = { ty:t('th_type'), d:t('th_desc'), l:t('th_lead'), o:t('th_owner'), dl:t('th_deadline'), st:t('th_state') };
   el('aBody').innerHTML = list.map(a=>`<tr onclick="showDetail('act',${a.id})">
-    <td data-label="Típus">${a.type} ${a.type_name}</td>
-    <td data-label="Leírás" style="font-weight:500">${a.summary}</td>
-    <td data-label="Lead" style="font-size:.75rem;color:var(--dim)">${a.lead}</td>
-    <td data-label="Felelős" style="font-size:.76rem">${a.user}</td>
-    <td data-label="Határidő">${dateCell(a.deadline)}</td>
-    <td data-label="Állapot">${ACT_STATUS[a.status]||''}</td>
+    <td data-label="${L.ty}">${a.type} ${a.type_name}</td>
+    <td data-label="${L.d}" style="font-weight:500">${a.summary}</td>
+    <td data-label="${L.l}" style="font-size:.75rem;color:var(--dim)">${a.lead}</td>
+    <td data-label="${L.o}" style="font-size:.76rem">${a.user}</td>
+    <td data-label="${L.dl}">${dateCell(a.deadline)}</td>
+    <td data-label="${L.st}">${actStatusHtml(a.status)}</td>
   </tr>`).join('');
   // Dashboard activities
   const da = el('dActs');
@@ -1080,33 +1142,34 @@ function renderActs() {
 
 function renderTeam() {
   const qs = q('tmSearch');
-  const list = TEAM.filter(t=>!qs||t.name.toLowerCase().includes(qs));
-  el('tmBody').innerHTML = list.map(t=>`<tr onclick="showDetail('member',${t.id})">
-    <td data-label="Értékesítő"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${AVC[t.name]||'#555'}">${t.name.split(' ').map(w=>w[0]).join('')}</div>${t.name}</div></td>
-    <td data-label="Leadek" style="font-family:'DM Mono',monospace">${t.leads}</td>
-    <td data-label="Megnyert" style="font-family:'DM Mono',monospace;color:var(--green)">${t.won}</td>
-    <td data-label="Elveszett" style="font-family:'DM Mono',monospace;color:var(--red)">${t.lost}</td>
-    <td data-label="Win Rate">
+  const list = TEAM.filter(m=>!qs||m.name.toLowerCase().includes(qs));
+  const L = { n:t('th_team_name'), l:t('th_leads'), w:t('th_won'), o:t('th_lost'), wr:t('th_winrate'), r:t('th_revenue'), a:t('th_avg_deal') };
+  el('tmBody').innerHTML = list.map(m=>`<tr onclick="showDetail('member',${m.id})">
+    <td data-label="${L.n}"><div style="display:flex;align-items:center;gap:.5rem"><div class="av" style="background:${AVC[m.name]||'#555'}">${m.name.split(' ').map(w=>w[0]).join('')}</div>${m.name}</div></td>
+    <td data-label="${L.l}" style="font-family:'DM Mono',monospace">${m.leads}</td>
+    <td data-label="${L.w}" style="font-family:'DM Mono',monospace;color:var(--green)">${m.won}</td>
+    <td data-label="${L.o}" style="font-family:'DM Mono',monospace;color:var(--red)">${m.lost}</td>
+    <td data-label="${L.wr}">
       <div class="prob-bar">
-        <div class="prob-track"><div class="prob-fill" style="width:${t.winrate}%;background:${t.winrate>=70?'var(--green)':t.winrate>=50?'var(--orange)':'var(--red)'}"></div></div>
-        <span style="font-family:'DM Mono',monospace;font-size:.7rem;width:2.2rem">${t.winrate}%</span>
+        <div class="prob-track"><div class="prob-fill" style="width:${m.winrate}%;background:${m.winrate>=70?'var(--green)':m.winrate>=50?'var(--orange)':'var(--red)'}"></div></div>
+        <span style="font-family:'DM Mono',monospace;font-size:.7rem;width:2.2rem">${m.winrate}%</span>
       </div>
     </td>
-    <td data-label="Bevétel" style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(t.revenue)}</td>
-    <td data-label="Átl. ügylet" style="font-family:'DM Mono',monospace">${fM(t.avg_deal)}</td>
+    <td data-label="${L.r}" style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(m.revenue)}</td>
+    <td data-label="${L.a}" style="font-family:'DM Mono',monospace">${fM(m.avg_deal)}</td>
   </tr>`).join('');
 }
 
 function renderFunnel() {
-  const fd=[{s:'Új Lead',c:284,p:100,cl:'#29acd9'},{s:'Minősített',c:156,p:55,cl:'#ff9500'},{s:'Ajánlat',c:89,p:31,cl:'#af52de'},{s:'Tárgyalás',c:44,p:15,cl:'#ff6b35'},{s:'Megnyert',c:34,p:12,cl:'#34c759'}];
+  const fd=[{sid:1,c:284,p:100,cl:'#29acd9'},{sid:2,c:156,p:55,cl:'#ff9500'},{sid:3,c:89,p:31,cl:'#af52de'},{sid:4,c:44,p:15,cl:'#ff6b35'},{sid:5,c:34,p:12,cl:'#34c759'}];
   const w=el('dFunnel'); if(w) w.innerHTML=fd.map(f=>`
-    <div class="f-stage"><div class="f-row"><span>${f.s}</span><span style="font-family:'DM Mono',monospace">${f.c} lead</span></div>
+    <div class="f-stage"><div class="f-row"><span>${stageName(f.sid)}</span><span style="font-family:'DM Mono',monospace">${f.c} ${t('funnel_leads')}</span></div>
     <div class="f-bg"><div class="f-fill" style="width:${f.p}%;background:${f.cl}">${f.p}%</div></div></div>`).join('');
   const fb=el('fByUser'); if(fb){
     const cl=['#29acd9','#af52de','#ff9500','#34c759'];
-    fb.innerHTML=TEAM.map((t,i)=>`
-      <div class="f-stage"><div class="f-row"><span>${t.name}</span><span style="font-family:'DM Mono',monospace">${fM(t.revenue)}</span></div>
-      <div class="f-bg"><div class="f-fill" style="width:${Math.round(t.winrate)}%;background:${cl[i]}">${t.winrate}%</div></div></div>`).join('');
+    fb.innerHTML=TEAM.map((m,i)=>`
+      <div class="f-stage"><div class="f-row"><span>${m.name}</span><span style="font-family:'DM Mono',monospace">${fM(m.revenue)}</span></div>
+      <div class="f-bg"><div class="f-fill" style="width:${Math.round(m.winrate)}%;background:${cl[i]}">${m.winrate}%</div></div></div>`).join('');
   }
 }
 
@@ -1118,7 +1181,9 @@ function showDetail(type, id) {
   let html = '';
 
   if (type==='lead') {
-    const stageColor = STAGES.find(s=>s.n===item.stage)?.c||'#555';
+    const stageColor = STAGE_COL[item.stageId]||'#555';
+    const priLbl = [t('priority_low'),t('priority_normal'),t('priority_high'),t('priority_crit')];
+    const typeLbl = (item.stageId===5||item.stageId===6) ? stageName(item.stageId) : t('opp_active');
     html = `
       <div class="detail-header">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
@@ -1127,21 +1192,21 @@ function showDetail(type, id) {
             <div class="detail-sub">${item.partner_name} · ${item.user}</div>
           </div>
           <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
-            <span class="badge ${SBG[item.stage]||'bn'}" style="font-size:.76rem;padding:.3rem .8rem">${item.stage}</span>
-            <button class="bpp" style="font-size:.74rem" onclick="nav('new-activity',null)">📅 Teendő</button>
-            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">✏️ Szerkesztés</button>
+            <span class="badge ${stageBadgeClass(item.stageId)}" style="font-size:.76rem;padding:.3rem .8rem">${stageName(item.stageId)}</span>
+            <button class="bpp" style="font-size:.74rem" onclick="nav('new-activity',null)">${t('detail_activity')}</button>
+            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">${t('detail_edit')}</button>
           </div>
         </div>
       </div>
       <div class="detail-grid">
-        <div class="df"><div class="df-l">Lehetőség neve</div><div class="df-v">${item.name}</div></div>
-        <div class="df"><div class="df-l">Ügyfél</div><div class="df-v">${item.partner_name}</div></div>
-        <div class="df"><div class="df-l">Email</div><div class="df-v mono">${item.email}</div></div>
-        <div class="df"><div class="df-l">Telefon</div><div class="df-v mono">${item.phone}</div></div>
-        <div class="df"><div class="df-l">Értékesítő</div><div class="df-v">${item.user}</div></div>
-        <div class="df"><div class="df-l">Forrás</div><div class="df-v">${item.source||'—'}</div></div>
-        <div class="df"><div class="df-l">Várható bevétel</div><div class="df-v mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.expected_revenue)}</div></div>
-        <div class="df"><div class="df-l">Valószínűség</div>
+        <div class="df"><div class="df-l">${t('df_opp_name')}</div><div class="df-v">${item.name}</div></div>
+        <div class="df"><div class="df-l">${t('df_customer')}</div><div class="df-v">${item.partner_name}</div></div>
+        <div class="df"><div class="df-l">${t('th_email')}</div><div class="df-v mono">${item.email}</div></div>
+        <div class="df"><div class="df-l">${t('th_phone')}</div><div class="df-v mono">${item.phone}</div></div>
+        <div class="df"><div class="df-l">${t('th_salesperson')}</div><div class="df-v">${item.user}</div></div>
+        <div class="df"><div class="df-l">${t('df_source')}</div><div class="df-v">${item.source||'—'}</div></div>
+        <div class="df"><div class="df-l">${t('df_exp_rev')}</div><div class="df-v mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.expected_revenue)}</div></div>
+        <div class="df"><div class="df-l">${t('df_prob')}</div>
           <div class="df-v">
             <div class="prob-bar">
               <div class="prob-track" style="height:8px"><div class="prob-fill" style="width:${item.probability}%;background:${item.probability>=70?'var(--green)':item.probability>=40?'var(--orange)':'var(--red)'}"></div></div>
@@ -1149,33 +1214,37 @@ function showDetail(type, id) {
             </div>
           </div>
         </div>
-        <div class="df"><div class="df-l">Várható zárás</div><div class="df-v mono" style="color:${isOverdue(item.date_deadline)?'var(--red)':'var(--tx)'}">${item.date_deadline}${isOverdue(item.date_deadline)?' ⚠':''}</div></div>
-        <div class="df"><div class="df-l">Prioritás</div><div class="df-v">${'★'.repeat(item.priority)}${'☆'.repeat(3-item.priority)} · ${['Alacsony','Normál','Magas','Kritikus'][item.priority]}</div></div>
-        <div class="df"><div class="df-l">Típus</div><div class="df-v">${item.stage==='Megnyert'||item.stage==='Elveszett'?item.stage:'Aktív lehetőség'}</div></div>
-        <div class="df"><div class="df-l">Fázis</div><div class="df-v"><span class="badge ${SBG[item.stage]||'bn'}">${item.stage}</span></div></div>
+        <div class="df"><div class="df-l">${t('df_close')}</div><div class="df-v mono" style="color:${isOverdue(item.date_deadline)?'var(--red)':'var(--tx)'}">${item.date_deadline}${isOverdue(item.date_deadline)?' ⚠':''}</div></div>
+        <div class="df"><div class="df-l">${t('df_pri')}</div><div class="df-v">${'★'.repeat(item.priority)}${'☆'.repeat(3-item.priority)} · ${priLbl[item.priority]||''}</div></div>
+        <div class="df"><div class="df-l">${t('df_type')}</div><div class="df-v">${typeLbl}</div></div>
+        <div class="df"><div class="df-l">${t('df_stage')}</div><div class="df-v"><span class="badge ${stageBadgeClass(item.stageId)}">${stageName(item.stageId)}</span></div></div>
       </div>
-      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">Megjegyzés</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
+      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">${t('df_note')}</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
       <div class="card">
-        <div class="ch"><span class="ct">Pipeline fázisok</span></div>
+        <div class="ch"><span class="ct">${t('pipeline_stages')}</span></div>
         <div style="padding:1.2rem;display:flex;gap:0;overflow-x:auto">
-          ${STAGES.map(s=>`
-            <div style="flex:1;min-width:80px;text-align:center;padding:.5rem .3rem">
-              <div style="width:32px;height:32px;border-radius:50%;background:${s.n===item.stage?stageColor:'var(--s2)'};border:2px solid ${s.n===item.stage?stageColor:'var(--bd)'};display:flex;align-items:center;justify-content:center;margin:0 auto .4rem;font-size:.7rem;color:${s.n===item.stage?'#fff':'var(--mu)'}">
-                ${STAGES.findIndex(x=>x.n===s.n)<STAGES.findIndex(x=>x.n===item.stage)?'✓':'·'}
+          ${[1,2,3,4,5].map(sid=>{
+            const isCurrent = item.stageId===sid;
+            const isPast = item.stageId!==6 && sid < item.stageId;
+            const c = STAGE_COL[sid];
+            return `<div style="flex:1;min-width:80px;text-align:center;padding:.5rem .3rem">
+              <div style="width:32px;height:32px;border-radius:50%;background:${isCurrent?c:'var(--s2)'};border:2px solid ${isCurrent?c:'var(--bd)'};display:flex;align-items:center;justify-content:center;margin:0 auto .4rem;font-size:.7rem;color:${isCurrent?'#fff':'var(--mu)'}">
+                ${isPast?'✓':'·'}
               </div>
-              <div style="font-size:.62rem;color:${s.n===item.stage?'var(--tx)':'var(--mu)'};font-weight:${s.n===item.stage?'600':'400'}">${s.n}</div>
-            </div>`).join('')}
+              <div style="font-size:.62rem;color:${isCurrent?'var(--tx)':'var(--mu)'};font-weight:${isCurrent?'600':'400'}">${stageName(sid)}</div>
+            </div>`;
+          }).join('')}
         </div>
       </div>
       <div class="card">
-        <div class="ch"><span class="ct">Aktivitások</span><span class="ca" onclick="nav('new-activity',null)">+ Új teendő</span></div>
+        <div class="ch"><span class="ct">${t('df_activities')}</span><span class="ca" onclick="nav('new-activity',null)">${t('detail_new_todo')}</span></div>
         <div class="tl">
           ${ACTS.filter(a=>a.lead===item.name).map(a=>`
             <div class="tl-item">
               <div class="tl-dot" style="background:${a.status==='overdue'?'var(--red)':a.status==='due'?'var(--orange)':'var(--cyan)'}"></div>
-              <div class="tl-info"><div class="tl-t">${a.type} ${a.summary}</div><div class="tl-m">${a.user} · ${ACT_STATUS[a.status]||''}</div></div>
+              <div class="tl-info"><div class="tl-t">${a.type} ${a.summary}</div><div class="tl-m">${a.user} · ${actStatusHtml(a.status)}</div></div>
               <div style="font-family:'DM Mono',monospace;font-size:.68rem;color:${isOverdue(a.deadline)?'var(--red)':'var(--mu)'}">${a.deadline}</div>
-            </div>`).join('')||'<div style="padding:1rem;color:var(--mu);font-size:.8rem">Nincs rögzített aktivitás</div>'}
+            </div>`).join('')||`<div style="padding:1rem;color:var(--mu);font-size:.8rem">${t('detail_no_act')}</div>`}
         </div>
       </div>`;
 
@@ -1190,45 +1259,45 @@ function showDetail(type, id) {
             <div class="detail-sub">${item.industry||'—'} · ${item.city}</div>
           </div>
           <div style="display:flex;gap:.6rem;align-items:center">
-            ${CUST_STATUS[item.status]||''}
-            <button class="bpp" style="font-size:.74rem" onclick="nav('new-lead',null)">+ Új lehetőség</button>
+            ${custStatusHtml(item.status)}
+            <button class="bpp" style="font-size:.74rem" onclick="nav('new-lead',null)">${t('detail_new_opp')}</button>
           </div>
         </div>
       </div>
       <div class="detail-grid">
-        <div class="df"><div class="df-l">Kapcsolattartó</div><div class="df-v">${item.contact||'—'}</div></div>
-        <div class="df"><div class="df-l">Email</div><div class="df-v mono">${item.email}</div></div>
-        <div class="df"><div class="df-l">Telefon</div><div class="df-v mono">${item.phone}</div></div>
-        <div class="df"><div class="df-l">Város</div><div class="df-v">${item.city}</div></div>
-        <div class="df"><div class="df-l">Iparág</div><div class="df-v">${item.industry||'—'}</div></div>
-        <div class="df"><div class="df-l">Státusz</div><div class="df-v">${CUST_STATUS[item.status]||''}</div></div>
-        <div class="df"><div class="df-l">Összes bevétel</div><div class="df-v mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.revenue)}</div></div>
-        <div class="df"><div class="df-l">Ügyletek száma</div><div class="df-v mono">${item.deals} db</div></div>
-        <div class="df"><div class="df-l">Átl. ügylet</div><div class="df-v mono">${fM(item.revenue/item.deals)}</div></div>
+        <div class="df"><div class="df-l">${t('df_contact')}</div><div class="df-v">${item.contact||'—'}</div></div>
+        <div class="df"><div class="df-l">${t('th_email')}</div><div class="df-v mono">${item.email}</div></div>
+        <div class="df"><div class="df-l">${t('th_phone')}</div><div class="df-v mono">${item.phone}</div></div>
+        <div class="df"><div class="df-l">${t('th_city')}</div><div class="df-v">${item.city}</div></div>
+        <div class="df"><div class="df-l">${t('df_industry')}</div><div class="df-v">${item.industry||'—'}</div></div>
+        <div class="df"><div class="df-l">${t('th_status')}</div><div class="df-v">${custStatusHtml(item.status)}</div></div>
+        <div class="df"><div class="df-l">${t('df_total_rev')}</div><div class="df-v mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.revenue)}</div></div>
+        <div class="df"><div class="df-l">${t('df_deal_count')}</div><div class="df-v mono">${item.deals} ${LANG==='en'?'':'db'}</div></div>
+        <div class="df"><div class="df-l">${t('df_avg_deal')}</div><div class="df-v mono">${fM(item.revenue/item.deals)}</div></div>
       </div>
       <div class="card" style="margin-bottom:1rem">
-        <div class="ch"><span class="ct">Lehetőségek</span><span class="ca" onclick="nav('new-lead',null)">+ Új →</span></div>
+        <div class="ch"><span class="ct">${t('df_opps')}</span><span class="ca" onclick="nav('new-lead',null)">${t('detail_new_arrow')}</span></div>
         <div class="tw"><table>
-          <thead><tr><th>Lehetőség</th><th>Fázis</th><th>Várható bevétel</th><th>Valószínűség</th><th>Határidő</th></tr></thead>
+          <thead><tr><th>${t('tbl_opp')}</th><th>${t('tbl_stage')}</th><th>${t('tbl_exp_rev')}</th><th>${t('tbl_prob')}</th><th>${t('th_deadline')}</th></tr></thead>
           <tbody>${custLeads.map(l=>`
             <tr onclick="showDetail('lead',${l.id})">
               <td>${l.name}</td>
-              <td><span class="badge ${SBG[l.stage]||'bn'}">${l.stage}</span></td>
+              <td><span class="badge ${stageBadgeClass(l.stageId)}">${stageName(l.stageId)}</span></td>
               <td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(l.expected_revenue)}</td>
               <td style="font-family:'DM Mono',monospace">${l.probability}%</td>
               <td>${dateCell(l.date_deadline)}</td>
-            </tr>`).join('')||'<tr><td colspan="5" style="color:var(--mu);text-align:center;padding:1rem">Nincs lead</td></tr>'}</tbody>
+            </tr>`).join('')||`<tr><td colspan="5" style="color:var(--mu);text-align:center;padding:1rem">${t('detail_no_lead')}</td></tr>`}</tbody>
         </table></div>
       </div>
       <div class="card">
-        <div class="ch"><span class="ct">Aktivitások</span></div>
+        <div class="ch"><span class="ct">${t('df_activities')}</span></div>
         <div class="tl">
           ${custActs.map(a=>`
             <div class="tl-item">
               <div class="tl-dot" style="background:${a.status==='overdue'?'var(--red)':a.status==='due'?'var(--orange)':'var(--cyan)'}"></div>
-              <div class="tl-info"><div class="tl-t">${a.type} ${a.summary}</div><div class="tl-m">${a.user} · határidő: ${a.deadline}</div></div>
-              <div>${ACT_STATUS[a.status]||''}</div>
-            </div>`).join('')||'<div style="padding:1rem;color:var(--mu);font-size:.8rem">Nincs aktivitás</div>'}
+              <div class="tl-info"><div class="tl-t">${a.type} ${a.summary}</div><div class="tl-m">${a.user} · ${t('detail_deadline_lbl')} ${a.deadline}</div></div>
+              <div>${actStatusHtml(a.status)}</div>
+            </div>`).join('')||`<div style="padding:1rem;color:var(--mu);font-size:.8rem">${t('detail_no_act2')}</div>`}
         </div>
       </div>`;
 
@@ -1239,20 +1308,20 @@ function showDetail(type, id) {
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
           <div><div class="detail-title">${item.type} ${item.summary}</div><div class="detail-sub">${item.partner} · ${item.user}</div></div>
           <div style="display:flex;gap:.6rem;align-items:center">
-            ${ACT_STATUS[item.status]||''}
-            <button class="bpp" style="font-size:.74rem;background:var(--green)" onclick="showToast('✓ Teendő elvégzettnek jelölve')">✅ Elvégzett</button>
+            ${actStatusHtml(item.status)}
+            <button class="bpp" style="font-size:.74rem;background:var(--green)" onclick="showToastDoneAct()">✅ ${t('act_status_done')}</button>
           </div>
         </div>
       </div>
       <div class="detail-grid">
-        <div class="df"><div class="df-l">Típus</div><div class="df-v">${item.type} ${item.type_name}</div></div>
-        <div class="df"><div class="df-l">Felelős</div><div class="df-v">${item.user}</div></div>
-        <div class="df"><div class="df-l">Határidő</div><div class="df-v mono" style="color:${isOverdue(item.deadline)?'var(--red)':'var(--tx)'}">${item.deadline}${isOverdue(item.deadline)?' ⚠':''}</div></div>
-        <div class="df"><div class="df-l">Partner</div><div class="df-v">${item.partner}</div></div>
-        <div class="df"><div class="df-l">Kapcsolódó lead</div><div class="df-v" style="color:var(--cyan);cursor:pointer" onclick="${relLead?`showDetail('lead',${relLead.id})`:'void(0)'}">${item.lead}</div></div>
-        <div class="df"><div class="df-l">Állapot</div><div class="df-v">${ACT_STATUS[item.status]||''}</div></div>
+        <div class="df"><div class="df-l">${t('th_type')}</div><div class="df-v">${item.type} ${item.type_name}</div></div>
+        <div class="df"><div class="df-l">${t('th_owner')}</div><div class="df-v">${item.user}</div></div>
+        <div class="df"><div class="df-l">${t('th_deadline')}</div><div class="df-v mono" style="color:${isOverdue(item.deadline)?'var(--red)':'var(--tx)'}">${item.deadline}${isOverdue(item.deadline)?' ⚠':''}</div></div>
+        <div class="df"><div class="df-l">${t('tbl_partner')}</div><div class="df-v">${item.partner}</div></div>
+        <div class="df"><div class="df-l">${t('df_related_lead')}</div><div class="df-v" style="color:var(--cyan);cursor:pointer" onclick="${relLead?`showDetail('lead',${relLead.id})`:'void(0)'}">${item.lead}</div></div>
+        <div class="df"><div class="df-l">${t('th_state')}</div><div class="df-v">${actStatusHtml(item.status)}</div></div>
       </div>
-      ${item.notes?`<div class="card"><div class="ch"><span class="ct">Megjegyzés / Napirend</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}`;
+      ${item.notes?`<div class="card"><div class="ch"><span class="ct">${t('note_agenda')}</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}`;
 
   } else if (type==='member') {
     const memberLeads = LEADS.filter(l=>l.user===item.name);
@@ -1261,44 +1330,44 @@ function showDetail(type, id) {
       <div class="detail-header">
         <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
           <div class="av" style="width:52px;height:52px;font-size:1.1rem;background:${AVC[item.name]||'#555'}">${item.name.split(' ').map(w=>w[0]).join('')}</div>
-          <div><div class="detail-title">${item.name}</div><div class="detail-sub">Értékesítő · Win Rate: ${item.winrate}%</div></div>
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">${t('member_sales')} ${item.winrate}%</div></div>
         </div>
       </div>
       <div class="detail-grid">
-        <div class="df"><div class="df-l">Aktív leadek</div><div class="df-v mono" style="color:var(--cyan);font-size:1.2rem">${item.leads}</div></div>
-        <div class="df"><div class="df-l">Megnyert ügyletek</div><div class="df-v mono" style="color:var(--green);font-size:1.2rem">${item.won}</div></div>
-        <div class="df"><div class="df-l">Elveszett</div><div class="df-v mono" style="color:var(--red);font-size:1.2rem">${item.lost}</div></div>
-        <div class="df"><div class="df-l">Win Rate</div>
+        <div class="df"><div class="df-l">${t('df_active_leads')}</div><div class="df-v mono" style="color:var(--cyan);font-size:1.2rem">${item.leads}</div></div>
+        <div class="df"><div class="df-l">${t('df_won_deals')}</div><div class="df-v mono" style="color:var(--green);font-size:1.2rem">${item.won}</div></div>
+        <div class="df"><div class="df-l">${t('df_lost_deals')}</div><div class="df-v mono" style="color:var(--red);font-size:1.2rem">${item.lost}</div></div>
+        <div class="df"><div class="df-l">${t('th_winrate')}</div>
           <div class="df-v">
             <div class="prob-bar"><div class="prob-track" style="height:8px"><div class="prob-fill" style="width:${item.winrate}%;background:${item.winrate>=70?'var(--green)':item.winrate>=50?'var(--orange)':'var(--red)'}"></div></div>
             <span style="font-family:'DM Mono',monospace">${item.winrate}%</span></div>
           </div>
         </div>
-        <div class="df"><div class="df-l">Összes bevétel</div><div class="df-v mono" style="color:var(--cyan)">${fM(item.revenue)}</div></div>
-        <div class="df"><div class="df-l">Átlagos ügylet</div><div class="df-v mono">${fM(item.avg_deal)}</div></div>
+        <div class="df"><div class="df-l">${t('df_total_rev2')}</div><div class="df-v mono" style="color:var(--cyan)">${fM(item.revenue)}</div></div>
+        <div class="df"><div class="df-l">${t('df_avg_opp')}</div><div class="df-v mono">${fM(item.avg_deal)}</div></div>
       </div>
       <div class="card" style="margin-bottom:1rem">
-        <div class="ch"><span class="ct">Aktív lehetőségek</span></div>
+        <div class="ch"><span class="ct">${t('tbl_active_opps')}</span></div>
         <div class="tw"><table>
-          <thead><tr><th>Lehetőség</th><th>Ügyfél</th><th>Fázis</th><th>Várható bev.</th><th>Határidő</th></tr></thead>
-          <tbody>${memberLeads.filter(l=>l.stage!=='Elveszett').map(l=>`
+          <thead><tr><th>${t('tbl_opp')}</th><th>${t('th_cust_name')}</th><th>${t('tbl_stage')}</th><th>${t('tbl_exp_short')}</th><th>${t('th_deadline')}</th></tr></thead>
+          <tbody>${memberLeads.filter(l=>l.stageId!==6).map(l=>`
             <tr onclick="showDetail('lead',${l.id})">
               <td>${l.name}</td><td>${l.partner_name}</td>
-              <td><span class="badge ${SBG[l.stage]||'bn'}">${l.stage}</span></td>
+              <td><span class="badge ${stageBadgeClass(l.stageId)}">${stageName(l.stageId)}</span></td>
               <td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(l.expected_revenue)}</td>
               <td>${dateCell(l.date_deadline)}</td>
-            </tr>`).join('')||'<tr><td colspan="5" style="color:var(--mu);text-align:center;padding:1rem">Nincs aktív lead</td></tr>'}</tbody>
+            </tr>`).join('')||`<tr><td colspan="5" style="color:var(--mu);text-align:center;padding:1rem">${t('detail_no_active')}</td></tr>`}</tbody>
         </table></div>
       </div>
       <div class="card">
-        <div class="ch"><span class="ct">Teendők</span></div>
+        <div class="ch"><span class="ct">${t('tbl_todos')}</span></div>
         <div class="tl">
           ${memberActs.map(a=>`
             <div class="tl-item">
               <div class="tl-dot" style="background:${a.status==='overdue'?'var(--red)':a.status==='due'?'var(--orange)':'var(--cyan)'}"></div>
               <div class="tl-info"><div class="tl-t">${a.type} ${a.summary} — ${a.partner}</div><div class="tl-m">${a.deadline}</div></div>
-              <div>${ACT_STATUS[a.status]||''}</div>
-            </div>`).join('')||'<div style="padding:1rem;color:var(--mu);font-size:.8rem">Nincs teendő</div>'}
+              <div>${actStatusHtml(a.status)}</div>
+            </div>`).join('')||`<div style="padding:1rem;color:var(--mu);font-size:.8rem">${t('detail_no_todo')}</div>`}
         </div>
       </div>`;
   }
@@ -1329,20 +1398,24 @@ function mkC(id,type,labels,datasets,extra={}) {
 }
 
 function updateDashChart(d) {
-  mkC('dChart','line',d.chart_l,[
-    {label:'Megnyert (M)',data:d.chart_in,borderColor:'#29acd9',backgroundColor:'rgba(41,172,217,0.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'},
-    {label:'Terv (M)',data:d.chart_plan,borderColor:'#af52de',backgroundColor:'rgba(175,82,222,0.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#af52de',borderDash:[4,3]},
+  const lab = chartLabels(d);
+  mkC('dChart','line',lab,[
+    {label:t('chart_won'),data:d.chart_in,borderColor:'#29acd9',backgroundColor:'rgba(41,172,217,0.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'},
+    {label:t('chart_plan'),data:d.chart_plan,borderColor:'#af52de',backgroundColor:'rgba(175,82,222,0.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#af52de',borderDash:[4,3]},
   ]);
 }
 
 function updateForecastChart(d) {
-  mkC('fChart','bar',d.chart_l,[
-    {label:'Terv',data:d.chart_plan,backgroundColor:'rgba(41,172,217,0.3)',borderRadius:4},
-    {label:'Tényleges',data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
+  const lab = chartLabels(d);
+  mkC('fChart','bar',lab,[
+    {label:t('chart_plan_short'),data:d.chart_plan,backgroundColor:'rgba(41,172,217,0.3)',borderRadius:4},
+    {label:t('chart_actual'),data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
   ]);
-  mkC('sChart','doughnut',STAGES.map(s=>s.n),[{data:[284,156,89,44,34],backgroundColor:STAGES.map(s=>s.c),borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
-  mkC('tmChart','bar',TEAM.map(t=>t.name.split(' ')[0]),[{label:'Bevétel (M)',data:TEAM.map(t=>+(t.revenue/1e6).toFixed(1)),backgroundColor:Object.values(AVC),borderRadius:6}]);
-  mkC('wrChart','bar',TEAM.map(t=>t.name.split(' ')[0]),[{label:'Win Rate %',data:TEAM.map(t=>t.winrate),backgroundColor:TEAM.map(t=>t.winrate>=70?'rgba(52,199,89,0.7)':t.winrate>=50?'rgba(255,149,0,0.7)':'rgba(255,59,48,0.7)'),borderRadius:6}]);
+  const stCol = [1,2,3,4,5].map(sid => STAGE_COL[sid]);
+  const stLab = [1,2,3,4,5].map(sid => stageName(sid));
+  mkC('sChart','doughnut',stLab,[{data:[284,156,89,44,34],backgroundColor:stCol,borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
+  mkC('tmChart','bar',TEAM.map(m=>m.name.split(' ')[0]),[{label:t('chart_rev'),data:TEAM.map(m=>+(m.revenue/1e6).toFixed(1)),backgroundColor:Object.values(AVC),borderRadius:6}]);
+  mkC('wrChart','bar',TEAM.map(m=>m.name.split(' ')[0]),[{label:t('chart_wr'),data:TEAM.map(m=>m.winrate),backgroundColor:TEAM.map(m=>m.winrate>=70?'rgba(52,199,89,0.7)':m.winrate>=50?'rgba(255,149,0,0.7)':'rgba(255,59,48,0.7)'),borderRadius:6}]);
 }
 
 /* ══ STAR RATING ══ */
@@ -1385,16 +1458,17 @@ function connLog(msg, color='var(--mu)') {
 }
 
 function setConnBadge(state) {
+  connBadgeState = state;
   const b = el('conn-badge');
   if(!b) return;
   const map = {
-    ok:      ['badge bw', '🟢 Kapcsolódva'],
-    error:   ['badge bl', '🔴 Hiba'],
-    loading: ['badge bq', '🟡 Kapcsolódás...'],
-    none:    ['badge bdr','⚫ Nincs kapcsolat'],
+    ok:      ['badge bw', 'conn_ok'],
+    error:   ['badge bl', 'conn_err'],
+    loading: ['badge bq', 'conn_load'],
+    none:    ['badge bdr','conn_none'],
   };
   b.className = map[state][0];
-  b.textContent = map[state][1];
+  b.textContent = t(map[state][1]);
 }
 
 /* ── Alap JSON-RPC hívó ── */
@@ -1422,7 +1496,7 @@ async function odooLogin() {
     login: ODOO_CONFIG.user,
     password: ODOO_CONFIG.key,
   });
-  if (!result?.uid) throw new Error('Sikertelen bejelentkezés — ellenőrizd az adatokat.');
+  if (!result?.uid) throw new Error(t('login_fail'));
   ODOO_CONFIG.uid = result.uid;
   ODOO_CONFIG.connected = true;
   return result.uid;
@@ -1436,15 +1510,14 @@ async function odooTestConn() {
   ODOO_CONFIG.key  = el('cfg-key').value.trim();
   el('conn-log').innerHTML = '';
   setConnBadge('loading');
-  connLog('Kapcsolódás: ' + ODOO_CONFIG.url);
+  connLog(t('conn_connecting') + ODOO_CONFIG.url);
   try {
     const uid = await odooLogin();
-    connLog('✓ Bejelentkezve · uid: ' + uid, 'var(--green)');
-    // Verzió lekérés
+    connLog(t('conn_logged') + uid, 'var(--green)');
     const ver = await odooRPC('/web/webclient/version_info', {});
-    connLog('✓ Odoo verzió: ' + (ver.server_version||'?'), 'var(--green)');
+    connLog(t('conn_ver') + (ver.server_version||'?'), 'var(--green)');
     setConnBadge('ok');
-    showToast('✓ Sikeres Odoo kapcsolat');
+    showToast(t('toast_odoo_ok'));
   } catch(e) {
     connLog('✗ Hiba: ' + e.message, 'var(--red)');
     setConnBadge('error');
@@ -1466,26 +1539,26 @@ async function odooConnect() {
   setConnBadge('loading');
   try {
     await odooLogin();
-    connLog('✓ Bejelentkezés sikeres', 'var(--green)');
+    connLog(t('conn_login_ok'), 'var(--green)');
     setConnBadge('ok');
     await odooLoadAll();
-    showToast('✓ Odoo adatok betöltve!');
+    showToast(t('toast_odoo_load'));
   } catch(e) {
     connLog('✗ ' + e.message, 'var(--red)');
     setConnBadge('error');
-    showToast('✗ Kapcsolódási hiba — demo módban fut');
+    showToast(t('toast_odoo_demo'));
   }
 }
 
 /* ── Összes adat betöltése Odoo-ból ── */
 async function odooLoadAll() {
-  connLog('Leadek betöltése...');
+  connLog(t('conn_loading_leads'));
   await odooLoadLeads();
-  connLog('Ügyfelek betöltése...');
+  connLog(t('conn_loading_cust'));
   await odooLoadCustomers();
-  connLog('Teendők betöltése...');
+  connLog(t('conn_loading_act'));
   await odooLoadActivities();
-  connLog('✓ Minden adat betöltve', 'var(--green)');
+  connLog(t('conn_all_loaded'), 'var(--green)');
   renderPipeline(); renderLeads(); renderCust(); renderActs();
 }
 
@@ -1505,7 +1578,7 @@ async function odooLoadLeads() {
     partner_name:     r.partner_id?.[1] || r.partner_name || '—',
     email:            r.email_from || '—',
     phone:            r.phone || '—',
-    stage:            r.stage_id?.[1] || 'Új Lead',
+    stageId:          stageIdFromHuName(r.stage_id?.[1] || 'Új Lead'),
     stage_id:         r.stage_id?.[0],
     user:             r.user_id?.[1] || '—',
     user_id:          r.user_id?.[0],
@@ -1516,7 +1589,7 @@ async function odooLoadLeads() {
     source:           '—',
     notes:            '',
   }));
-  connLog(`✓ ${LEADS.length} lead betöltve`, 'var(--green)');
+  connLog(t('conn_leads_loaded') + LEADS.length + t('conn_lead_word'), 'var(--green)');
 }
 
 /* ── res.partner (ügyfelek) betöltése ── */
@@ -1578,18 +1651,17 @@ async function odooCreateLead(values) {
 }
 
 /* ── crm.lead FÁZIS MÓDOSÍTÁSA (drag & drop) ── */
-async function odooUpdateLeadStage(leadId, stageName) {
-  if (!ODOO_CONFIG.connected) return; // demo: LEADS már frissítve van
+async function odooUpdateLeadStage(leadId, stageIdNum) {
+  if (!ODOO_CONFIG.connected) return;
+  const stageHuName = STAGE_ODOO_HU[stageIdNum - 1];
+  if (!stageHuName) return;
   try {
-    // Először megkeressük a stage_id-t a nevéből
     const stages = await odooCall('crm.stage', 'search_read',
-      [[['name','=',stageName]]], { fields: ['id','name'], limit:1 });
-    if (!stages.length) throw new Error('Stage nem található: ' + stageName);
-    const stageId = stages[0].id;
-    // Odoo: crm.lead.write([id], {stage_id: stageId})
-    await odooCall('crm.lead', 'write', [[leadId], { stage_id: stageId }]);
+      [[['name','=',stageHuName]]], { fields: ['id','name'], limit:1 });
+    if (!stages.length) throw new Error('Stage: ' + stageHuName);
+    await odooCall('crm.lead', 'write', [[leadId], { stage_id: stages[0].id }]);
   } catch(e) {
-    connLog('✗ Stage írási hiba: ' + e.message, 'var(--red)');
+    connLog(t('conn_stage_err') + e.message, 'var(--red)');
   }
 }
 
@@ -1617,10 +1689,10 @@ async function odooCreateActivity(values) {
 async function saveNewLead() {
   const name    = document.querySelector('#pg-new-lead input[type=text]')?.value?.trim();
   const partner = document.querySelector('#pg-new-lead select')?.value;
-  if (!name) { showToast('✗ Add meg a lehetőség nevét!'); return; }
+  if (!name) { showToast(t('toast_need_name')); return; }
 
   const starCount = [...document.querySelectorAll('#leadPriorityStars .star-btn.active')].length;
-  const stageEl   = document.querySelectorAll('#pg-new-lead select')[3];
+  const stageId   = parseInt(el('nl-stage')?.value || '1', 10) || 1;
   const userEl    = document.querySelectorAll('#pg-new-lead select')[2];
   const revEl     = document.querySelector('#pg-new-lead input[type=number]');
   const probEl    = document.querySelectorAll('#pg-new-lead input[type=number]')[1];
@@ -1630,7 +1702,7 @@ async function saveNewLead() {
   const values = {
     name,
     partner_name: partner || '—',
-    stage:    stageEl?.value  || 'Új Lead',
+    stageId,
     user:     userEl?.value   || '—',
     expected_revenue: parseFloat(revEl?.value || 0),
     probability:      parseInt(probEl?.value  || 0),
@@ -1645,11 +1717,11 @@ async function saveNewLead() {
     const newId = await odooCreateLead(values);
     values.id = newId;
     if (ODOO_CONFIG.connected) LEADS.push(values);
-    showToast('✓ Lead mentve' + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
+    showToast(t('toast_saved_lead') + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
     renderPipeline(); renderLeads();
     navBack();
   } catch(e) {
-    showToast('✗ Mentési hiba: ' + e.message);
+    showToast(t('toast_err') + e.message);
   }
 }
 
@@ -1658,7 +1730,7 @@ async function saveNewCustomer() {
   const name  = inputs[0]?.value?.trim();
   const email = inputs[2]?.value?.trim();
   const city  = inputs[6]?.value?.trim();
-  if (!name) { showToast('✗ Add meg a cégnév!'); return; }
+  if (!name) { showToast(t('toast_need_company')); return; }
 
   const values = {
     name,
@@ -1673,18 +1745,18 @@ async function saveNewCustomer() {
     const newId = await odooCreateCustomer(values);
     values.id = newId; values.revenue = 0; values.deals = 0;
     if (ODOO_CONFIG.connected) CUST.push(values);
-    showToast('✓ Ügyfél mentve' + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
+    showToast(t('toast_saved_cust') + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
     renderCust();
     navBack();
   } catch(e) {
-    showToast('✗ Mentési hiba: ' + e.message);
+    showToast(t('toast_err') + e.message);
   }
 }
 
 async function saveNewActivity() {
   const summaryEl = document.querySelectorAll('#pg-new-activity input[type=text]')[0];
   const summary   = summaryEl?.value?.trim();
-  if (!summary) { showToast('✗ Add meg a leírást!'); return; }
+  if (!summary) { showToast(t('toast_need_desc')); return; }
 
   const typeEl    = document.querySelector('#pg-new-activity select');
   const leadEl    = document.querySelectorAll('#pg-new-activity select')[1];
@@ -1710,20 +1782,22 @@ async function saveNewActivity() {
     const newId = await odooCreateActivity(values);
     values.id = newId;
     if (ODOO_CONFIG.connected) ACTS.push(values);
-    showToast('✓ Teendő mentve' + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
+    showToast(t('toast_saved_act') + (ODOO_CONFIG.connected ? ' → Odoo #'+newId : ' (demo)'));
     renderActs();
     navBack();
   } catch(e) {
-    showToast('✗ Mentési hiba: ' + e.message);
+    showToast(t('toast_err') + e.message);
   }
 }
 
 /* ══ TOAST ══ */
+function showToastDoneAct(){ showToast(t('toast_done')); }
+function showToastDraftLead(){ showToast(t('toast_draft_lead')); }
 function showToast(msg) {
-  let t = document.querySelector('.toast');
-  if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
+  let node = document.querySelector('.toast');
+  if(!node){node=document.createElement('div');node.className='toast';document.body.appendChild(node);}
+  node.textContent=msg; node.classList.add('show');
+  setTimeout(()=>node.classList.remove('show'),3000);
 }
 
 /* ══ GLOBAL SEARCH ══ */
@@ -1737,13 +1811,13 @@ function gSearchFn() {
 }
 
 /* ══ NAV ══ */
-const PT = {dashboard:'CRM Dashboard',pipeline:'Pipeline',customers:'Ügyfelek',leads:'Leadek',activities:'Teendők',forecast:'Előrejelzés',team:'Csapat Teljesítmény',settings:'Beállítások',detail:'Részletek','new-lead':'Új Lead / Lehetőség','new-customer':'Új ügyfél','new-activity':'Új teendő'};
 function nav(page, navEl) {
+  currentNavPage = page;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-'+page)?.classList.add('active');
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   if(navEl) navEl.classList.add('active');
-  el('tbTitle').textContent = PT[page]||page;
+  el('tbTitle').textContent = t(PAGE_KEY[page] || 'page_dashboard');
   if(['forecast','team'].includes(page)) setTimeout(()=>{updateForecastChart(PD[activePeriod]);renderFunnel();},60);
   closeSB();
 }
@@ -1758,7 +1832,13 @@ function toggleTheme(){
 }
 
 /* ══ INIT ══ */
+document.documentElement.lang = LANG === 'en' ? 'en' : 'hu';
 loadCfgToForm();
+setConnBadge('none');
+applyStaticI18n();
+i18nStageSelect();
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === LANG));
+el('tbTitle').textContent = t(PAGE_KEY[currentNavPage]);
 renderPipeline(); renderCust(); renderLeads(); renderActs(); renderTeam(); renderFunnel();
 applyPeriod('Q1');
 </script>

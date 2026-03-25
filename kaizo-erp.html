@@ -6,6 +6,7 @@
 <title>Kaizo ERP</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="kaizo-erp-i18n.js"></script>
 <style>
 :root{--cyan:#29acd9;--cyan-dim:rgba(41,172,217,0.15);--green:#34c759;--orange:#ff9500;--red:#ff3b30;--purple:#af52de;--r:14px;--rs:8px;--sw:220px;}
 [data-theme="dark"]{--bg:#06070f;--sf:#0e1018;--s2:#151722;--bd:rgba(255,255,255,0.07);--tx:#f0efed;--dim:rgba(240,239,237,0.45);--mu:rgba(240,239,237,0.22);--sh:0 4px 24px rgba(0,0,0,0.4);}
@@ -39,6 +40,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);trans
 .si-w::placeholder{color:var(--mu);}.si-w:focus{border-color:var(--cyan);}
 .si{position:absolute;left:.72rem;top:50%;transform:translateY(-50%);font-size:.75rem;color:var(--mu);}
 .tr{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+.lang-switcher{display:flex;border:1px solid var(--bd);border-radius:100px;overflow:hidden;background:var(--s2);}
+.lang-btn{padding:.28rem .75rem;font-size:.65rem;letter-spacing:.1em;font-family:'DM Sans',sans-serif;color:var(--dim);background:transparent;border:none;cursor:pointer;transition:background .2s,color .2s;}
+.lang-btn.active{background:var(--cyan-dim);color:var(--cyan);}
 .tbb{background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.28rem .75rem;font-size:.7rem;color:var(--dim);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .tbb:hover{border-color:var(--cyan);color:var(--cyan);}
 .bpp{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;}
@@ -176,24 +180,23 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <aside class="sidebar" id="sidebar">
   <div class="sl"><div class="lt">KAIZO</div><div class="ls">ERP</div></div>
   <div class="ns">
-    <div class="nl">Pénzügy</div>
-    <div class="ni active" onclick="nav('dashboard',this)"><span class="ic">📊</span>Dashboard</div>
-    <div class="ni" onclick="nav('out-invoices',this)"><span class="ic">📤</span>Kimenő számlák</div>
-    <div class="ni" onclick="nav('in-invoices',this)"><span class="ic">📥</span>Bejövő számlák</div>
-    <div class="ni" onclick="nav('payments',this)"><span class="ic">💳</span>Fizetések</div>
+    <div class="nl" data-i18n="nav_finance">Pénzügy</div>
+    <div class="ni active" onclick="nav('dashboard',this)"><span class="ic">📊</span><span data-i18n="nav_dashboard">Dashboard</span></div>
+    <div class="ni" onclick="nav('out-invoices',this)"><span class="ic">📤</span><span data-i18n="nav_out">Kimenő számlák</span></div>
+    <div class="ni" onclick="nav('in-invoices',this)"><span class="ic">📥</span><span data-i18n="nav_in">Bejövő számlák</span></div>
+    <div class="ni" onclick="nav('payments',this)"><span class="ic">💳</span><span data-i18n="nav_pay">Fizetések</span></div>
   </div>
   <div class="ns" style="margin-top:.4rem">
-    <div class="nl">Beszerzés</div>
-    <div class="ni" onclick="nav('purchase',this)"><span class="ic">🛒</span>Rendelések</div>
-    <div class="ni" onclick="nav('vendors',this)"><span class="ic">🏭</span>Szállítók</div>
-    <div class="ni" onclick="nav('receipts',this)"><span class="ic">📦</span>Árubevétel</div>
+    <div class="nl" data-i18n="nav_procurement">Beszerzés</div>
+    <div class="ni" onclick="nav('purchase',this)"><span class="ic">🛒</span><span data-i18n="nav_po">Rendelések</span></div>
+    <div class="ni" onclick="nav('vendors',this)"><span class="ic">🏭</span><span data-i18n="nav_vendors">Szállítók</span></div>
+    <div class="ni" onclick="nav('receipts',this)"><span class="ic">📦</span><span data-i18n="nav_rc">Árubevétel</span></div>
   </div>
   <div class="ns" style="margin-top:.4rem">
-    <div class="nl">Riportok</div>
-    <div class="ni" onclick="nav('ledger',this)"><span class="ic">📉</span>Főkönyv</div>
-    <div class="ni" onclick="nav('cashflow',this)"><span class="ic">🔄</span>Cash Flow</div>
+    <div class="nl" data-i18n="nav_reports">Riportok</div>
+    <div class="ni" onclick="nav('ledger',this)"><span class="ic">📉</span><span data-i18n="nav_ledger">Főkönyv</span></div>
+    <div class="ni" onclick="nav('cashflow',this)"><span class="ic">🔄</span><span data-i18n="nav_cf">Cash Flow</span></div>
   </div>
-  <div class="sbb"><div class="ni" onclick="nav('settings',this)"><span class="ic">⚙️</span>Beállítások</div></div>
 </aside>
 <div class="main">
 <header class="topbar">
@@ -205,8 +208,12 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     <button class="pb" onclick="setPeriod(this,'YTD')">YTD</button>
     <button class="pb" onclick="setPeriod(this,'12M')">12H</button>
   </div>
-  <div class="sw"><span class="si">🔍</span><input class="si-w" type="text" placeholder="Keresés..." id="gSearch" oninput="gSearchFn()"></div>
+  <div class="sw"><span class="si">🔍</span><input class="si-w" type="text" placeholder="Keresés..." id="gSearch" data-i18n-placeholder="search_ph" oninput="gSearchFn()"></div>
   <div class="tr">
+    <div class="lang-switcher">
+      <button type="button" class="lang-btn active" data-lang="hu" onclick="setLang('hu')">HU</button>
+      <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
     <button class="tbb" onclick="toggleTheme()">🌙</button>
   </div>
 </header>
@@ -215,23 +222,23 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ DASHBOARD ══ -->
 <div class="page active" id="pg-dashboard">
   <div class="kgrid" id="dash-kgrid">
-    <div class="kc"><div class="kl" id="dk0l">Bevétel</div><div class="kv" id="dk0v">—</div><div class="kd" id="dk0d">—</div></div>
-    <div class="kc"><div class="kl" id="dk1l">Kiadás</div><div class="kv" id="dk1v">—</div><div class="kd" id="dk1d">—</div></div>
-    <div class="kc"><div class="kl" id="dk2l">Kintlévőség</div><div class="kv" id="dk2v">—</div><div class="kd" id="dk2d">—</div></div>
-    <div class="kc"><div class="kl" id="dk3l">Cash Flow</div><div class="kv" id="dk3v">—</div><div class="kd" id="dk3d">—</div></div>
+    <div class="kc"><div class="kl" id="dk0l" data-i18n="dk_rev">Bevétel</div><div class="kv" id="dk0v">—</div><div class="kd" id="dk0d">—</div></div>
+    <div class="kc"><div class="kl" id="dk1l" data-i18n="dk_exp">Kiadás</div><div class="kv" id="dk1v">—</div><div class="kd" id="dk1d">—</div></div>
+    <div class="kc"><div class="kl" id="dk2l" data-i18n="dk_ar">Kintlévőség</div><div class="kv" id="dk2v">—</div><div class="kd" id="dk2d">—</div></div>
+    <div class="kc"><div class="kl" id="dk3l" data-i18n="dk_cf">Cash Flow</div><div class="kv" id="dk3v">—</div><div class="kd" id="dk3d">—</div></div>
   </div>
   <div class="r12">
-    <div class="card"><div class="ch"><span class="ct">Pénzügyi összesítő</span></div><div class="sg" id="dSummary"></div></div>
-    <div class="card"><div class="ch"><span class="ct">Cash Flow trend</span></div><div class="cw"><canvas id="dChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="ct_fin_summary">Pénzügyi összesítő</span></div><div class="sg" id="dSummary"></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="ct_cf_trend">Cash Flow trend</span></div><div class="cw"><canvas id="dChart"></canvas></div></div>
   </div>
   <div class="r2">
     <div class="card">
-      <div class="ch"><span class="ct">📤 Kimenő számlák</span><span class="ca" onclick="nav('out-invoices',null)">Összes →</span></div>
-      <div class="tw"><table><thead><tr><th>Számlaszám</th><th>Ügyfél</th><th>Összeg</th><th>Státusz</th></tr></thead><tbody id="dOutBody"></tbody></table></div>
+      <div class="ch"><span class="ct" data-i18n="ct_out_list">📤 Kimenő számlák</span><span class="ca" onclick="nav('out-invoices',null)" data-i18n="ct_all">Összes →</span></div>
+      <div class="tw"><table><thead><tr><th data-i18n="th_invoice_no">Számlaszám</th><th data-i18n="th_customer">Ügyfél</th><th data-i18n="th_gross">Összeg</th><th data-i18n="th_status">Státusz</th></tr></thead><tbody id="dOutBody"></tbody></table></div>
     </div>
     <div class="card">
-      <div class="ch"><span class="ct">📥 Bejövő számlák</span><span class="ca" onclick="nav('in-invoices',null)">Összes →</span></div>
-      <div class="tw"><table><thead><tr><th>Számlaszám</th><th>Szállító</th><th>Összeg</th><th>Státusz</th></tr></thead><tbody id="dInBody"></tbody></table></div>
+      <div class="ch"><span class="ct" data-i18n="ct_in_list">📥 Bejövő számlák</span><span class="ca" onclick="nav('in-invoices',null)" data-i18n="ct_all">Összes →</span></div>
+      <div class="tw"><table><thead><tr><th data-i18n="th_invoice_no">Számlaszám</th><th data-i18n="th_vendor">Szállító</th><th data-i18n="th_gross">Összeg</th><th data-i18n="th_status">Státusz</th></tr></thead><tbody id="dInBody"></tbody></table></div>
     </div>
   </div>
 </div>
@@ -239,30 +246,30 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ KIMENŐ SZÁMLÁK ══ -->
 <div class="page" id="pg-out-invoices">
   <div class="phd">
-    <h1>📤 Kimenő számlák</h1>
+    <h1 data-i18n="h1_out">📤 Kimenő számlák</h1>
     <div class="phd-right">
       <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
-      <button class="bpp" onclick="nav('new-out-invoice',null)">+ Új számla</button>
+      <button class="bpp" onclick="nav('new-out-invoice',null)" data-i18n="btn_new_out">+ Új számla</button>
     </div>
   </div>
   <div class="kgrid">
-    <div class="kc"><div class="kl">Összes kimenő</div><div class="kv" id="oi-cnt">0</div><div class="kd">db</div></div>
-    <div class="kc"><div class="kl">Teljes összeg</div><div class="kv" id="oi-sum">0</div><div class="kd">Ft</div></div>
-    <div class="kc"><div class="kl">Fizetetlen</div><div class="kv" id="oi-unpaid">0</div><div class="kd wa">nyitott</div></div>
-    <div class="kc"><div class="kl">Lejárt</div><div class="kv" id="oi-over">0</div><div class="kd dn">azonnali</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_oi_cnt">Összes kimenő</div><div class="kv" id="oi-cnt">0</div><div class="kd" data-i18n="kpi_unit_db">db</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_oi_sum">Teljes összeg</div><div class="kv" id="oi-sum">0</div><div class="kd" data-i18n="kpi_unit_ft">Ft</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_oi_unpaid">Fizetetlen</div><div class="kv" id="oi-unpaid">0</div><div class="kd wa" data-i18n="kpi_open_hint">nyitott</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_oi_over">Lejárt</div><div class="kv" id="oi-over">0</div><div class="kd dn" data-i18n="kpi_over_hint">azonnali</div></div>
   </div>
   <div class="card">
-    <div class="cs"><span class="si">🔍</span><input type="text" id="oiSearch" oninput="renderOI()" placeholder="Keresés: számlaszám, ügyfél..."></div>
+    <div class="cs"><span class="si">🔍</span><input type="text" id="oiSearch" oninput="renderOI()" data-i18n-placeholder="ph_oi" placeholder="Keresés: számlaszám, ügyfél..."></div>
     <div class="tw"><table>
       <thead><tr>
-        <th onclick="srt('oi','name',this)">Számlaszám <span class="si2"></span></th>
-        <th onclick="srt('oi','partner',this)">Ügyfél <span class="si2"></span></th>
-        <th onclick="srt('oi','invoice_date',this)">Kiállítva <span class="si2"></span></th>
-        <th onclick="srt('oi','invoice_date_due',this)">Esedékes <span class="si2"></span></th>
-        <th onclick="srt('oi','amount_untaxed',this)">Nettó <span class="si2"></span></th>
-        <th onclick="srt('oi','amount_total',this)">Bruttó <span class="si2"></span></th>
-        <th onclick="srt('oi','amount_residual',this)">Nyitott <span class="si2"></span></th>
-        <th onclick="srt('oi','payment_state',this)">Státusz <span class="si2"></span></th>
+        <th onclick="srt('oi','name',this)"><span data-i18n="th_invoice_no">Számlaszám</span> <span class="si2"></span></th>
+        <th onclick="srt('oi','partner',this)"><span data-i18n="th_customer">Ügyfél</span> <span class="si2"></span></th>
+        <th onclick="srt('oi','invoice_date',this)"><span data-i18n="th_issued">Kiállítva</span> <span class="si2"></span></th>
+        <th onclick="srt('oi','invoice_date_due',this)"><span data-i18n="th_due">Esedékes</span> <span class="si2"></span></th>
+        <th onclick="srt('oi','amount_untaxed',this)"><span data-i18n="th_net">Nettó</span> <span class="si2"></span></th>
+        <th onclick="srt('oi','amount_total',this)"><span data-i18n="th_gross">Bruttó</span> <span class="si2"></span></th>
+        <th onclick="srt('oi','amount_residual',this)"><span data-i18n="th_open">Nyitott</span> <span class="si2"></span></th>
+        <th onclick="srt('oi','payment_state',this)"><span data-i18n="th_status">Státusz</span> <span class="si2"></span></th>
       </tr></thead>
       <tbody id="oiBody"></tbody>
     </table></div>
@@ -272,30 +279,30 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ BEJÖVŐ SZÁMLÁK ══ -->
 <div class="page" id="pg-in-invoices">
   <div class="phd">
-    <h1>📥 Bejövő számlák</h1>
+    <h1 data-i18n="h1_in">📥 Bejövő számlák</h1>
     <div class="phd-right">
       <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
-      <button class="bpp" onclick="nav('new-in-invoice',null)">+ Számla rögzítése</button>
+      <button class="bpp" onclick="nav('new-in-invoice',null)" data-i18n="btn_reg_in">+ Számla rögzítése</button>
     </div>
   </div>
   <div class="kgrid">
-    <div class="kc"><div class="kl">Összes bejövő</div><div class="kv" id="ii-cnt">0</div><div class="kd">db</div></div>
-    <div class="kc"><div class="kl">Teljes összeg</div><div class="kv" id="ii-sum">0</div><div class="kd">Ft</div></div>
-    <div class="kc"><div class="kl">Fizetendő</div><div class="kv" id="ii-unpaid">0</div><div class="kd wa">nyitott</div></div>
-    <div class="kc"><div class="kl">Lejárt határidő</div><div class="kv" id="ii-over">0</div><div class="kd dn">figyelem</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_ii_cnt">Összes bejövő</div><div class="kv" id="ii-cnt">0</div><div class="kd" data-i18n="kpi_unit_db">db</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_ii_sum">Teljes összeg</div><div class="kv" id="ii-sum">0</div><div class="kd" data-i18n="kpi_unit_ft">Ft</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_ii_unpaid">Fizetendő</div><div class="kv" id="ii-unpaid">0</div><div class="kd wa" data-i18n="kpi_open_hint">nyitott</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_ii_over">Lejárt határidő</div><div class="kv" id="ii-over">0</div><div class="kd dn" data-i18n="kpi_due_hint">figyelem</div></div>
   </div>
   <div class="card">
-    <div class="cs"><span class="si">🔍</span><input type="text" id="iiSearch" oninput="renderII()" placeholder="Keresés: számlaszám, szállító..."></div>
+    <div class="cs"><span class="si">🔍</span><input type="text" id="iiSearch" oninput="renderII()" data-i18n-placeholder="ph_ii" placeholder="Keresés: számlaszám, szállító..."></div>
     <div class="tw"><table>
       <thead><tr>
-        <th onclick="srt('ii','name',this)">Számlaszám <span class="si2"></span></th>
-        <th onclick="srt('ii','partner',this)">Szállító <span class="si2"></span></th>
-        <th onclick="srt('ii','invoice_date',this)">Dátum <span class="si2"></span></th>
-        <th onclick="srt('ii','invoice_date_due',this)">Esedékes <span class="si2"></span></th>
-        <th onclick="srt('ii','amount_untaxed',this)">Nettó <span class="si2"></span></th>
-        <th onclick="srt('ii','amount_total',this)">Bruttó <span class="si2"></span></th>
-        <th onclick="srt('ii','amount_residual',this)">Fizetendő <span class="si2"></span></th>
-        <th onclick="srt('ii','payment_state',this)">Státusz <span class="si2"></span></th>
+        <th onclick="srt('ii','name',this)"><span data-i18n="th_invoice_no">Számlaszám</span> <span class="si2"></span></th>
+        <th onclick="srt('ii','partner',this)"><span data-i18n="th_vendor">Szállító</span> <span class="si2"></span></th>
+        <th onclick="srt('ii','invoice_date',this)"><span data-i18n="th_date">Dátum</span> <span class="si2"></span></th>
+        <th onclick="srt('ii','invoice_date_due',this)"><span data-i18n="th_due">Esedékes</span> <span class="si2"></span></th>
+        <th onclick="srt('ii','amount_untaxed',this)"><span data-i18n="th_net">Nettó</span> <span class="si2"></span></th>
+        <th onclick="srt('ii','amount_total',this)"><span data-i18n="th_gross">Bruttó</span> <span class="si2"></span></th>
+        <th onclick="srt('ii','amount_residual',this)"><span data-i18n="th_payable">Fizetendő</span> <span class="si2"></span></th>
+        <th onclick="srt('ii','payment_state',this)"><span data-i18n="th_status">Státusz</span> <span class="si2"></span></th>
       </tr></thead>
       <tbody id="iiBody"></tbody>
     </table></div>
@@ -305,29 +312,29 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ FIZETÉSEK ══ -->
 <div class="page" id="pg-payments">
   <div class="phd">
-    <h1>💳 Fizetések</h1>
+    <h1 data-i18n="h1_pay">💳 Fizetések</h1>
     <div class="phd-right">
       <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
-      <button class="bpp" onclick="nav('new-payment',null)">+ Fizetés rögzítése</button>
+      <button class="bpp" onclick="nav('new-payment',null)" data-i18n="btn_new_pay">+ Fizetés rögzítése</button>
     </div>
   </div>
   <div class="kgrid">
-    <div class="kc"><div class="kl">Beérkezett</div><div class="kv" id="pay-in">—</div><div class="kd up">bevétel</div></div>
-    <div class="kc"><div class="kl">Kifizetett</div><div class="kv" id="pay-out">—</div><div class="kd dn">kiadás</div></div>
-    <div class="kc"><div class="kl">Feldolgozás alatt</div><div class="kv" id="pay-pend">—</div><div class="kd wa">pending</div></div>
-    <div class="kc"><div class="kl">Nettó egyenleg</div><div class="kv" id="pay-net">—</div><div class="kd up">nettó</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_pay_in">Beérkezett</div><div class="kv" id="pay-in">—</div><div class="kd up" data-i18n="kpi_pay_in_hint">bevétel</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_pay_out">Kifizetett</div><div class="kv" id="pay-out">—</div><div class="kd dn" data-i18n="kpi_pay_out_hint">kiadás</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_pay_pend">Feldolgozás alatt</div><div class="kv" id="pay-pend">—</div><div class="kd wa" data-i18n="kpi_pay_pend_hint">pending</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_pay_net">Nettó egyenleg</div><div class="kv" id="pay-net">—</div><div class="kd up" data-i18n="kpi_pay_net_hint">nettó</div></div>
   </div>
   <div class="card">
-    <div class="cs"><span class="si">🔍</span><input type="text" id="paySearch" oninput="renderPay()" placeholder="Keresés: partner, összeg..."></div>
+    <div class="cs"><span class="si">🔍</span><input type="text" id="paySearch" oninput="renderPay()" data-i18n-placeholder="ph_pay" placeholder="Keresés: partner, összeg..."></div>
     <div class="tw"><table>
       <thead><tr>
-        <th onclick="srt('pay','name',this)">Hivatkozás <span class="si2"></span></th>
-        <th onclick="srt('pay','partner',this)">Partner <span class="si2"></span></th>
-        <th onclick="srt('pay','date',this)">Dátum <span class="si2"></span></th>
-        <th onclick="srt('pay','type',this)">Típus <span class="si2"></span></th>
-        <th onclick="srt('pay','journal',this)">Bank/Pénztár <span class="si2"></span></th>
-        <th onclick="srt('pay','amount',this)">Összeg <span class="si2"></span></th>
-        <th onclick="srt('pay','state',this)">Állapot <span class="si2"></span></th>
+        <th onclick="srt('pay','name',this)"><span data-i18n="th_ref">Hivatkozás</span> <span class="si2"></span></th>
+        <th onclick="srt('pay','partner',this)"><span data-i18n="th_partner">Partner</span> <span class="si2"></span></th>
+        <th onclick="srt('pay','date',this)"><span data-i18n="th_date">Dátum</span> <span class="si2"></span></th>
+        <th onclick="srt('pay','typeKey',this)"><span data-i18n="th_type">Típus</span> <span class="si2"></span></th>
+        <th onclick="srt('pay','journal',this)"><span data-i18n="th_bank">Bank/Pénztár</span> <span class="si2"></span></th>
+        <th onclick="srt('pay','amount',this)"><span data-i18n="th_amount">Összeg</span> <span class="si2"></span></th>
+        <th onclick="srt('pay','state',this)"><span data-i18n="th_state">Állapot</span> <span class="si2"></span></th>
       </tr></thead>
       <tbody id="payBody"></tbody>
     </table></div>
@@ -337,38 +344,38 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ BESZERZÉSI RENDELÉSEK ══ -->
 <div class="page" id="pg-purchase">
   <div class="phd">
-    <h1>🛒 Beszerzési rendelések</h1>
+    <h1 data-i18n="h1_po">🛒 Beszerzési rendelések</h1>
     <div class="phd-right">
       <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
-      <button class="bpp" onclick="nav('new-purchase',null)">+ Új rendelés</button>
+      <button class="bpp" onclick="nav('new-purchase',null)" data-i18n="btn_new_po">+ Új rendelés</button>
     </div>
   </div>
   <div class="kgrid">
-    <div class="kc"><div class="kl">Összes rendelés</div><div class="kv" id="po-cnt">0</div><div class="kd">db</div></div>
-    <div class="kc"><div class="kl">Teljes érték</div><div class="kv" id="po-sum">0</div><div class="kd">Ft</div></div>
-    <div class="kc"><div class="kl">Jóváhagyásra vár</div><div class="kv" id="po-pend">0</div><div class="kd wa">draft/sent</div></div>
-    <div class="kc"><div class="kl">Számlázandó</div><div class="kv" id="po-bill">0</div><div class="kd">teendő</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_po_cnt">Összes rendelés</div><div class="kv" id="po-cnt">0</div><div class="kd" data-i18n="kpi_unit_db">db</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_po_sum">Teljes érték</div><div class="kv" id="po-sum">0</div><div class="kd" data-i18n="kpi_unit_ft">Ft</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_po_pend">Jóváhagyásra vár</div><div class="kv" id="po-pend">0</div><div class="kd wa" data-i18n="kpi_po_pend_hint">draft/sent</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_po_bill">Számlázandó</div><div class="kv" id="po-bill">0</div><div class="kd" data-i18n="kpi_po_bill_hint">teendő</div></div>
   </div>
   <div class="card">
     <div class="ch">
-      <span class="ct">Rendelések</span>
+      <span class="ct" data-i18n="ct_po_list">Rendelések</span>
       <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
         <select id="poFilter" onchange="renderPO()" style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:.25rem .5rem;font-size:.72rem;color:var(--tx);font-family:'DM Sans',sans-serif;cursor:pointer;outline:none;">
-          <option value="all">Összes</option><option value="draft">Piszkozat</option><option value="sent">Elküldve</option><option value="purchase">Jóváhagyva</option><option value="done">Lezárt</option>
+          <option value="all" data-i18n="po_filter_all">Összes</option><option value="draft" data-i18n="po_filter_draft">Piszkozat</option><option value="sent" data-i18n="po_filter_sent">Elküldve</option><option value="purchase" data-i18n="po_filter_purchase">Jóváhagyva</option><option value="done" data-i18n="po_filter_done">Lezárt</option>
         </select>
-        <input id="poSearch" oninput="renderPO()" type="text" placeholder="Keresés..." style="background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.25rem .7rem;font-size:.74rem;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;width:140px;">
+        <input id="poSearch" oninput="renderPO()" type="text" data-i18n-placeholder="search_ph" placeholder="Keresés..." style="background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.25rem .7rem;font-size:.74rem;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;width:140px;">
       </div>
     </div>
     <div class="tw"><table>
       <thead><tr>
-        <th onclick="srt('po','name',this)">Rendelésszám <span class="si2"></span></th>
-        <th onclick="srt('po','partner',this)">Szállító <span class="si2"></span></th>
-        <th onclick="srt('po','date_order',this)">Dátum <span class="si2"></span></th>
-        <th onclick="srt('po','date_planned',this)">Várható szállítás <span class="si2"></span></th>
-        <th onclick="srt('po','amount_untaxed',this)">Nettó <span class="si2"></span></th>
-        <th onclick="srt('po','amount_total',this)">Bruttó <span class="si2"></span></th>
-        <th onclick="srt('po','invoice_status',this)">Számlázás <span class="si2"></span></th>
-        <th onclick="srt('po','state',this)">Státusz <span class="si2"></span></th>
+        <th onclick="srt('po','name',this)"><span data-i18n="th_po_no">Rendelésszám</span> <span class="si2"></span></th>
+        <th onclick="srt('po','partner',this)"><span data-i18n="th_vendor">Szállító</span> <span class="si2"></span></th>
+        <th onclick="srt('po','date_order',this)"><span data-i18n="th_date">Dátum</span> <span class="si2"></span></th>
+        <th onclick="srt('po','date_planned',this)"><span data-i18n="th_planned">Várható szállítás</span> <span class="si2"></span></th>
+        <th onclick="srt('po','amount_untaxed',this)"><span data-i18n="th_net">Nettó</span> <span class="si2"></span></th>
+        <th onclick="srt('po','amount_total',this)"><span data-i18n="th_gross">Bruttó</span> <span class="si2"></span></th>
+        <th onclick="srt('po','invoice_status',this)"><span data-i18n="th_billing">Számlázás</span> <span class="si2"></span></th>
+        <th onclick="srt('po','state',this)"><span data-i18n="th_status">Státusz</span> <span class="si2"></span></th>
       </tr></thead>
       <tbody id="poBody"></tbody>
     </table></div>
@@ -377,18 +384,18 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 
 <!-- ══ SZÁLLÍTÓK ══ -->
 <div class="page" id="pg-vendors">
-  <div class="phd"><h1>🏭 Szállítók</h1><button class="bpp" onclick="nav('new-vendor',null)">+ Új szállító</button></div>
+  <div class="phd"><h1 data-i18n="h1_vn">🏭 Szállítók</h1><button class="bpp" onclick="nav('new-vendor',null)" data-i18n="btn_new_vn">+ Új szállító</button></div>
   <div class="card">
-    <div class="cs"><span class="si">🔍</span><input type="text" id="vnSearch" oninput="renderVN()" placeholder="Keresés..."></div>
+    <div class="cs"><span class="si">🔍</span><input type="text" id="vnSearch" oninput="renderVN()" data-i18n-placeholder="search_ph" placeholder="Keresés..."></div>
     <div class="tw"><table>
       <thead><tr>
-        <th onclick="srt('vn','name',this)">Szállító <span class="si2"></span></th>
-        <th onclick="srt('vn','country',this)">Ország <span class="si2"></span></th>
-        <th onclick="srt('vn','category',this)">Kategória <span class="si2"></span></th>
-        <th onclick="srt('vn','orders',this)">Rendelések <span class="si2"></span></th>
-        <th onclick="srt('vn','total_spend',this)">Kiadás <span class="si2"></span></th>
-        <th onclick="srt('vn','avg_delivery',this)">Átl. szállítás <span class="si2"></span></th>
-        <th>Státusz</th>
+        <th onclick="srt('vn','name',this)"><span data-i18n="th_v_name">Szállító</span> <span class="si2"></span></th>
+        <th onclick="srt('vn','country',this)"><span data-i18n="th_country">Ország</span> <span class="si2"></span></th>
+        <th onclick="srt('vn','category',this)"><span data-i18n="th_cat">Kategória</span> <span class="si2"></span></th>
+        <th onclick="srt('vn','orders',this)"><span data-i18n="th_orders">Rendelések</span> <span class="si2"></span></th>
+        <th onclick="srt('vn','total_spend',this)"><span data-i18n="th_spend">Kiadás</span> <span class="si2"></span></th>
+        <th onclick="srt('vn','avg_delivery',this)"><span data-i18n="th_del">Átl. szállítás</span> <span class="si2"></span></th>
+        <th data-i18n="th_status">Státusz</th>
       </tr></thead>
       <tbody id="vnBody"></tbody>
     </table></div>
@@ -397,23 +404,23 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 
 <!-- ══ BEÉRKEZÉSEK ══ -->
 <div class="page" id="pg-receipts">
-  <div class="phd"><h1>📦 Árubevétel</h1><button class="bpp" onclick="nav('new-receipt',null)">+ Árubevétel rögzítése</button></div>
+  <div class="phd"><h1 data-i18n="h1_rc">📦 Árubevétel</h1><button class="bpp" onclick="nav('new-receipt',null)" data-i18n="btn_new_rc">+ Árubevétel rögzítése</button></div>
   <div class="kgrid">
-    <div class="kc"><div class="kl">Várt beérkezések</div><div class="kv">8</div><div class="kd wa">ezen a héten</div></div>
-    <div class="kc"><div class="kl">Beérkezett (hó)</div><div class="kv">24</div><div class="kd up">▲ 20%</div></div>
-    <div class="kc"><div class="kl">Ellenőrzésre vár</div><div class="kv">3</div><div class="kd wa">⚠ pending</div></div>
-    <div class="kc"><div class="kl">Visszaküldve</div><div class="kv">1</div><div class="kd dn">eltérés</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_rc_1">Várt beérkezések</div><div class="kv">8</div><div class="kd wa" data-i18n="kpi_rc_1h">ezen a héten</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_rc_2">Beérkezett (hó)</div><div class="kv">24</div><div class="kd up">▲ 20%</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_rc_3">Ellenőrzésre vár</div><div class="kv">3</div><div class="kd wa" data-i18n="kpi_rc_3h">⚠ pending</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_rc_4">Visszaküldve</div><div class="kv">1</div><div class="kd dn" data-i18n="kpi_rc_4h">eltérés</div></div>
   </div>
   <div class="card">
-    <div class="cs"><span class="si">🔍</span><input type="text" id="rcSearch" oninput="renderRC()" placeholder="Keresés..."></div>
+    <div class="cs"><span class="si">🔍</span><input type="text" id="rcSearch" oninput="renderRC()" data-i18n-placeholder="search_ph" placeholder="Keresés..."></div>
     <div class="tw"><table>
       <thead><tr>
-        <th onclick="srt('rc','name',this)">Azonosító <span class="si2"></span></th>
-        <th onclick="srt('rc','partner',this)">Szállító <span class="si2"></span></th>
-        <th onclick="srt('rc','po_ref',this)">PO hivatkozás <span class="si2"></span></th>
-        <th onclick="srt('rc','scheduled_date',this)">Várható dátum <span class="si2"></span></th>
-        <th onclick="srt('rc','done_date',this)">Teljesítve <span class="si2"></span></th>
-        <th onclick="srt('rc','state',this)">Állapot <span class="si2"></span></th>
+        <th onclick="srt('rc','name',this)"><span data-i18n="th_wh_id">Azonosító</span> <span class="si2"></span></th>
+        <th onclick="srt('rc','partner',this)"><span data-i18n="th_vendor">Szállító</span> <span class="si2"></span></th>
+        <th onclick="srt('rc','po_ref',this)"><span data-i18n="th_po">PO</span> <span class="si2"></span></th>
+        <th onclick="srt('rc','scheduled_date',this)"><span data-i18n="th_sched_date">Várható dátum</span> <span class="si2"></span></th>
+        <th onclick="srt('rc','done_date',this)"><span data-i18n="th_done">Teljesítve</span> <span class="si2"></span></th>
+        <th onclick="srt('rc','state',this)"><span data-i18n="th_state">Állapot</span> <span class="si2"></span></th>
       </tr></thead>
       <tbody id="rcBody"></tbody>
     </table></div>
@@ -423,26 +430,26 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ FŐKÖNYV ══ -->
 <div class="page" id="pg-ledger">
   <div class="phd">
-    <h1>📉 Főkönyv</h1>
+    <h1 data-i18n="h1_ledger">📉 Főkönyv</h1>
     <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
   </div>
   <div class="kgrid">
-    <div class="kc"><div class="kl">Bevételek</div><div class="kv" id="ld-in">—</div><div class="kd up">▲</div></div>
-    <div class="kc"><div class="kl">Kiadások</div><div class="kv" id="ld-out">—</div><div class="kd dn">▲</div></div>
-    <div class="kc"><div class="kl">Eredmény</div><div class="kv" id="ld-res">—</div><div class="kd up">profit</div></div>
-    <div class="kc"><div class="kl">Nyitott tételek</div><div class="kv" id="ld-open">—</div><div class="kd">egyenlegezésre</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_ld_1">Bevételek</div><div class="kv" id="ld-in">—</div><div class="kd up">▲</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_ld_2">Kiadások</div><div class="kv" id="ld-out">—</div><div class="kd dn">▲</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_ld_3">Eredmény</div><div class="kv" id="ld-res">—</div><div class="kd up" data-i18n="kpi_ld_3h">profit</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_ld_4">Nyitott tételek</div><div class="kv" id="ld-open">—</div><div class="kd" data-i18n="kpi_ld_4h">egyenlegezésre</div></div>
   </div>
   <div class="card">
-    <div class="cs"><span class="si">🔍</span><input type="text" id="ldSearch" oninput="renderLD()" placeholder="Keresés..."></div>
+    <div class="cs"><span class="si">🔍</span><input type="text" id="ldSearch" oninput="renderLD()" data-i18n-placeholder="search_ph" placeholder="Keresés..."></div>
     <div class="tw"><table>
       <thead><tr>
-        <th onclick="srt('ld','date',this)">Dátum <span class="si2"></span></th>
-        <th onclick="srt('ld','ref',this)">Hivatkozás <span class="si2"></span></th>
-        <th onclick="srt('ld','account',this)">Főkönyvi számla <span class="si2"></span></th>
-        <th onclick="srt('ld','partner',this)">Partner <span class="si2"></span></th>
-        <th onclick="srt('ld','debit',this)">Terhelés <span class="si2"></span></th>
-        <th onclick="srt('ld','credit',this)">Jóváírás <span class="si2"></span></th>
-        <th onclick="srt('ld','balance',this)">Egyenleg <span class="si2"></span></th>
+        <th onclick="srt('ld','date',this)"><span data-i18n="th_date">Dátum</span> <span class="si2"></span></th>
+        <th onclick="srt('ld','ref',this)"><span data-i18n="th_ref">Hivatkozás</span> <span class="si2"></span></th>
+        <th onclick="srt('ld','account',this)"><span data-i18n="th_gl_acct">Főkönyvi számla</span> <span class="si2"></span></th>
+        <th onclick="srt('ld','partner',this)"><span data-i18n="th_partner">Partner</span> <span class="si2"></span></th>
+        <th onclick="srt('ld','debit',this)"><span data-i18n="th_debit">Terhelés</span> <span class="si2"></span></th>
+        <th onclick="srt('ld','credit',this)"><span data-i18n="th_credit">Jóváírás</span> <span class="si2"></span></th>
+        <th onclick="srt('ld','balance',this)"><span data-i18n="th_balance">Egyenleg</span> <span class="si2"></span></th>
       </tr></thead>
       <tbody id="ldBody"></tbody>
     </table></div>
@@ -452,19 +459,19 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 <!-- ══ CASH FLOW ══ -->
 <div class="page" id="pg-cashflow">
   <div class="phd">
-    <h1>🔄 Cash Flow elemzés</h1>
+    <h1 data-i18n="h1_cf">🔄 Cash Flow elemzés</h1>
     <div class="psw"><button class="pb active" onclick="setPeriod(this,'Q1')">Q1</button><button class="pb" onclick="setPeriod(this,'Q2')">Q2</button><button class="pb" onclick="setPeriod(this,'YTD')">YTD</button><button class="pb" onclick="setPeriod(this,'12M')">12H</button></div>
   </div>
   <div class="kgrid">
-    <div class="kc"><div class="kl">Beáramlás</div><div class="kv" id="cf-in">—</div><div class="kd up">bevétel</div></div>
-    <div class="kc"><div class="kl">Kiáramlás</div><div class="kv" id="cf-out">—</div><div class="kd dn">kiadás</div></div>
-    <div class="kc"><div class="kl">Nettó cash flow</div><div class="kv" id="cf-net">—</div><div class="kd up">nettó</div></div>
-    <div class="kc"><div class="kl">Likviditási mutató</div><div class="kv" id="cf-liq">—</div><div class="kd up">egészséges</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_cf_1">Beáramlás</div><div class="kv" id="cf-in">—</div><div class="kd up" data-i18n="kpi_cf_1h">bevétel</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_cf_2">Kiáramlás</div><div class="kv" id="cf-out">—</div><div class="kd dn" data-i18n="kpi_cf_2h">kiadás</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_cf_3">Nettó cash flow</div><div class="kv" id="cf-net">—</div><div class="kd up" data-i18n="kpi_cf_3h">nettó</div></div>
+    <div class="kc"><div class="kl" data-i18n="kpi_cf_4">Likviditási mutató</div><div class="kv" id="cf-liq">—</div><div class="kd up" data-i18n="kpi_cf_4h">egészséges</div></div>
   </div>
-  <div class="card"><div class="ch"><span class="ct">Havi Cash Flow</span></div><div class="cw" style="height:260px"><canvas id="cfBigChart"></canvas></div></div>
+  <div class="card"><div class="ch"><span class="ct" data-i18n="ct_cf_monthly">Havi Cash Flow</span></div><div class="cw" style="height:260px"><canvas id="cfBigChart"></canvas></div></div>
   <div class="r2">
-    <div class="card"><div class="ch"><span class="ct">Cash Flow típusonként</span></div><div class="cw"><canvas id="cfTypeChart"></canvas></div></div>
-    <div class="card"><div class="ch"><span class="ct">Kumulatív egyenleg</span></div><div class="cw"><canvas id="cfCumChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="ct_cf_by_type">Cash Flow típusonként</span></div><div class="cw"><canvas id="cfTypeChart"></canvas></div></div>
+    <div class="card"><div class="ch"><span class="ct" data-i18n="ct_cf_cum">Kumulatív egyenleg</span></div><div class="cw"><canvas id="cfCumChart"></canvas></div></div>
   </div>
 </div>
 
@@ -492,14 +499,14 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 
 <!-- ══ DETAIL PAGES ══ -->
 <div class="page" id="pg-detail">
-  <div class="detail-back" onclick="navBack()">← Vissza</div>
+  <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
   <div id="detailContent"></div>
 </div>
 
 <!-- ══ ÚJ KIMENŐ SZÁMLA ══ -->
 <div class="page" id="pg-new-out-invoice">
-  <div class="detail-back" onclick="navBack()">← Vissza</div>
-  <div class="phd"><h1>📤 Új kimenő számla</h1></div>
+  <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
+  <div class="phd"><h1 data-i18n="page_new_oi">📤 Új kimenő számla</h1></div>
   <div class="card">
     <div class="ch"><span class="ct">Fejléc adatok</span><span style="font-size:.72rem;color:var(--mu)">account.move · move_type: out_invoice</span></div>
     <div class="form-grid cols3">
@@ -556,16 +563,16 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     </div>
   </div>
   <div class="form-actions">
-    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
-    <button class="btn-draft" onclick="showToast('Mentve piszkozatként')">Piszkozat mentése</button>
-    <button class="btn-save" onclick="showToast('✓ Számla kiállítva és elmentve')">Számla kiállítása</button>
+    <button class="btn-cancel" onclick="navBack()" data-i18n="btn_cancel">Mégsem</button>
+    <button class="btn-draft" onclick="showToast(t('toast_draft'))" data-i18n="btn_draft_save">Piszkozat mentése</button>
+    <button class="btn-save" onclick="showToast(t('toast_oi'))" data-i18n="btn_oi_issue">Számla kiállítása</button>
   </div>
 </div>
 
 <!-- ══ ÚJ BEJÖVŐ SZÁMLA ══ -->
 <div class="page" id="pg-new-in-invoice">
-  <div class="detail-back" onclick="navBack()">← Vissza</div>
-  <div class="phd"><h1>📥 Bejövő számla rögzítése</h1></div>
+  <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
+  <div class="phd"><h1 data-i18n="page_new_ii">📥 Bejövő számla rögzítése</h1></div>
   <div class="card">
     <div class="ch"><span class="ct">Szállítói számla adatai</span><span style="font-size:.72rem;color:var(--mu)">account.move · move_type: in_invoice</span></div>
     <div class="form-grid cols3">
@@ -635,16 +642,16 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     </div>
   </div>
   <div class="form-actions">
-    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
-    <button class="btn-draft" onclick="showToast('Mentve piszkozatként')">Piszkozat mentése</button>
-    <button class="btn-save" onclick="showToast('✓ Bejövő számla rögzítve')">Rögzítés & Könyvelés</button>
+    <button class="btn-cancel" onclick="navBack()" data-i18n="btn_cancel">Mégsem</button>
+    <button class="btn-draft" onclick="showToast(t('toast_draft'))" data-i18n="btn_draft_save">Piszkozat mentése</button>
+    <button class="btn-save" onclick="showToast(t('toast_ii'))" data-i18n="btn_ii_post">Rögzítés & Könyvelés</button>
   </div>
 </div>
 
 <!-- ══ ÚJ FIZETÉS ══ -->
 <div class="page" id="pg-new-payment">
-  <div class="detail-back" onclick="navBack()">← Vissza</div>
-  <div class="phd"><h1>💳 Fizetés rögzítése</h1></div>
+  <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
+  <div class="phd"><h1 data-i18n="page_new_pay">💳 Fizetés rögzítése</h1></div>
   <div class="card">
     <div class="ch"><span class="ct">Fizetés adatai</span><span style="font-size:.72rem;color:var(--mu)">account.payment</span></div>
     <div class="form-grid">
@@ -709,16 +716,16 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     </div>
   </div>
   <div class="form-actions">
-    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
-    <button class="btn-draft" onclick="showToast('Mentve piszkozatként')">Piszkozat mentése</button>
-    <button class="btn-save" onclick="showToast('✓ Fizetés könyvelve')">Könyvelés & Mentés</button>
+    <button class="btn-cancel" onclick="navBack()" data-i18n="btn_cancel">Mégsem</button>
+    <button class="btn-draft" onclick="showToast(t('toast_draft'))" data-i18n="btn_draft_save">Piszkozat mentése</button>
+    <button class="btn-save" onclick="showToast(t('toast_pay'))" data-i18n="btn_pay_post">Könyvelés & Mentés</button>
   </div>
 </div>
 
 <!-- ══ ÚJ RENDELÉS ══ -->
 <div class="page" id="pg-new-purchase">
-  <div class="detail-back" onclick="navBack()">← Vissza</div>
-  <div class="phd"><h1>🛒 Új beszerzési rendelés</h1></div>
+  <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
+  <div class="phd"><h1 data-i18n="page_new_po">🛒 Új beszerzési rendelés</h1></div>
   <div class="card">
     <div class="ch"><span class="ct">Rendelés fejléce</span><span style="font-size:.72rem;color:var(--mu)">purchase.order</span></div>
     <div class="form-grid cols3">
@@ -777,16 +784,16 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     </div>
   </div>
   <div class="form-actions">
-    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
-    <button class="btn-draft" onclick="showToast('Rendelés piszkozatként mentve')">Piszkozat mentése</button>
-    <button class="btn-save" onclick="showToast('✓ Rendelés elküldve jóváhagyásra')">Küldés jóváhagyásra</button>
+    <button class="btn-cancel" onclick="navBack()" data-i18n="btn_cancel">Mégsem</button>
+    <button class="btn-draft" onclick="showToast(t('toast_po_draft'))" data-i18n="btn_draft_save">Piszkozat mentése</button>
+    <button class="btn-save" onclick="showToast(t('toast_po'))" data-i18n="btn_po_send">Küldés jóváhagyásra</button>
   </div>
 </div>
 
 <!-- ══ ÚJ SZÁLLÍTÓ ══ -->
 <div class="page" id="pg-new-vendor">
-  <div class="detail-back" onclick="navBack()">← Vissza</div>
-  <div class="phd"><h1>🏭 Új szállító rögzítése</h1></div>
+  <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
+  <div class="phd"><h1 data-i18n="page_new_vn">🏭 Új szállító rögzítése</h1></div>
   <div class="card">
     <div class="ch"><span class="ct">Alapadatok</span><span style="font-size:.72rem;color:var(--mu)">res.partner · supplier_rank &gt; 0</span></div>
     <div class="form-grid cols3">
@@ -865,15 +872,15 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     </div>
   </div>
   <div class="form-actions">
-    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
-    <button class="btn-save" onclick="showToast('✓ Szállító sikeresen rögzítve')">Szállító mentése</button>
+    <button class="btn-cancel" onclick="navBack()" data-i18n="btn_cancel">Mégsem</button>
+    <button class="btn-save" onclick="showToast(t('toast_vn'))" data-i18n="btn_vn_save">Szállító mentése</button>
   </div>
 </div>
 
 <!-- ══ ÚJ ÁRUBEVÉTEL ══ -->
 <div class="page" id="pg-new-receipt">
-  <div class="detail-back" onclick="navBack()">← Vissza</div>
-  <div class="phd"><h1>📦 Árubevétel rögzítése</h1></div>
+  <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
+  <div class="phd"><h1 data-i18n="page_new_rc">📦 Árubevétel rögzítése</h1></div>
   <div class="card">
     <div class="ch"><span class="ct">Bevételi adatok</span><span style="font-size:.72rem;color:var(--mu)">stock.picking · picking_type: incoming</span></div>
     <div class="form-grid cols3">
@@ -947,9 +954,9 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     </div>
   </div>
   <div class="form-actions">
-    <button class="btn-cancel" onclick="navBack()">Mégsem</button>
-    <button class="btn-draft" onclick="showToast('Vázlat mentve')">Vázlat mentése</button>
-    <button class="btn-save" onclick="showToast('✓ Árubevétel rögzítve és raktárba könyvelve')">Rögzítés & Raktárba könyvelés</button>
+    <button class="btn-cancel" onclick="navBack()" data-i18n="btn_cancel">Mégsem</button>
+    <button class="btn-draft" onclick="showToast(t('toast_rc_draft'))" data-i18n="btn_draft_save">Vázlat mentése</button>
+    <button class="btn-save" onclick="showToast(t('toast_rc'))" data-i18n="btn_rc_post">Rögzítés & Raktárba könyvelés</button>
   </div>
 </div>
 
@@ -958,6 +965,47 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
 const TODAY = '2025-03-20';
 let activePeriod = 'Q1';
 let detailBackPage = 'out-invoices';
+
+const LS_KEY_ERP = 'kaizo-erp-lang';
+let LANG = localStorage.getItem(LS_KEY_ERP) || 'hu';
+let currentNavPage = 'dashboard';
+const PAGE_KEY = {
+  dashboard:'page_dashboard','out-invoices':'page_out_invoices','in-invoices':'page_in_invoices',
+  payments:'page_payments',purchase:'page_purchase',vendors:'page_vendors',receipts:'page_receipts',
+  ledger:'page_ledger',cashflow:'page_cashflow',detail:'page_detail',
+  'new-out-invoice':'page_new_oi','new-in-invoice':'page_new_ii','new-payment':'page_new_pay',
+  'new-purchase':'page_new_po','new-vendor':'page_new_vn','new-receipt':'page_new_rc'
+};
+function t(k){ return (window.KaizoERP_i18n && window.KaizoERP_i18n[LANG] && window.KaizoERP_i18n[LANG][k]) || k; }
+function setLang(lang){
+  LANG = lang;
+  localStorage.setItem(LS_KEY_ERP, lang);
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
+  applyStaticI18n();
+  applyPeriod(activePeriod);
+  renderOI(); renderII(); renderPO(); renderVN(); renderPay(); renderRC(); renderLD();
+  if(el('tbTitle') && currentNavPage && PAGE_KEY[currentNavPage]) el('tbTitle').textContent = t(PAGE_KEY[currentNavPage]);
+  document.title = t('doc_title');
+  i18nPayDirection();
+}
+function applyStaticI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(n=>{
+    const k = n.getAttribute('data-i18n');
+    if(k) n.textContent = t(k);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(n=>{
+    const k = n.getAttribute('data-i18n-placeholder');
+    if(k) n.placeholder = t(k);
+  });
+}
+function i18nPayDirection(){
+  const sel = el('pay-direction');
+  if(!sel || sel.options.length<2) return;
+  sel.options[0].text = t('pay_dir_in');
+  sel.options[1].text = t('pay_dir_out');
+}
+function payDirectionChange() {}
 
 /* ══ PERIOD DATA ══ */
 const PD = {
@@ -1016,12 +1064,12 @@ let VN=[
   {id:8,name:'Bútor Zrt.',email:'rend@butor.hu',phone:'+36 30 901 2345',country:'Magyarország',category:'Berendezés',orders:1,total_spend:482600,avg_delivery:10,payment_term:'30 nap',status:'active'},
 ];
 let PAY=[
-  {id:1,name:'PAY/2025/00045',partner:'Kovács Bt.',date:'2025-03-18',type:'Beérkezett',journal:'OTP Bank',amount:2349500,state:'posted'},
-  {id:2,name:'PAY/2025/00044',partner:'Microsoft Kft.',date:'2025-03-17',type:'Kifizetett',journal:'OTP Bank',amount:406400,state:'posted'},
-  {id:3,name:'PAY/2025/00043',partner:'Tech Kft.',date:'2025-03-15',type:'Beérkezett',journal:'K&H Bank',amount:1244600,state:'posted'},
-  {id:4,name:'PAY/2025/00042',partner:'Telecom Zrt.',date:'2025-03-14',type:'Kifizetett',journal:'Pénztár',amount:107950,state:'posted'},
-  {id:5,name:'PAY/2025/00041',partner:'E-com Kft.',date:'2025-03-12',type:'Beérkezett',journal:'OTP Bank',amount:1524000,state:'posted'},
-  {id:6,name:'PAY/2025/00040',partner:'AWS Hungary Kft.',date:'2025-03-10',type:'Kifizetett',journal:'K&H Bank',amount:609600,state:'draft'},
+  {id:1,name:'PAY/2025/00045',partner:'Kovács Bt.',date:'2025-03-18',typeKey:'in',journal:'OTP Bank',amount:2349500,state:'posted'},
+  {id:2,name:'PAY/2025/00044',partner:'Microsoft Kft.',date:'2025-03-17',typeKey:'out',journal:'OTP Bank',amount:406400,state:'posted'},
+  {id:3,name:'PAY/2025/00043',partner:'Tech Kft.',date:'2025-03-15',typeKey:'in',journal:'K&H Bank',amount:1244600,state:'posted'},
+  {id:4,name:'PAY/2025/00042',partner:'Telecom Zrt.',date:'2025-03-14',typeKey:'out',journal:'Pénztár',amount:107950,state:'posted'},
+  {id:5,name:'PAY/2025/00041',partner:'E-com Kft.',date:'2025-03-12',typeKey:'in',journal:'OTP Bank',amount:1524000,state:'posted'},
+  {id:6,name:'PAY/2025/00040',partner:'AWS Hungary Kft.',date:'2025-03-10',typeKey:'out',journal:'K&H Bank',amount:609600,state:'draft'},
 ];
 let RC=[
   {id:1,name:'WH/IN/00234',partner:'Szerver Bt.',po_ref:'PO/2025/00199',scheduled_date:'2025-03-20',done_date:null,state:'ready'},
@@ -1041,21 +1089,45 @@ let LD=[
 ];
 
 /* ══ HELPERS ══ */
-const fM = n => (n/1000000).toFixed(2)+'M Ft';
+const fM = n => (n/1000000).toFixed(2)+t('money_m');
 const fK = n => n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'E':n;
 const q  = id => (document.getElementById(id)||{value:''}).value.toLowerCase();
 const el = id => document.getElementById(id);
 const isOverdue = d => d && d < TODAY;
 
-const PAY_STATE = {
-  not_paid:'<span class="badge bca">Fizetetlen</span>',
-  paid:'<span class="badge bpa">Fizetve</span>',
-  partial:'<span class="badge bpr">Részleges</span>',
-  in_payment:'<span class="badge bpo">Folyamatban</span>'
+const CHART_LBL_MAP = {
+  'Jan':'Jan','Feb':'Feb','Már':'Mar','Ápr':'Apr','Máj':'May','Jún':'Jun',
+  'Jul':'Jul','Aug':'Aug','Sze':'Sep','Okt':'Oct','Nov':'Nov','Dec':'Dec',
+  "Ápr'24":"Apr '24","Feb'25":"Feb '25"
 };
-const PO_STATE_B = {draft:'<span class="badge bdr">Piszkozat</span>',sent:'<span class="badge bpo">Elküldve</span>',purchase:'<span class="badge bpa">Jóváhagyva</span>',done:'<span class="badge bpu">Lezárt</span>',cancel:'<span class="badge bca">Törölve</span>'};
-const IS_LBL = {nothing:'—','to invoice':'Számlázandó',invoiced:'Számlázva'};
-const REC_STATE = {ready:'<span class="badge bpo">Kész</span>',done:'<span class="badge bpa">Teljesítve</span>',waiting:'<span class="badge bpr">Vár</span>'};
+function chartLabels(raw){
+  if(LANG!=='en') return raw;
+  return raw.map(x => CHART_LBL_MAP[x] || x);
+}
+
+function payStateHtml(state){
+  const cls = {not_paid:'bca',paid:'bpa',partial:'bpr',in_payment:'bpo'}[state]||'bdr';
+  const txt = {not_paid:t('pay_not_paid'),paid:t('pay_paid'),partial:t('pay_partial'),in_payment:t('pay_in_progress')}[state]||'';
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+function poStateHtml(state){
+  const cls = {draft:'bdr',sent:'bpo',purchase:'bpa',done:'bpu',cancel:'bca'}[state]||'bdr';
+  const txt = {draft:t('po_draft'),sent:t('po_sent'),purchase:t('po_purchase'),done:t('po_done'),cancel:t('po_cancel')}[state]||'';
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+function invoiceStatusHtml(s){
+  if(s==='nothing') return t('inv_nothing');
+  if(s==='to invoice') return t('inv_to_invoice');
+  if(s==='invoiced') return t('inv_invoiced');
+  return '—';
+}
+function recStateHtml(s){
+  const cls = {ready:'bpo',done:'bpa',waiting:'bpr'}[s]||'bdr';
+  const txt = {ready:t('rc_ready'),done:t('rc_done'),waiting:t('rc_wait')}[s]||'';
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+function payTypeLabel(p){ return p.typeKey==='in' ? t('pay_type_in') : t('pay_type_out'); }
+function isPayIn(p){ return p.typeKey==='in'; }
 
 /* dátum szín: piros ha lejárt, sima ha nem */
 function dateCell(d, label='') {
@@ -1099,7 +1171,10 @@ function applyPeriod(p) {
   // Dashboard KPI-k
   const pctBev  = p==='Q1'?11.4:p==='Q2'?18.2:p==='YTD'?15.8:24.1;
   const pctKiad = p==='Q1'?7.2:p==='Q2'?9.4:p==='YTD'?8.3:16.7;
-  el('dk0l').textContent = 'Bevétel ('+d.lbl+')';
+  el('dk0l').textContent = t('dk_rev')+' ('+d.lbl+')';
+  el('dk1l').textContent = t('dk_exp');
+  el('dk2l').textContent = t('dk_ar');
+  el('dk3l').textContent = t('dk_cf');
   el('dk0v').textContent = d.bev+'M';
   el('dk0d').className = 'kd up'; el('dk0d').textContent = '▲ '+pctBev+'%';
   el('dk1v').textContent = d.kiad+'M';
@@ -1108,13 +1183,14 @@ function applyPeriod(p) {
   el('dk3v').textContent = d.cf+'M';
 
   // Dashboard summary
+  const ms = t('money_suffix');
   const ds = el('dSummary');
   if (ds) ds.innerHTML =
-    `<div class="sb2"><div class="sbl">Kimenő számlák</div><div class="sbv" style="color:var(--green)">${d.bev}M Ft</div></div>`+
-    `<div class="sb2"><div class="sbl">Ebből beérkezett</div><div class="sbv">${Math.round(d.bev*0.77)}M Ft</div></div>`+
-    `<div class="sb2"><div class="sbl">Bejövő számlák</div><div class="sbv" style="color:var(--red)">${d.kiad}M Ft</div></div>`+
-    `<div class="sb2"><div class="sbl">Fizetendő</div><div class="sbv" style="color:var(--orange)">${Math.round(d.kiad*0.44)}M Ft</div></div>`+
-    `<div class="sb2" style="grid-column:span 2;border-bottom:none"><div class="sbl">⚠ Lejárt kintlévőség</div><div class="sbv" style="font-size:1rem;color:var(--red)">${Math.round(d.kint*0.27)}M Ft</div></div>`;
+    `<div class="sb2"><div class="sbl">${t('dash_sum_out')}</div><div class="sbv" style="color:var(--green)">${d.bev}${ms}</div></div>`+
+    `<div class="sb2"><div class="sbl">${t('dash_sum_collected')}</div><div class="sbv">${Math.round(d.bev*0.77)}${ms}</div></div>`+
+    `<div class="sb2"><div class="sbl">${t('dash_sum_in')}</div><div class="sbv" style="color:var(--red)">${d.kiad}${ms}</div></div>`+
+    `<div class="sb2"><div class="sbl">${t('dash_sum_due')}</div><div class="sbv" style="color:var(--orange)">${Math.round(d.kiad*0.44)}${ms}</div></div>`+
+    `<div class="sb2" style="grid-column:span 2;border-bottom:none"><div class="sbl">${t('dash_sum_overdue')}</div><div class="sbv" style="font-size:1rem;color:var(--red)">${Math.round(d.kint*0.27)}${ms}</div></div>`;
 
   // Kimenő számla KPI-k (nincs render felülírva, ezeket közvetlenül frissítjük)
   const oiList = OI; // lehetne periódus alapján szűrni is
@@ -1164,14 +1240,14 @@ function renderOI() {
   const qs = q('oiSearch');
   const list = OI.filter(i=>!qs||i.name.toLowerCase().includes(qs)||i.partner.toLowerCase().includes(qs));
   el('oiBody').innerHTML = list.map(i => `<tr onclick="showDetail('oi',${i.id})">
-    <td data-label="Számlaszám"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${i.name}</span></td>
-    <td data-label="Ügyfél">${i.partner}</td>
-    <td data-label="Kiállítva">${dateCell(i.invoice_date)}</td>
-    <td data-label="Esedékes">${dateCell(i.invoice_date_due)}</td>
-    <td data-label="Nettó" style="font-family:'DM Mono',monospace">${fM(i.amount_untaxed)}</td>
-    <td data-label="Bruttó" style="font-family:'DM Mono',monospace;color:var(--green)">${fM(i.amount_total)}</td>
-    <td data-label="Nyitott" style="font-family:'DM Mono',monospace;color:${i.amount_residual>0?'var(--orange)':'var(--mu)'}">${fM(i.amount_residual)}</td>
-    <td data-label="Státusz">${PAY_STATE[i.payment_state]||''}</td>
+    <td data-label="${t('th_invoice_no')}"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${i.name}</span></td>
+    <td data-label="${t('th_customer')}">${i.partner}</td>
+    <td data-label="${t('th_issued')}">${dateCell(i.invoice_date)}</td>
+    <td data-label="${t('th_due')}">${dateCell(i.invoice_date_due)}</td>
+    <td data-label="${t('th_net')}" style="font-family:'DM Mono',monospace">${fM(i.amount_untaxed)}</td>
+    <td data-label="${t('th_gross')}" style="font-family:'DM Mono',monospace;color:var(--green)">${fM(i.amount_total)}</td>
+    <td data-label="${t('th_open')}" style="font-family:'DM Mono',monospace;color:${i.amount_residual>0?'var(--orange)':'var(--mu)'}">${fM(i.amount_residual)}</td>
+    <td data-label="${t('th_status')}">${payStateHtml(i.payment_state)}</td>
   </tr>`).join('');
   // dashboard mini
   const db = el('dOutBody');
@@ -1179,7 +1255,7 @@ function renderOI() {
     <td style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--cyan)">${i.name}</td>
     <td>${i.partner}</td>
     <td style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--green)">${fM(i.amount_total)}</td>
-    <td>${PAY_STATE[i.payment_state]||''}</td>
+    <td>${payStateHtml(i.payment_state)}</td>
   </tr>`).join('');
 }
 
@@ -1187,21 +1263,21 @@ function renderII() {
   const qs = q('iiSearch');
   const list = II.filter(i=>!qs||i.name.toLowerCase().includes(qs)||i.partner.toLowerCase().includes(qs));
   el('iiBody').innerHTML = list.map(i => `<tr onclick="showDetail('ii',${i.id})">
-    <td data-label="Számlaszám"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--orange)">${i.name}</span></td>
-    <td data-label="Szállító">${i.partner}</td>
-    <td data-label="Dátum">${dateCell(i.invoice_date)}</td>
-    <td data-label="Esedékes">${dateCell(i.invoice_date_due)}</td>
-    <td data-label="Nettó" style="font-family:'DM Mono',monospace">${fM(i.amount_untaxed)}</td>
-    <td data-label="Bruttó" style="font-family:'DM Mono',monospace;color:var(--red)">${fM(i.amount_total)}</td>
-    <td data-label="Fizetendő" style="font-family:'DM Mono',monospace;color:${i.amount_residual>0?'var(--orange)':'var(--mu)'}">${fM(i.amount_residual)}</td>
-    <td data-label="Státusz">${PAY_STATE[i.payment_state]||''}</td>
+    <td data-label="${t('th_invoice_no')}"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--orange)">${i.name}</span></td>
+    <td data-label="${t('th_vendor')}">${i.partner}</td>
+    <td data-label="${t('th_date')}">${dateCell(i.invoice_date)}</td>
+    <td data-label="${t('th_due')}">${dateCell(i.invoice_date_due)}</td>
+    <td data-label="${t('th_net')}" style="font-family:'DM Mono',monospace">${fM(i.amount_untaxed)}</td>
+    <td data-label="${t('th_gross')}" style="font-family:'DM Mono',monospace;color:var(--red)">${fM(i.amount_total)}</td>
+    <td data-label="${t('th_payable')}" style="font-family:'DM Mono',monospace;color:${i.amount_residual>0?'var(--orange)':'var(--mu)'}">${fM(i.amount_residual)}</td>
+    <td data-label="${t('th_status')}">${payStateHtml(i.payment_state)}</td>
   </tr>`).join('');
   const db = el('dInBody');
   if(db) db.innerHTML = II.slice(0,4).map(i=>`<tr onclick="nav('in-invoices',null)">
     <td style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--orange)">${i.name}</td>
     <td>${i.partner}</td>
     <td style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--red)">${fM(i.amount_total)}</td>
-    <td>${PAY_STATE[i.payment_state]||''}</td>
+    <td>${payStateHtml(i.payment_state)}</td>
   </tr>`).join('');
 }
 
@@ -1210,14 +1286,14 @@ function renderPO() {
   const flt = (el('poFilter')||{value:'all'}).value;
   const list = PO_DATA.filter(p=>(flt==='all'||p.state===flt)&&(!qs||p.name.toLowerCase().includes(qs)||p.partner.toLowerCase().includes(qs)));
   el('poBody').innerHTML = list.map(p => `<tr onclick="showDetail('po',${p.id})">
-    <td data-label="Rendelésszám"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${p.name}</span></td>
-    <td data-label="Szállító">${p.partner}</td>
-    <td data-label="Dátum">${dateCell(p.date_order)}</td>
-    <td data-label="Várható szállítás">${dateCell(p.date_planned)}</td>
-    <td data-label="Nettó" style="font-family:'DM Mono',monospace">${fM(p.amount_untaxed)}</td>
-    <td data-label="Bruttó" style="font-family:'DM Mono',monospace">${fM(p.amount_total)}</td>
-    <td data-label="Számlázás" style="font-size:.74rem;color:var(--dim)">${IS_LBL[p.invoice_status]||'—'}</td>
-    <td data-label="Státusz">${PO_STATE_B[p.state]||''}</td>
+    <td data-label="${t('th_po_no')}"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${p.name}</span></td>
+    <td data-label="${t('th_vendor')}">${p.partner}</td>
+    <td data-label="${t('th_date')}">${dateCell(p.date_order)}</td>
+    <td data-label="${t('th_planned')}">${dateCell(p.date_planned)}</td>
+    <td data-label="${t('th_net')}" style="font-family:'DM Mono',monospace">${fM(p.amount_untaxed)}</td>
+    <td data-label="${t('th_gross')}" style="font-family:'DM Mono',monospace">${fM(p.amount_total)}</td>
+    <td data-label="${t('th_billing')}" style="font-size:.74rem;color:var(--dim)">${invoiceStatusHtml(p.invoice_status)}</td>
+    <td data-label="${t('th_status')}">${poStateHtml(p.state)}</td>
   </tr>`).join('');
 }
 
@@ -1225,13 +1301,13 @@ function renderVN() {
   const qs = q('vnSearch');
   const list = VN.filter(v=>!qs||v.name.toLowerCase().includes(qs)||v.category.toLowerCase().includes(qs));
   el('vnBody').innerHTML = list.map(v => `<tr onclick="showDetail('vn',${v.id})">
-    <td data-label="Szállító"><strong>${v.name}</strong></td>
-    <td data-label="Ország">${v.country}</td>
-    <td data-label="Kategória" style="font-size:.74rem;color:var(--dim)">${v.category}</td>
-    <td data-label="Rendelések" style="font-family:'DM Mono',monospace">${v.orders}</td>
-    <td data-label="Kiadás" style="font-family:'DM Mono',monospace;color:var(--red)">${fM(v.total_spend)}</td>
-    <td data-label="Átl. szállítás" style="font-family:'DM Mono',monospace">${v.avg_delivery} nap</td>
-    <td data-label="Státusz"><span class="badge ${v.status==='active'?'bpa':'bdr'}">${v.status==='active'?'Aktív':'Inaktív'}</span></td>
+    <td data-label="${t('th_v_name')}"><strong>${v.name}</strong></td>
+    <td data-label="${t('th_country')}">${v.country}</td>
+    <td data-label="${t('th_cat')}" style="font-size:.74rem;color:var(--dim)">${v.category}</td>
+    <td data-label="${t('th_orders')}" style="font-family:'DM Mono',monospace">${v.orders}</td>
+    <td data-label="${t('th_spend')}" style="font-family:'DM Mono',monospace;color:var(--red)">${fM(v.total_spend)}</td>
+    <td data-label="${t('th_del')}" style="font-family:'DM Mono',monospace">${v.avg_delivery}${t('th_days')}</td>
+    <td data-label="${t('th_status')}"><span class="badge ${v.status==='active'?'bpa':'bdr'}">${v.status==='active'?t('vn_active'):t('vn_inactive')}</span></td>
   </tr>`).join('');
 }
 
@@ -1239,13 +1315,13 @@ function renderPay() {
   const qs = q('paySearch');
   const list = PAY.filter(p=>!qs||p.partner.toLowerCase().includes(qs)||p.name.toLowerCase().includes(qs));
   el('payBody').innerHTML = list.map(p => `<tr onclick="showDetail('pay',${p.id})">
-    <td data-label="Hivatkozás"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${p.name}</span></td>
-    <td data-label="Partner">${p.partner}</td>
-    <td data-label="Dátum">${dateCell(p.date)}</td>
-    <td data-label="Típus"><span class="badge ${p.type==='Beérkezett'?'bpa':'bca'}">${p.type}</span></td>
-    <td data-label="Bank" style="font-size:.76rem;color:var(--dim)">${p.journal}</td>
-    <td data-label="Összeg" style="font-family:'DM Mono',monospace;color:${p.type==='Beérkezett'?'var(--green)':'var(--red)'}">${fM(p.amount)}</td>
-    <td data-label="Állapot"><span class="badge ${p.state==='posted'?'bpa':'bdr'}">${p.state==='posted'?'Könyvelve':'Piszkozat'}</span></td>
+    <td data-label="${t('th_ref')}"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${p.name}</span></td>
+    <td data-label="${t('th_partner')}">${p.partner}</td>
+    <td data-label="${t('th_date')}">${dateCell(p.date)}</td>
+    <td data-label="${t('th_type')}"><span class="badge ${isPayIn(p)?'bpa':'bca'}">${payTypeLabel(p)}</span></td>
+    <td data-label="${t('th_bank')}" style="font-size:.76rem;color:var(--dim)">${p.journal}</td>
+    <td data-label="${t('th_amount')}" style="font-family:'DM Mono',monospace;color:${isPayIn(p)?'var(--green)':'var(--red)'}">${fM(p.amount)}</td>
+    <td data-label="${t('th_state')}"><span class="badge ${p.state==='posted'?'bpa':'bdr'}">${p.state==='posted'?t('posted'):t('draft')}</span></td>
   </tr>`).join('');
 }
 
@@ -1253,12 +1329,12 @@ function renderRC() {
   const qs = q('rcSearch');
   const list = RC.filter(r=>!qs||r.name.toLowerCase().includes(qs)||r.partner.toLowerCase().includes(qs));
   el('rcBody').innerHTML = list.map(r => `<tr onclick="showDetail('rc',${r.id})">
-    <td data-label="Azonosító"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${r.name}</span></td>
-    <td data-label="Szállító">${r.partner}</td>
-    <td data-label="PO" style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--dim)">${r.po_ref}</td>
-    <td data-label="Várható">${dateCell(r.scheduled_date)}</td>
-    <td data-label="Teljesítve" style="font-family:'DM Mono',monospace;font-size:.74rem">${r.done_date||'—'}</td>
-    <td data-label="Állapot">${REC_STATE[r.state]||''}</td>
+    <td data-label="${t('th_wh_id')}"><span style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${r.name}</span></td>
+    <td data-label="${t('th_vendor')}">${r.partner}</td>
+    <td data-label="${t('th_po')}" style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--dim)">${r.po_ref}</td>
+    <td data-label="${t('th_sched')}">${dateCell(r.scheduled_date)}</td>
+    <td data-label="${t('th_done')}" style="font-family:'DM Mono',monospace;font-size:.74rem">${r.done_date||t('inv_nothing')}</td>
+    <td data-label="${t('th_state')}">${recStateHtml(r.state)}</td>
   </tr>`).join('');
 }
 
@@ -1266,13 +1342,13 @@ function renderLD() {
   const qs = q('ldSearch');
   const list = LD.filter(l=>!qs||l.ref.toLowerCase().includes(qs)||l.partner.toLowerCase().includes(qs));
   el('ldBody').innerHTML = list.map(l => `<tr>
-    <td data-label="Dátum">${dateCell(l.date)}</td>
-    <td data-label="Hivatkozás"><span style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--cyan)">${l.ref}</span></td>
-    <td data-label="Főkönyv" style="font-size:.76rem;color:var(--dim)">${l.account}</td>
-    <td data-label="Partner">${l.partner}</td>
-    <td data-label="Terhelés" style="font-family:'DM Mono',monospace;color:${l.debit>0?'var(--red)':'var(--mu)'}">${l.debit>0?fM(l.debit):'—'}</td>
-    <td data-label="Jóváírás" style="font-family:'DM Mono',monospace;color:${l.credit>0?'var(--green)':'var(--mu)'}">${l.credit>0?fM(l.credit):'—'}</td>
-    <td data-label="Egyenleg" style="font-family:'DM Mono',monospace;color:${l.balance>0?'var(--green)':'var(--red)'}">${fM(Math.abs(l.balance))}</td>
+    <td data-label="${t('th_date')}">${dateCell(l.date)}</td>
+    <td data-label="${t('th_ref')}"><span style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--cyan)">${l.ref}</span></td>
+    <td data-label="${t('th_gl')}" style="font-size:.76rem;color:var(--dim)">${l.account}</td>
+    <td data-label="${t('th_partner')}">${l.partner}</td>
+    <td data-label="${t('th_debit')}" style="font-family:'DM Mono',monospace;color:${l.debit>0?'var(--red)':'var(--mu)'}">${l.debit>0?fM(l.debit):t('inv_nothing')}</td>
+    <td data-label="${t('th_credit')}" style="font-family:'DM Mono',monospace;color:${l.credit>0?'var(--green)':'var(--mu)'}">${l.credit>0?fM(l.credit):t('inv_nothing')}</td>
+    <td data-label="${t('th_balance')}" style="font-family:'DM Mono',monospace;color:${l.balance>0?'var(--green)':'var(--red)'}">${fM(Math.abs(l.balance))}</td>
   </tr>`).join('');
 }
 
@@ -1292,31 +1368,31 @@ function showDetail(type, id) {
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
           <div>
             <div class="detail-title">${item.name}</div>
-            <div class="detail-sub">${isOut?'Kimenő számla':'Bejövő számla'} · ${item.partner}</div>
+            <div class="detail-sub">${isOut?t('sub_out_inv'):t('sub_in_inv')} · ${item.partner}</div>
           </div>
           <div style="display:flex;gap:.6rem;align-items:center">
-            ${PAY_STATE[item.payment_state]||''}
-            <button class="bpp" style="font-size:.74rem">📥 Fizetés rögzítése</button>
-            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">🖨 Nyomtatás</button>
+            ${payStateHtml(item.payment_state)}
+            <button class="bpp" style="font-size:.74rem">${t('btn_pay_rec')}</button>
+            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">${t('btn_print')}</button>
           </div>
         </div>
       </div>
       <div class="detail-grid">
-        <div class="detail-field"><div class="df-label">Számlaszám</div><div class="df-value mono">${item.name}</div></div>
-        <div class="detail-field"><div class="df-label">${isOut?'Ügyfél':'Szállító'}</div><div class="df-value">${item.partner}</div></div>
-        <div class="detail-field"><div class="df-label">Hivatkozás</div><div class="df-value mono">${item.ref||'—'}</div></div>
-        <div class="detail-field"><div class="df-label">Kiállítás dátuma</div><div class="df-value mono">${item.invoice_date}</div></div>
-        <div class="detail-field"><div class="df-label">Esedékesség</div><div class="df-value mono" style="color:${isOverdue(item.invoice_date_due)?'var(--red)':'var(--tx)'}">${item.invoice_date_due}${isOverdue(item.invoice_date_due)?' ⚠':''}</div></div>
-        <div class="detail-field"><div class="df-label">Pénznem</div><div class="df-value">${item.currency}</div></div>
-        <div class="detail-field"><div class="df-label">Nettó összeg</div><div class="df-value mono" style="color:var(--tx)">${fM(item.amount_untaxed)}</div></div>
-        <div class="detail-field"><div class="df-label">ÁFA (27%)</div><div class="df-value mono">${fM(taxAmt)}</div></div>
-        <div class="detail-field"><div class="df-label">Bruttó összeg</div><div class="df-value mono" style="color:${isOut?'var(--green)':'var(--red)'};font-size:1.1rem">${fM(item.amount_total)}</div></div>
-        <div class="detail-field" style="grid-column:span ${item.amount_residual>0?'2':'1'}"><div class="df-label">Nyitott egyenleg</div><div class="df-value mono" style="color:${item.amount_residual>0?'var(--orange)':'var(--green)'}">${fM(item.amount_residual)}</div></div>
-        ${item.amount_residual>0?`<div class="detail-field"><div class="df-label">Státusz</div><div class="df-value">${PAY_STATE[item.payment_state]||''}</div></div>`:''}
+        <div class="detail-field"><div class="df-label">${t('df_invoice_no')}</div><div class="df-value mono">${item.name}</div></div>
+        <div class="detail-field"><div class="df-label">${isOut?t('df_partner_cust'):t('df_partner_vend')}</div><div class="df-value">${item.partner}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_ref')}</div><div class="df-value mono">${item.ref||t('inv_nothing')}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_issue_date')}</div><div class="df-value mono">${item.invoice_date}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_due')}</div><div class="df-value mono" style="color:${isOverdue(item.invoice_date_due)?'var(--red)':'var(--tx)'}">${item.invoice_date_due}${isOverdue(item.invoice_date_due)?' ⚠':''}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_currency')}</div><div class="df-value">${item.currency}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_net')}</div><div class="df-value mono" style="color:var(--tx)">${fM(item.amount_untaxed)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_vat')}</div><div class="df-value mono">${fM(taxAmt)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_gross')}</div><div class="df-value mono" style="color:${isOut?'var(--green)':'var(--red)'};font-size:1.1rem">${fM(item.amount_total)}</div></div>
+        <div class="detail-field" style="grid-column:span ${item.amount_residual>0?'2':'1'}"><div class="df-label">${t('df_open_bal')}</div><div class="df-value mono" style="color:${item.amount_residual>0?'var(--orange)':'var(--green)'}">${fM(item.amount_residual)}</div></div>
+        ${item.amount_residual>0?`<div class="detail-field"><div class="df-label">${t('df_status')}</div><div class="df-value">${payStateHtml(item.payment_state)}</div></div>`:''}
       </div>
-      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">Megjegyzés</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
+      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">${t('df_notes')}</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
       <div class="card">
-        <div class="ch"><span class="ct">Tételsor</span></div>
+        <div class="ch"><span class="ct">${t('df_lines')}</span></div>
         <div class="tw"><table>
           <thead><tr><th>Termék/Szolgáltatás</th><th>Mennyiség</th><th>Egységár</th><th>Nettó</th><th>ÁFA</th><th>Összesen</th></tr></thead>
           <tbody>
@@ -1326,42 +1402,42 @@ function showDetail(type, id) {
         </table></div>
       </div>
       <div class="card">
-        <div class="ch"><span class="ct">Aktivitás log</span></div>
+        <div class="ch"><span class="ct">${t('df_activity')}</span></div>
         <div class="timeline">
-          <div class="tl-item"><div class="tl-dot" style="background:var(--green)"></div><div class="tl-info"><div class="tl-title">Számla kiállítva</div><div class="tl-meta">${item.invoice_date} · Rendszer</div></div></div>
-          ${item.payment_state==='paid'?`<div class="tl-item"><div class="tl-dot" style="background:var(--cyan)"></div><div class="tl-info"><div class="tl-title">Fizetés beérkezett — ${fM(item.amount_total)}</div><div class="tl-meta">Banki átutalás · OTP Bank</div></div></div>`:''}
-          ${item.payment_state==='partial'?`<div class="tl-item"><div class="tl-dot" style="background:var(--orange)"></div><div class="tl-info"><div class="tl-title">Részleges fizetés — ${fM(item.amount_total-item.amount_residual)}</div><div class="tl-meta">Nyitott: ${fM(item.amount_residual)}</div></div></div>`:''}
-          ${isOverdue(item.invoice_date_due)&&item.payment_state!=='paid'?`<div class="tl-item"><div class="tl-dot" style="background:var(--red)"></div><div class="tl-info"><div class="tl-title">⚠ Lejárt határidő</div><div class="tl-meta">${item.invoice_date_due} óta nyitott</div></div></div>`:''}
+          <div class="tl-item"><div class="tl-dot" style="background:var(--green)"></div><div class="tl-info"><div class="tl-title">${t('tl_inv_issued')}</div><div class="tl-meta">${item.invoice_date}</div></div></div>
+          ${item.payment_state==='paid'?`<div class="tl-item"><div class="tl-dot" style="background:var(--cyan)"></div><div class="tl-info"><div class="tl-title">${t('tl_pay_in')} — ${fM(item.amount_total)}</div><div class="tl-meta">OTP Bank</div></div></div>`:''}
+          ${item.payment_state==='partial'?`<div class="tl-item"><div class="tl-dot" style="background:var(--orange)"></div><div class="tl-info"><div class="tl-title">${t('tl_pay_partial')} — ${fM(item.amount_total-item.amount_residual)}</div><div class="tl-meta">${t('tl_open')} ${fM(item.amount_residual)}</div></div></div>`:''}
+          ${isOverdue(item.invoice_date_due)&&item.payment_state!=='paid'?`<div class="tl-item"><div class="tl-dot" style="background:var(--red)"></div><div class="tl-info"><div class="tl-title">${t('tl_overdue')}</div><div class="tl-meta">${item.invoice_date_due} · ${t('tl_since_open')}</div></div></div>`:''}
         </div>
       </div>`;
   } else if (type==='po') {
     html = `
       <div class="detail-header">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
-          <div><div class="detail-title">${item.name}</div><div class="detail-sub">Beszerzési rendelés · ${item.partner}</div></div>
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">${t('sub_po')} · ${item.partner}</div></div>
           <div style="display:flex;gap:.6rem;align-items:center">
-            ${PO_STATE_B[item.state]||''}
-            <button class="bpp" style="font-size:.74rem">✅ Jóváhagyás</button>
-            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">📧 Küldés</button>
+            ${poStateHtml(item.state)}
+            <button class="bpp" style="font-size:.74rem">${t('btn_approve')}</button>
+            <button class="bpp" style="font-size:.74rem;background:var(--s2);color:var(--tx)">${t('btn_send')}</button>
           </div>
         </div>
       </div>
       <div class="detail-grid">
-        <div class="detail-field"><div class="df-label">Rendelésszám</div><div class="df-value mono">${item.name}</div></div>
-        <div class="detail-field"><div class="df-label">Szállító</div><div class="df-value">${item.partner}</div></div>
-        <div class="detail-field"><div class="df-label">Számlázás állapota</div><div class="df-value">${IS_LBL[item.invoice_status]||'—'}</div></div>
-        <div class="detail-field"><div class="df-label">Rendelés dátuma</div><div class="df-value mono">${item.date_order}</div></div>
-        <div class="detail-field"><div class="df-label">Várható szállítás</div><div class="df-value mono" style="color:${isOverdue(item.date_planned)?'var(--red)':'var(--tx)'}">${item.date_planned}${isOverdue(item.date_planned)?' ⚠':''}</div></div>
-        <div class="detail-field"><div class="df-label">Státusz</div><div class="df-value">${PO_STATE_B[item.state]||''}</div></div>
-        <div class="detail-field"><div class="df-label">Nettó összeg</div><div class="df-value mono">${fM(item.amount_untaxed)}</div></div>
-        <div class="detail-field"><div class="df-label">ÁFA (27%)</div><div class="df-value mono">${fM(item.amount_total-item.amount_untaxed)}</div></div>
-        <div class="detail-field"><div class="df-label">Bruttó összeg</div><div class="df-value mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.amount_total)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_po_no')}</div><div class="df-value mono">${item.name}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_partner_vend')}</div><div class="df-value">${item.partner}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_inv_stat')}</div><div class="df-value">${invoiceStatusHtml(item.invoice_status)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_po_date')}</div><div class="df-value mono">${item.date_order}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_exp_del')}</div><div class="df-value mono" style="color:${isOverdue(item.date_planned)?'var(--red)':'var(--tx)'}">${item.date_planned}${isOverdue(item.date_planned)?' ⚠':''}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_status')}</div><div class="df-value">${poStateHtml(item.state)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_net')}</div><div class="df-value mono">${fM(item.amount_untaxed)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_vat')}</div><div class="df-value mono">${fM(item.amount_total-item.amount_untaxed)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_gross')}</div><div class="df-value mono" style="color:var(--cyan);font-size:1.1rem">${fM(item.amount_total)}</div></div>
       </div>
-      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">Megjegyzés</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
+      ${item.notes?`<div class="card" style="margin-bottom:1rem"><div class="ch"><span class="ct">${t('df_notes')}</span></div><div style="padding:1rem 1.2rem;font-size:.82rem;color:var(--dim)">${item.notes}</div></div>`:''}
       <div class="card">
-        <div class="ch"><span class="ct">Tételsor</span></div>
+        <div class="ch"><span class="ct">${t('df_lines')}</span></div>
         <div class="tw"><table>
-          <thead><tr><th>Termék</th><th>Mennyiség</th><th>Egységár</th><th>Összesen</th><th>Szállítás várható</th></tr></thead>
+          <thead><tr><th>Termék</th><th>Mennyiség</th><th>Egységár</th><th>Összesen</th><th>${t('th_planned')}</th></tr></thead>
           <tbody>
             <tr><td>Hardver egység</td><td>1 db</td><td style="font-family:'DM Mono',monospace">${fM(item.amount_untaxed*0.7)}</td><td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(item.amount_untaxed*0.7)}</td><td>${dateCell(item.date_planned)}</td></tr>
             <tr><td>Szállítás & telepítés</td><td>1 db</td><td style="font-family:'DM Mono',monospace">${fM(item.amount_untaxed*0.3)}</td><td style="font-family:'DM Mono',monospace;color:var(--cyan)">${fM(item.amount_untaxed*0.3)}</td><td>${dateCell(item.date_planned)}</td></tr>
@@ -1373,64 +1449,64 @@ function showDetail(type, id) {
       <div class="detail-header">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
           <div><div class="detail-title">${item.name}</div><div class="detail-sub">${item.category} · ${item.country}</div></div>
-          <span class="badge ${item.status==='active'?'bpa':'bdr'}" style="font-size:.78rem;padding:.3rem .8rem">${item.status==='active'?'Aktív szállító':'Inaktív'}</span>
+          <span class="badge ${item.status==='active'?'bpa':'bdr'}" style="font-size:.78rem;padding:.3rem .8rem">${item.status==='active'?t('vn_active_long'):t('vn_inactive')}</span>
         </div>
       </div>
       <div class="detail-grid">
         <div class="detail-field"><div class="df-label">Email</div><div class="df-value">${item.email}</div></div>
         <div class="detail-field"><div class="df-label">Telefon</div><div class="df-value mono">${item.phone}</div></div>
-        <div class="detail-field"><div class="df-label">Ország</div><div class="df-value">${item.country}</div></div>
-        <div class="detail-field"><div class="df-label">Kategória</div><div class="df-value">${item.category}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_country')}</div><div class="df-value">${item.country}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_cat')}</div><div class="df-value">${item.category}</div></div>
         <div class="detail-field"><div class="df-label">Fizetési feltétel</div><div class="df-value">${item.payment_term}</div></div>
-        <div class="detail-field"><div class="df-label">Átl. szállítás</div><div class="df-value mono">${item.avg_delivery} nap</div></div>
-        <div class="detail-field"><div class="df-label">Rendelések száma</div><div class="df-value mono">${item.orders} db</div></div>
-        <div class="detail-field"><div class="df-label">Összes kiadás</div><div class="df-value mono" style="color:var(--red)">${fM(item.total_spend)}</div></div>
-        <div class="detail-field"><div class="df-label">Átl. rendelés</div><div class="df-value mono">${fM(item.total_spend/item.orders)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_del')}</div><div class="df-value mono">${item.avg_delivery}${t('th_days')}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_orders')}</div><div class="df-value mono">${item.orders} ${t('kpi_unit_db')}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_spend')}</div><div class="df-value mono" style="color:var(--red)">${fM(item.total_spend)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_avg_order')}</div><div class="df-value mono">${fM(item.total_spend/item.orders)}</div></div>
       </div>
       <div class="card">
-        <div class="ch"><span class="ct">Kapcsolódó rendelések</span></div>
+        <div class="ch"><span class="ct">${t('df_related_po')}</span></div>
         <div class="tw"><table>
-          <thead><tr><th>Rendelésszám</th><th>Dátum</th><th>Összeg</th><th>Státusz</th></tr></thead>
+          <thead><tr><th>${t('th_po_no')}</th><th>${t('th_date')}</th><th>${t('th_amount')}</th><th>${t('th_status')}</th></tr></thead>
           <tbody>${PO_DATA.filter(p=>p.partner===item.name).map(p=>`
             <tr onclick="showDetail('po',${p.id})">
               <td style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${p.name}</td>
               <td>${dateCell(p.date_order)}</td>
               <td style="font-family:'DM Mono',monospace">${fM(p.amount_total)}</td>
-              <td>${PO_STATE_B[p.state]||''}</td>
-            </tr>`).join('')||'<tr><td colspan="4" style="color:var(--mu);text-align:center;padding:1rem">Nincs rendelés</td></tr>'}</tbody>
+              <td>${poStateHtml(p.state)}</td>
+            </tr>`).join('')||`<tr><td colspan="4" style="color:var(--mu);text-align:center;padding:1rem">${t('detail_no_orders')}</td></tr>`}</tbody>
         </table></div>
       </div>`;
   } else if (type==='pay') {
     html = `
       <div class="detail-header">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
-          <div><div class="detail-title">${item.name}</div><div class="detail-sub">Fizetés · ${item.partner}</div></div>
-          <span class="badge ${item.type==='Beérkezett'?'bpa':'bca'}" style="font-size:.78rem;padding:.3rem .8rem">${item.type}</span>
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">${t('sub_pay')} · ${item.partner}</div></div>
+          <span class="badge ${isPayIn(item)?'bpa':'bca'}" style="font-size:.78rem;padding:.3rem .8rem">${payTypeLabel(item)}</span>
         </div>
       </div>
       <div class="detail-grid">
-        <div class="detail-field"><div class="df-label">Partner</div><div class="df-value">${item.partner}</div></div>
-        <div class="detail-field"><div class="df-label">Dátum</div><div class="df-value mono">${item.date}</div></div>
-        <div class="detail-field"><div class="df-label">Bank/Pénztár</div><div class="df-value">${item.journal}</div></div>
-        <div class="detail-field"><div class="df-label">Összeg</div><div class="df-value mono" style="color:${item.type==='Beérkezett'?'var(--green)':'var(--red)'};font-size:1.2rem">${fM(item.amount)}</div></div>
-        <div class="detail-field"><div class="df-label">Állapot</div><div class="df-value"><span class="badge ${item.state==='posted'?'bpa':'bdr'}">${item.state==='posted'?'Könyvelve':'Piszkozat'}</span></div></div>
-        <div class="detail-field"><div class="df-label">Típus</div><div class="df-value">${item.type}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_partner')}</div><div class="df-value">${item.partner}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_date')}</div><div class="df-value mono">${item.date}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_bank')}</div><div class="df-value">${item.journal}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_amount')}</div><div class="df-value mono" style="color:${isPayIn(item)?'var(--green)':'var(--red)'};font-size:1.2rem">${fM(item.amount)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_state')}</div><div class="df-value"><span class="badge ${item.state==='posted'?'bpa':'bdr'}">${item.state==='posted'?t('posted'):t('draft')}</span></div></div>
+        <div class="detail-field"><div class="df-label">${t('th_type')}</div><div class="df-value">${payTypeLabel(item)}</div></div>
       </div>`;
   } else if (type==='rc') {
     html = `
       <div class="detail-header">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
-          <div><div class="detail-title">${item.name}</div><div class="detail-sub">Beérkezés · ${item.partner}</div></div>
-          ${REC_STATE[item.state]||''}
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">${t('sub_rc')} · ${item.partner}</div></div>
+          ${recStateHtml(item.state)}
         </div>
       </div>
       <div class="detail-grid">
-        <div class="detail-field"><div class="df-label">Szállító</div><div class="df-value">${item.partner}</div></div>
-        <div class="detail-field"><div class="df-label">PO hivatkozás</div><div class="df-value mono" style="color:var(--cyan)">${item.po_ref}</div></div>
-        <div class="detail-field"><div class="df-label">Várható dátum</div><div class="df-value mono">${dateCell(item.scheduled_date)}</div></div>
-        <div class="detail-field"><div class="df-label">Teljesítve</div><div class="df-value mono">${item.done_date||'—'}</div></div>
-        <div class="detail-field"><div class="df-label">Állapot</div><div class="df-value">${REC_STATE[item.state]||''}</div></div>
-        <div class="detail-field"><div class="df-label">Azonosító</div><div class="df-value mono">${item.name}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_partner_vend')}</div><div class="df-value">${item.partner}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_po')}</div><div class="df-value mono" style="color:var(--cyan)">${item.po_ref}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_sched_date')}</div><div class="df-value mono">${dateCell(item.scheduled_date)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_done')}</div><div class="df-value mono">${item.done_date||t('inv_nothing')}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_state')}</div><div class="df-value">${recStateHtml(item.state)}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_wh_id')}</div><div class="df-value mono">${item.name}</div></div>
       </div>`;
   }
 
@@ -1464,25 +1540,28 @@ function mkC(id,type,labels,datasets,extra={}) {
 }
 
 function updateDashChart(d) {
-  mkC('dChart','bar',d.chart_l,[
-    {label:'Bevétel (M)',data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
-    {label:'Kiadás (M)',data:d.chart_out,backgroundColor:'rgba(255,59,48,0.6)',borderRadius:4},
-    {label:'Nettó (M)',data:d.chart_net,type:'line',borderColor:'#29acd9',backgroundColor:'transparent',tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'},
+  const lab = chartLabels(d.chart_l);
+  mkC('dChart','bar',lab,[
+    {label:t('chart_in'),data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
+    {label:t('chart_out'),data:d.chart_out,backgroundColor:'rgba(255,59,48,0.6)',borderRadius:4},
+    {label:t('chart_net'),data:d.chart_net,type:'line',borderColor:'#29acd9',backgroundColor:'transparent',tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'},
   ]);
 }
 
 function renderCFCharts(d) {
-  mkC('cfBigChart','bar',d.chart_l,[
-    {label:'Beáramlás',data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
-    {label:'Kiáramlás',data:d.chart_out,backgroundColor:'rgba(255,59,48,0.6)',borderRadius:4},
+  const lab = chartLabels(d.chart_l);
+  const cfTypes = (window.KaizoERP_i18n[LANG] && window.KaizoERP_i18n[LANG].chart_cf_types) || [];
+  mkC('cfBigChart','bar',lab,[
+    {label:t('chart_cf_in'),data:d.chart_in,backgroundColor:'rgba(52,199,89,0.7)',borderRadius:4},
+    {label:t('chart_cf_out'),data:d.chart_out,backgroundColor:'rgba(255,59,48,0.6)',borderRadius:4},
   ]);
-  mkC('cfTypeChart','doughnut',['Vevők','Szállítók','Bérköltség','Egyéb'],[{
+  mkC('cfTypeChart','doughnut',cfTypes,[{
     data:[45.2,28.4,18.6,7.8],backgroundColor:['#34c759','#ff3b30','#ff9500','#29acd9'],borderWidth:0
   }],{scales:{x:{display:false},y:{display:false}}});
   const cum=[]; let s=0;
   d.chart_net.forEach(v=>{s+=v;cum.push(+s.toFixed(1));});
-  mkC('cfCumChart','line',d.chart_l,[{
-    label:'Kumulatív (M)',data:cum,borderColor:'#29acd9',backgroundColor:'rgba(41,172,217,0.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'
+  mkC('cfCumChart','line',lab,[{
+    label:t('chart_cum'),data:cum,borderColor:'#29acd9',backgroundColor:'rgba(41,172,217,0.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#29acd9'
   }]);
 }
 
@@ -1497,13 +1576,13 @@ function gSearchFn() {
 }
 
 /* ══ NAV ══ */
-const PT={dashboard:'ERP Dashboard','out-invoices':'Kimenő számlák','in-invoices':'Bejövő számlák',payments:'Fizetések',purchase:'Rendelések',vendors:'Szállítók',receipts:'Árubevétel',ledger:'Főkönyv',cashflow:'Cash Flow',settings:'Beállítások',detail:'Részletek','new-out-invoice':'Új kimenő számla','new-in-invoice':'Bejövő számla rögzítése','new-payment':'Fizetés rögzítése','new-purchase':'Új rendelés','new-vendor':'Új szállító','new-receipt':'Árubevétel rögzítése'};
 function nav(page, navEl) {
+  currentNavPage = page;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-'+page).classList.add('active');
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   if(navEl) navEl.classList.add('active');
-  el('tbTitle').textContent = PT[page]||page;
+  el('tbTitle').textContent = (PAGE_KEY[page] ? t(PAGE_KEY[page]) : page);
   if(page==='cashflow') setTimeout(()=>renderCFCharts(PD[activePeriod]),60);
   closeSB();
 }
@@ -1553,7 +1632,9 @@ function calcTotals(type) {
   const net = lines.reduce((s,l) => s + l.qty*l.price, 0);
   const tax = lines.reduce((s,l) => s + l.qty*l.price*(l.tax/100), 0);
   const gross = net + tax;
-  const fmt = n => n.toLocaleString('hu-HU') + ' Ft';
+  const loc = LANG==='en' ? 'en-US' : 'hu-HU';
+  const suf = LANG==='en' ? ' HUF' : ' Ft';
+  const fmt = n => n.toLocaleString(loc) + suf;
   const ne = document.getElementById(type+'-t-net');
   const te = document.getElementById(type+'-t-tax');
   const ge = document.getElementById(type+'-t-gross');
@@ -1569,7 +1650,10 @@ function calcTotals(type) {
   }
 }
 
-function fmtFt(n) { return Math.round(n).toLocaleString('hu-HU') + ' Ft'; }
+function fmtFt(n) {
+  const loc = LANG==='en' ? 'en-US' : 'hu-HU';
+  return Math.round(n).toLocaleString(loc) + (LANG==='en' ? ' HUF' : ' Ft');
+}
 
 // Fizetés preview
 function payCalc() {
@@ -1578,7 +1662,8 @@ function payCalc() {
   const previewAmt = document.getElementById('pay-preview-amt');
   if (amt > 0) {
     preview.style.display = 'block';
-    previewAmt.textContent = amt.toLocaleString('hu-HU') + ' Ft';
+    const loc = LANG==='en' ? 'en-US' : 'hu-HU';
+    previewAmt.textContent = amt.toLocaleString(loc) + (LANG==='en' ? ' HUF' : ' Ft');
   } else {
     preview.style.display = 'none';
   }
@@ -1593,11 +1678,11 @@ function poFillTerms(sel) {
 
 // Toast értesítés
 function showToast(msg) {
-  let t = document.querySelector('.toast');
-  if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  let node = document.querySelector('.toast');
+  if (!node) { node = document.createElement('div'); node.className = 'toast'; document.body.appendChild(node); }
+  node.textContent = msg;
+  node.classList.add('show');
+  setTimeout(() => node.classList.remove('show'), 3000);
 }
 
 // Árubevétel üres sor
@@ -1611,12 +1696,10 @@ function rcEmptyRow() {
 }
 
 /* ══ INIT ══ */
-renderOI(); renderII(); renderPO(); renderVN(); renderPay(); renderRC(); renderLD();
-// Kezdő tételsorok a formokhoz
+setLang(LANG);
 addLine('oi'); addLine('oi');
 addLine('ii'); addLine('ii');
 addLine('po'); addLine('po');
-applyPeriod('Q1');
 </script>
 </body>
 </html>
