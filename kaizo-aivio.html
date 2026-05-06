@@ -1,86 +1,657 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hu">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Kaizo — AI ügynök demó (AIVIO)</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root { --bg:#06070f; --cyan:#29acd9; --bd:rgba(255,255,255,.08); --tx:#f0efed; --mu:rgba(240,239,237,.5); }
-* { box-sizing: border-box; margin: 0; }
-html, body { height: 100%; }
-body {
-  background: var(--bg);
-  color: var(--tx);
-  font-family: 'DM Sans', sans-serif;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-.aivio-top {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: .6rem .9rem;
-  padding: .75rem clamp(.85rem, 3vw, 1.5rem);
-  border-bottom: 1px solid var(--bd);
-  background: rgba(14, 16, 24, .97);
-}
-.aivio-top a {
-  color: var(--cyan);
-  text-decoration: none;
-  font-size: .82rem;
-  font-weight: 500;
-}
-.aivio-top a:hover { text-decoration: underline; }
-.aivio-brand {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: .92rem;
-  color: var(--cyan);
-  letter-spacing: .04em;
-}
-.aivio-note {
-  font-size: .68rem;
-  color: var(--mu);
-  width: 100%;
-  text-align: center;
-  order: 4;
-}
-@media (min-width: 640px) {
-  .aivio-note { width: auto; order: 0; flex: 1; text-align: center; }
-}
-.aivio-frame-wrap {
-  flex: 1;
-  min-height: 0;
-  position: relative;
-}
-.aivio-frame-wrap iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Kaizo × AIVIO — AI ügynök demó</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cyan:#29acd9;
+      --bg1:#06070f; --bg2:#0e1018; --card:#0f141c; --muted:rgba(240,239,237,.45); --text:#f0efed;
+      --border: rgba(255,255,255,.10); --glow: rgba(41,172,217,.35);
+      --pill: rgba(255,255,255,.06);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:'DM Sans',system-ui,sans-serif;
+      background: radial-gradient(1000px 600px at 18% 8%, rgba(41,172,217,.12) 0%, transparent 55%),
+                  radial-gradient(800px 500px at 85% 0%, rgba(41,172,217,.06) 0%, transparent 50%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      color:var(--text);
+      min-height:100vh;
+    }
+    .kaizo-bar{
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;
+      padding:.85rem clamp(1rem,4vw,2rem);
+      background:rgba(14,16,24,.88);
+      border-bottom:1px solid var(--border);
+      font-size:.85rem;
+    }
+    .kaizo-bar a{color:var(--cyan);text-decoration:none;font-weight:500}
+    .kaizo-bar a:hover{text-decoration:underline}
+    .kaizo-mark{font-family:'Syne',sans-serif;font-weight:700;color:var(--cyan);letter-spacing:.04em;font-size:.95rem}
+    .wrap{max-width:1200px; margin:0 auto; padding:34px 22px 50px}
+    h1{font-family:'Syne',sans-serif;font-size:44px; margin:0 0 10px;font-weight:700}
+    .sub{color:var(--muted); font-size:16px; line-height:1.4}
+    .toprow{display:flex; align-items:center; gap:14px; margin-top:16px; flex-wrap:wrap}
+    .pill{
+      display:inline-flex; align-items:center; gap:10px;
+      background: var(--pill); border:1px solid var(--border);
+      border-radius:999px; padding:10px 14px; color:var(--muted);
+      backdrop-filter: blur(8px);
+    }
+    .dot{width:10px; height:10px; border-radius:999px; background:#34c759}
+    .dot.err{background:#ff3b30}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:18px; margin-top:18px}
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr} h1{font-size:34px} }
+    .card{
+      background: rgba(15,27,51,.72);
+      border:1px solid var(--border);
+      border-radius:20px; overflow:hidden;
+      box-shadow: 0 25px 70px rgba(0,0,0,.45);
+      position:relative;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .card:hover{ transform: translateY(-2px); border-color: rgba(41,172,217,.4); box-shadow: 0 25px 90px rgba(0,0,0,.55) }
+    .card.active{ outline: 2px solid rgba(41,172,217,.55); box-shadow: 0 0 0 6px rgba(41,172,217,.12), 0 25px 90px rgba(0,0,0,.55) }
+    .img{height:210px; background:#000; position:relative}
+    .img img{width:100%; height:100%; object-fit:cover; display:block; filter: saturate(1.05) contrast(1.02) }
+    .label{
+      position:absolute; top:14px; left:14px;
+      background: rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.15);
+      padding:6px 10px; border-radius:999px; font-size:13px;
+    }
+    .content{padding:16px 18px 18px}
+    .title{font-size:22px; font-weight:800}
+    .desc{color:var(--muted); margin-top:4px}
+    .panel{
+      margin-top:18px;
+      background: rgba(8,16,33,.55);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+    }
+    .row{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .state{display:flex; gap:10px; align-items:center; font-weight:700}
+    .state small{font-weight:600; color:var(--muted)}
+    .chat{
+      margin-top:14px;
+      height:260px;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:12px;
+      background: rgba(2,6,23,.55);
+    }
+    .msg{margin:10px 0; padding:10px 12px; border-radius:12px; max-width: 900px}
+    .me{background: rgba(99,102,241,.16); border:1px solid rgba(99,102,241,.25)}
+    .ai{background: rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.20)}
+    .meta{color:var(--muted); font-size:12px; margin-bottom:6px}
+    .inputrow{display:flex; gap:10px; margin-top:12px}
+    input{
+      flex:1; padding:12px 12px;
+      border-radius:12px; border:1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.55); color:var(--text);
+      outline:none;
+    }
+    button{
+      padding:12px 14px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      cursor:pointer;
+    }
+    button:hover{border-color: rgba(41,172,217,.45)}
+    .hint{color:var(--muted); font-size:12px; margin-top:10px}
+    #corsWarn{display:none;background:rgba(255,149,0,.12);border:1px solid rgba(255,149,0,.3);border-radius:14px;padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.45}
+  </style>
 </head>
 <body>
-<header class="aivio-top">
-  <a href="index.html#demo">← Főoldal</a>
-  <span class="aivio-brand">Kaizo × AIVIO</span>
-  <a href="https://aivio-592551502751.europe-central2.run.app/" target="_blank" rel="noopener">Új lapon</a>
-  <p class="aivio-note">Mikrofon: engedélyezd a böngészőben. Chrome ajánlott.</p>
-</header>
-<div class="aivio-frame-wrap">
-  <iframe
-    src="https://aivio-592551502751.europe-central2.run.app/"
-    title="AIVIO — AI ügynök demó"
-    allow="microphone *; autoplay; display-capture"
-    referrerpolicy="no-referrer-when-downgrade"
-  ></iframe>
-</div>
+  <header class="kaizo-bar">
+    <a href="index.html#demo">← Kaizo főoldal</a>
+    <span class="kaizo-mark">Kaizo × AIVIO</span>
+    <a href="https://aivio-592551502751.europe-central2.run.app/" target="_blank" rel="noopener">Cloud Run (eredeti)</a>
+  </header>
+  <div class="wrap">
+    <div id="corsWarn"></div>
+    <h1>AI ügyfélszolgálati ügynökök</h1>
+    <div class="sub">
+      Kattints egy robotkártyára: Ari bemutatkozik (hang + chat), utána automatikusan hallgat, válaszol, és újra hallgat.
+      <br/>Tipp: ha a böngésző rákérdez a mikrofonra, engedélyezd. (Chrome-ban a legstabilabb.)
+    </div>
+
+    <div class="toprow">
+      <div class="pill"><span id="dot" class="dot"></span><b id="status">IDLE</b><span id="rev" style="margin-left:10px"></span></div>
+      <div class="pill">Voice: <b>Ari</b> (7B7mSWflzRSaO1yGeJH6)</div>
+      <div class="pill">Backend: <span id="backend">checking…</span></div>
+      <a class="pill" href="https://aivio-592551502751.europe-central2.run.app/cms.html" target="_blank" rel="noopener" style="text-decoration:none">Robot CMS</a>
+      <a class="pill" href="https://aivio-592551502751.europe-central2.run.app/crm-dashboard.html" target="_blank" rel="noopener" style="text-decoration:none">CRM Dashboard</a>
+    </div>
+
+    <div class="grid" id="cards">
+      <div class="card" data-robot="outbound_sales">
+        <div class="img"><img src="https://aivio-592551502751.europe-central2.run.app/img/outbound-email.jpg" alt=""><span class="label">Mihály</span></div>
+        <div class="content">
+          <div class="title">Sales ügynök</div>
+          <div class="desc">Telefonos időpont egyeztetés</div>
+        </div>
+      </div>
+
+      <div class="card" data-robot="email_sales">
+        <div class="img"><img src="https://aivio-592551502751.europe-central2.run.app/img/data-collection.jpg" alt=""><span class="label">Ricsi</span></div>
+        <div class="content">
+          <div class="title">Ügyfélszolgálat</div>
+          <div class="desc">Időpontfoglaló rendszer</div>
+        </div>
+      </div>
+
+      <div class="card" data-robot="support_inbound">
+        <div class="img"><img src="https://aivio-592551502751.europe-central2.run.app/img/outbound-phone.jpg" alt=""><span class="label">Ari</span></div>
+        <div class="content">
+          <div class="title">Bejövő ügyfélszolgálat</div>
+          <div class="desc">Telefonos támogatás</div>
+        </div>
+      </div>
+
+      <div class="card" data-robot="customer_satisfaction">
+        <div class="img"><img src="https://aivio-592551502751.europe-central2.run.app/img/inbound-support.jpg" alt=""><span class="label">Adél</span></div>
+        <div class="content">
+          <div class="title">Ügyfél elégedettségmérés</div>
+          <div class="desc">Szolgáltatás utáni visszajelzés</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <div class="state">
+          <span>Aktív robot:</span>
+          <b id="activeRobot">nincs</b>
+          <small id="activeKey"></small>
+        </div>
+        <div class="state">
+          <small>State:</small> <b id="loopState">IDLE</b>
+        </div>
+      </div>
+
+      <div class="chat" id="chat"></div>
+
+      <div class="inputrow">
+        <input id="textInput" placeholder="Írj ide (fallback), Enter = küldés" />
+        <button id="sendBtn">Küld</button>
+        <button id="stopBtn">Stop</button>
+      </div>
+      <div class="hint">Stop gombbal leáll a loop. Egymás után több csendes próbálkozás után automatikusan leáll — beszélj kicsit hangosabban, vagy írj a mezőbe. A TTS után rövid szünet segít a mikrofonnak.</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const API_BASE = "https://aivio-592551502751.europe-central2.run.app";
+  const VOICE_ID = "7B7mSWflzRSaO1yGeJH6"; // Ari (ElevenLabs)
+  const TTS_MODEL = "eleven_flash_v2_5";
+  const LISTEN_TIMEOUT_MS = 22000;
+  const MAX_SILENT_TURNS = 8;
+
+  const el = (id) => document.getElementById(id);
+  const chatEl = el("chat");
+  const statusEl = el("status");
+  const loopStateEl = el("loopState");
+  const dotEl = el("dot");
+  const revEl = el("rev");
+  const backendEl = el("backend");
+  const activeRobotEl = el("activeRobot");
+  const activeKeyEl = el("activeKey");
+
+  let activeRobotKey = null;
+  let activeRobotTitle = null;
+  let running = false;
+  let busy = false;
+  let history = []; // {role:"user"/"assistant", content:"..."}
+  let activeAudio = null;
+  let micStream = null;
+  let silentTurns = 0;
+
+  function setStatus(kind, text) {
+    statusEl.textContent = text;
+    if (kind === "err") dotEl.classList.add("err"); else dotEl.classList.remove("err");
+  }
+  function setLoopState(s){ loopStateEl.textContent = s; }
+
+  function addMsg(who, text, meta="") {
+    const div = document.createElement("div");
+    div.className = "msg " + (who === "me" ? "me" : "ai");
+    div.innerHTML = `<div class="meta">${meta}</div>${escapeHtml(text)}`;
+    chatEl.appendChild(div);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+  function escapeHtml(s){
+    return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  async function apiJSON(url, body){
+    const r = await fetch(url, {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body)
+    });
+    if(!r.ok){
+      const t = await r.text().catch(()=> "");
+      throw new Error(`${url} ${r.status} ${t}`);
+    }
+    return r.json();
+  }
+
+  function stopActiveAudio(){
+    if(!activeAudio) return;
+    try { activeAudio.pause(); } catch(e) {}
+    try { activeAudio.currentTime = 0; } catch(e) {}
+    activeAudio = null;
+  }
+
+  async function ensureMicStream(){
+    if (micStream) return micStream;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error("A böngésző nem támogatja a mikrofon hozzáférést.");
+    }
+    micStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+    return micStream;
+  }
+
+  async function monitorBargeIn(audio){
+    try {
+      const stream = await ensureMicStream();
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return false;
+
+      const ctx = new Ctx();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      const src = ctx.createMediaStreamSource(stream);
+      src.connect(analyser);
+      const data = new Uint8Array(analyser.fftSize);
+
+      return await new Promise((resolve) => {
+        let speechFrames = 0;
+
+        const tick = () => {
+          if (audio.paused || audio.ended) {
+            resolve(false);
+            return;
+          }
+
+          analyser.getByteTimeDomainData(data);
+          let sum = 0;
+          for (let i = 0; i < data.length; i++) {
+            const v = (data[i] - 128) / 128;
+            sum += v * v;
+          }
+          const rms = Math.sqrt(sum / data.length);
+
+          if (rms > 0.04) {
+            speechFrames += 1;
+          } else {
+            speechFrames = Math.max(0, speechFrames - 1);
+          }
+
+          if (speechFrames >= 4) {
+            resolve(true);
+            return;
+          }
+
+          requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function ttsSpeak(text, opts = {}){
+    const allowBargeIn = opts.allowBargeIn !== false;
+    setLoopState("SPEAKING");
+    const r = await fetch(API_BASE + "/speak", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ text, voiceId: VOICE_ID, model_id: TTS_MODEL })
+    });
+    if(!r.ok){
+      const t = await r.text().catch(()=> "");
+      throw new Error(`/speak ${r.status} ${t}`);
+    }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    activeAudio = audio;
+
+    const interrupted = await new Promise((resolve, reject) => {
+      const done = () => {
+        window._postTtsListen = true;
+        resolve(false);
+      };
+
+      audio.onended = done;
+      audio.onerror = reject;
+      audio.play().then(async () => {
+        if (!allowBargeIn) return;
+        const detected = await monitorBargeIn(audio);
+        if (detected && !audio.paused && !audio.ended) {
+          try { audio.pause(); } catch(e) {}
+          resolve(true);
+        }
+      }).catch(reject);
+    });
+
+    if (activeAudio === audio) activeAudio = null;
+    URL.revokeObjectURL(url);
+    return { interrupted };
+  }
+
+  // ===== STT (Web Speech API) =====
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let activeRec = null;
+  let sttStartLocked = false;
+
+  function createRec(){
+    if(!SpeechRecognition) return null;
+    const rec = new SpeechRecognition();
+    rec.lang = "hu-HU";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    return rec;
+  }
+
+  async function listenOnce(){
+    if (sttStartLocked) return "";
+    sttStartLocked = true;
+
+    if (activeRec) {
+      try {
+        activeRec.onresult = null;
+        activeRec.onerror = null;
+        activeRec.onend = null;
+        activeRec.abort();
+      } catch(e) {}
+      activeRec = null;
+    }
+
+    const r = createRec();
+    if(!r) {
+      sttStartLocked = false;
+      throw new Error("A böngésző nem támogatja a SpeechRecognition-t (Web Speech API). Próbáld Chrome-ban.");
+    }
+    activeRec = r;
+
+    setLoopState("LISTENING");
+
+    return new Promise((resolve, reject) => {
+      let done = false;
+      let timeoutId = null;
+
+      const finish = (value, isError = false) => {
+        if (done) return;
+        done = true;
+        if (timeoutId) clearTimeout(timeoutId);
+        if (activeRec === r) activeRec = null;
+        sttStartLocked = false;
+        r.onresult = null;
+        r.onerror = null;
+        r.onend = null;
+        if (isError) reject(value); else resolve(value);
+      };
+
+      r.onresult = (ev) => {
+        const text = ev.results?.[0]?.[0]?.transcript?.trim() || "";
+        finish(text);
+      };
+      r.onerror = (e) => {
+        const code = e?.error || "unknown";
+        if (code === "no-speech" || code === "aborted") {
+          finish("");
+          return;
+        }
+        finish(new Error("STT error: " + code), true);
+      };
+      r.onend = () => {
+        finish("");
+      };
+
+      const preMs = window._postTtsListen ? 750 : 40;
+      window._postTtsListen = false;
+
+      const armListen = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          try { r.abort(); } catch(e) {}
+          finish("");
+        }, LISTEN_TIMEOUT_MS);
+        try {
+          r.start();
+        } catch(err){
+          const msg = err?.message || String(err);
+          if (msg.toLowerCase().includes("recognition has already started")) {
+            setTimeout(() => {
+              try { r.abort(); } catch(e) {}
+              finish("");
+            }, 120);
+            return;
+          }
+          finish(err, true);
+        }
+      };
+      setTimeout(armListen, preMs);
+    });
+  }
+
+  async function think(text){
+    setLoopState("THINKING");
+    const data = await apiJSON(API_BASE + "/think", { text, robot: activeRobotKey, history });
+    return data.text || "";
+  }
+
+  // ====== LOOP ======
+  async function handleTurn(userText, meta = "Te") {
+    addMsg("me", userText, meta);
+    history.push({ role:"user", content: userText });
+
+    const answer = await think(userText);
+    if(!running) return { interruptedText: "" };
+
+    addMsg("ai", answer, activeRobotTitle || "Ari");
+    history.push({ role:"assistant", content: answer });
+
+    return ttsSpeak(answer, { allowBargeIn: true });
+  }
+
+  async function loop(seedText = ""){
+    if(!running || busy) return;
+    busy = true;
+
+    try {
+      let currentInput = (seedText || "").trim();
+
+      while(running) {
+        if(!currentInput) {
+          // 1) hallgat
+          currentInput = await listenOnce();
+          if(!running){ busy=false; return; }
+
+          if(!currentInput){
+            silentTurns += 1;
+            if (silentTurns >= MAX_SILENT_TURNS) {
+              addMsg("ai", "Nem hallottam választ, ezért most leállok. Kattints újra egy robotra, ha folytatjuk.", "AIVIO");
+              stopAll();
+              return;
+            }
+            // csend → hallgasson tovább
+            busy = false;
+            setTimeout(loop, 380);
+            return;
+          }
+        }
+
+        silentTurns = 0;
+
+        const spoken = await handleTurn(currentInput, currentInput === seedText && seedText ? "Te (félbeszakítás)" : "Te");
+        if(!running){ busy=false; return; }
+
+        // user beleszólt az AI mondatába -> azonnal hallgatjuk a mondatát
+        if(spoken?.interrupted) {
+          const interruptedHeard = await listenOnce();
+          currentInput = interruptedHeard || "";
+          continue;
+        }
+
+        break;
+      }
+
+      // 5) újra
+      busy = false;
+      setTimeout(loop, 150);
+
+    } catch(err){
+      console.error(err);
+      setStatus("err", "ERROR");
+      setLoopState("ERROR");
+      addMsg("ai", (err && err.message) ? err.message : String(err), "Hiba");
+      busy = false;
+      running = false;
+    }
+  }
+
+  async function startForRobot(robotKey, robotTitle, intro){
+    // UI highlight
+    document.querySelectorAll(".card").forEach(c => c.classList.toggle("active", c.dataset.robot === robotKey));
+
+    activeRobotKey = robotKey;
+    activeRobotTitle = robotTitle;
+
+    activeRobotEl.textContent = robotTitle;
+    activeKeyEl.textContent = `(${robotKey})`;
+
+    try {
+      await ensureMicStream();
+    } catch (e) {
+      addMsg("ai", "Nem kaptam mikrofon engedélyt — csak szöveggel válaszolhatsz (lásd alul).", "Rendszer");
+    }
+
+    setStatus("ok", "RUNNING");
+    running = true;
+    busy = false;
+    silentTurns = 0;
+
+    // intro chat + hang
+    addMsg("ai", intro, robotTitle);
+    history = [{ role:"assistant", content: intro }];
+
+    try {
+      await ttsSpeak(intro);
+    } catch(err){
+      console.error(err);
+      addMsg("ai", "Nem tudok beszélni (TTS hiba). Nézd a logot.", "Hiba");
+      running = false;
+      setStatus("err", "ERROR");
+      setLoopState("ERROR");
+      return;
+    }
+
+    // indul a loop
+    busy = false;
+    loop();
+  }
+
+  // fallback: kézi küldés (nem vár chatre, csak segéd)
+  async function sendText(){
+    const v = el("textInput").value.trim();
+    if(!v) return;
+    el("textInput").value = "";
+    if(!activeRobotKey){
+      addMsg("ai", "Válassz előbb egy robotot a kártyákra kattintva.", "AIVIO");
+      return;
+    }
+    addMsg("me", v, "Te");
+    history.push({ role:"user", content: v });
+
+    try{
+      const answer = await think(v);
+      addMsg("ai", answer, activeRobotTitle || "Ari");
+      history.push({ role:"assistant", content: answer });
+      const spoken = await ttsSpeak(answer, { allowBargeIn: true });
+      if (spoken?.interrupted) {
+        const interruptedHeard = await listenOnce();
+        loop(interruptedHeard || "");
+        return;
+      }
+    }catch(err){
+      addMsg("ai", err.message || String(err), "Hiba");
+    }
+  }
+
+  function stopAll(){
+    running = false;
+    busy = false;
+    stopActiveAudio();
+    silentTurns = 0;
+    setLoopState("IDLE");
+    setStatus("ok", "IDLE");
+    try { if(activeRec) activeRec.abort(); } catch(e){}
+    activeRec = null;
+    sttStartLocked = false;
+  }
+
+  // init: health + robots
+  (async () => {
+    const cw = document.getElementById("corsWarn");
+    try{
+      const h = await fetch(API_BASE + "/health").then(r=>{ if(!r.ok) throw new Error(); return r.json(); });
+      revEl.textContent = `REV: ${h.rev || "?"}`;
+      backendEl.textContent = h.ok ? "OK" : "?";
+    }catch(e){
+      backendEl.textContent = "hiba";
+      if(cw){ cw.style.display="block"; cw.innerHTML = "<b>API nem elérhető a böngészőből.</b> A kaizo.hu és a Cloud Run külön domain — add hozzá a CORS middleware-t az AIVIO <code>index.js</code>-hez és deploy (lásd <code>aivio-cors-snippet.js</code> a Kaizo repóban), vagy nyisd a demót közvetlenül a Cloud Run URL-en."; }
+    }
+
+    try{
+      await fetch(API_BASE + "/robots").then(r=>r.json());
+    }catch(e){}
+  })();
+
+  // card click
+  document.getElementById("cards").addEventListener("click", async (e) => {
+    const card = e.target.closest(".card");
+    if(!card) return;
+    const key = card.dataset.robot;
+
+    // kérjünk robot intro-t a backendből (a rendszer prompt központi legyen)
+    try{
+      const data = await fetch(API_BASE + "/robots").then(r=>r.json());
+      const item = (data.robots || []).find(x => x.key === key);
+      const title = item?.title || key;
+      const intro = item?.intro || "Szia! Ari vagyok.";
+      stopAll();
+      await startForRobot(key, title, intro);
+    }catch(err){
+      addMsg("ai", "Nem érem el a /robots endpointot.", "Hiba");
+    }
+  });
+
+  el("sendBtn").addEventListener("click", sendText);
+  el("textInput").addEventListener("keydown", (e)=> { if(e.key==="Enter") sendText(); });
+  el("stopBtn").addEventListener("click", stopAll);
+
+  setStatus("ok", "IDLE");
+  setLoopState("IDLE");
+})();
+</script>
 </body>
 </html>
