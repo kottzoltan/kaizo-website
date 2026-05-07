@@ -1,0 +1,661 @@
+<!doctype html>
+<!-- AIVIO Cloud Run / Express: ehhez a tárolóhoz tölts fel `public/index.html` néven, majd redeploy. STT: continuous + interim + csend → kevésbé vág le hamar. -->
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AIVIO – AI ügynök demó</title>
+  <style>
+    :root {
+      --bg1:#071023; --bg2:#0b1f3d; --card:#0f1b33; --muted:#93a4c7; --text:#e7eefc;
+      --border: rgba(255,255,255,.10); --glow: rgba(90,160,255,.35);
+      --pill: rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background: radial-gradient(1200px 700px at 20% 10%, #123b7a 0%, transparent 60%),
+                  radial-gradient(900px 600px at 80% 0%, #0a2a63 0%, transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      color:var(--text);
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:34px 22px 50px}
+    h1{font-size:44px; margin:0 0 10px}
+    .sub{color:var(--muted); font-size:16px; line-height:1.4}
+    .toprow{display:flex; align-items:center; gap:14px; margin-top:16px; flex-wrap:wrap}
+    .pill{
+      display:inline-flex; align-items:center; gap:10px;
+      background: var(--pill); border:1px solid var(--border);
+      border-radius:999px; padding:10px 14px; color:var(--muted);
+      backdrop-filter: blur(8px);
+    }
+    .dot{width:10px; height:10px; border-radius:999px; background:#22c55e}
+    .dot.err{background:#ef4444}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:18px; margin-top:18px}
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr} h1{font-size:34px} }
+    .card{
+      background: rgba(15,27,51,.72);
+      border:1px solid var(--border);
+      border-radius:20px; overflow:hidden;
+      box-shadow: 0 25px 70px rgba(0,0,0,.45);
+      position:relative;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .card:hover{ transform: translateY(-2px); border-color: rgba(120,190,255,.35); box-shadow: 0 25px 90px rgba(0,0,0,.55) }
+    .card.active{ outline: 2px solid rgba(120,190,255,.55); box-shadow: 0 0 0 6px rgba(90,160,255,.12), 0 25px 90px rgba(0,0,0,.55) }
+    .img{height:210px; background:#000; position:relative}
+    .img img{width:100%; height:100%; object-fit:cover; display:block; filter: saturate(1.05) contrast(1.02) }
+    .label{
+      position:absolute; top:14px; left:14px;
+      background: rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.15);
+      padding:6px 10px; border-radius:999px; font-size:13px;
+    }
+    .content{padding:16px 18px 18px}
+    .title{font-size:22px; font-weight:800}
+    .desc{color:var(--muted); margin-top:4px}
+    .panel{
+      margin-top:18px;
+      background: rgba(8,16,33,.55);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+    }
+    .row{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .state{display:flex; gap:10px; align-items:center; font-weight:700}
+    .state small{font-weight:600; color:var(--muted)}
+    .chat{
+      margin-top:14px;
+      height:260px;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:12px;
+      background: rgba(2,6,23,.55);
+    }
+    .msg{margin:10px 0; padding:10px 12px; border-radius:12px; max-width: 900px}
+    .me{background: rgba(99,102,241,.16); border:1px solid rgba(99,102,241,.25)}
+    .ai{background: rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.20)}
+    .meta{color:var(--muted); font-size:12px; margin-bottom:6px}
+    .inputrow{display:flex; gap:10px; margin-top:12px}
+    input{
+      flex:1; padding:12px 12px;
+      border-radius:12px; border:1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.55); color:var(--text);
+      outline:none;
+    }
+    button{
+      padding:12px 14px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      cursor:pointer;
+    }
+    button:hover{border-color: rgba(120,190,255,.35)}
+    .hint{color:var(--muted); font-size:12px; margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>AIVIO – AI ügynök demó</h1>
+    <div class="sub">
+      Kattints egy robotkártyára: Ari bemutatkozik (hang + chat), utána automatikusan hallgat, válaszol, és újra hallgat.
+      <br/>Tipp: ha a böngésző rákérdez a mikrofonra, engedélyezd. (Chrome-ban a legstabilabb.)
+    </div>
+
+    <div class="toprow">
+      <div class="pill"><span id="dot" class="dot"></span><b id="status">IDLE</b><span id="rev" style="margin-left:10px"></span></div>
+      <div class="pill">Voice: <b>Ari</b> (7B7mSWflzRSaO1yGeJH6)</div>
+      <div class="pill">Backend: <span id="backend">checking…</span></div>
+      <a class="pill" href="/cms.html" style="text-decoration:none">Robot CMS</a>
+      <a class="pill" href="/crm-dashboard.html" style="text-decoration:none">CRM Dashboard</a>
+    </div>
+
+    <div class="grid" id="cards">
+      <div class="card" data-robot="outbound_sales">
+        <div class="img"><img src="/img/outbound-email.jpg" alt=""><span class="label">Mihály</span></div>
+        <div class="content">
+          <div class="title">Sales ügynök</div>
+          <div class="desc">Telefonos időpont egyeztetés</div>
+        </div>
+      </div>
+
+      <div class="card" data-robot="email_sales">
+        <div class="img"><img src="/img/data-collection.jpg" alt=""><span class="label">Ricsi</span></div>
+        <div class="content">
+          <div class="title">Ügyfélszolgálat</div>
+          <div class="desc">Időpontfoglaló rendszer</div>
+        </div>
+      </div>
+
+      <div class="card" data-robot="support_inbound">
+        <div class="img"><img src="/img/outbound-phone.jpg" alt=""><span class="label">Ari</span></div>
+        <div class="content">
+          <div class="title">Bejövő ügyfélszolgálat</div>
+          <div class="desc">Telefonos támogatás</div>
+        </div>
+      </div>
+
+      <div class="card" data-robot="customer_satisfaction">
+        <div class="img"><img src="/img/inbound-support.jpg" alt=""><span class="label">Adél</span></div>
+        <div class="content">
+          <div class="title">Ügyfél elégedettségmérés</div>
+          <div class="desc">Szolgáltatás utáni visszajelzés</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <div class="state">
+          <span>Aktív robot:</span>
+          <b id="activeRobot">nincs</b>
+          <small id="activeKey"></small>
+        </div>
+        <div class="state">
+          <small>State:</small> <b id="loopState">IDLE</b>
+        </div>
+      </div>
+
+      <div class="chat" id="chat"></div>
+
+      <div class="inputrow">
+        <input id="textInput" placeholder="Írj ide (fallback), Enter = küldés" />
+        <button id="sendBtn">Küld</button>
+        <button id="stopBtn">Stop</button>
+      </div>
+      <div class="hint">Stop gombbal állítsd le a loopot. Többszöri csend az STT szerint állítja meg a beszélgetést (lásd kód).</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const VOICE_ID = "7B7mSWflzRSaO1yGeJH6"; // Ari (ElevenLabs)
+  const TTS_MODEL = "eleven_flash_v2_5";
+  /** Max egy STT-session hossza (védelem végtelen zaj ellen). */
+  const ABS_MAX_LISTEN_MS = 38000;
+  /** Ennyi csönd transcript után elküldjük a mondatot. */
+  const SILENCE_AFTER_WORD_MS = 1800;
+  const MAX_SILENT_TURNS = 6;
+
+  const el = (id) => document.getElementById(id);
+  const chatEl = el("chat");
+  const statusEl = el("status");
+  const loopStateEl = el("loopState");
+  const dotEl = el("dot");
+  const revEl = el("rev");
+  const backendEl = el("backend");
+  const activeRobotEl = el("activeRobot");
+  const activeKeyEl = el("activeKey");
+
+  let activeRobotKey = null;
+  let activeRobotTitle = null;
+  let running = false;
+  let busy = false;
+  let history = []; // {role:"user"/"assistant", content:"..."}
+  let activeAudio = null;
+  let micStream = null;
+  let silentTurns = 0;
+
+  function setStatus(kind, text) {
+    statusEl.textContent = text;
+    if (kind === "err") dotEl.classList.add("err"); else dotEl.classList.remove("err");
+  }
+  function setLoopState(s){ loopStateEl.textContent = s; }
+
+  function addMsg(who, text, meta="") {
+    const div = document.createElement("div");
+    div.className = "msg " + (who === "me" ? "me" : "ai");
+    div.innerHTML = `<div class="meta">${meta}</div>${escapeHtml(text)}`;
+    chatEl.appendChild(div);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+  function escapeHtml(s){
+    return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  async function apiJSON(url, body){
+    const r = await fetch(url, {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body)
+    });
+    if(!r.ok){
+      const t = await r.text().catch(()=> "");
+      throw new Error(`${url} ${r.status} ${t}`);
+    }
+    return r.json();
+  }
+
+  function stopActiveAudio(){
+    if(!activeAudio) return;
+    try { activeAudio.pause(); } catch(e) {}
+    try { activeAudio.currentTime = 0; } catch(e) {}
+    activeAudio = null;
+  }
+
+  async function ensureMicStream(){
+    if (micStream) return micStream;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error("A böngésző nem támogatja a mikrofon hozzáférést.");
+    }
+    micStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+    return micStream;
+  }
+
+  async function monitorBargeIn(audio){
+    try {
+      const stream = await ensureMicStream();
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return false;
+
+      const ctx = new Ctx();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      const src = ctx.createMediaStreamSource(stream);
+      src.connect(analyser);
+      const data = new Uint8Array(analyser.fftSize);
+
+      return await new Promise((resolve) => {
+        let speechFrames = 0;
+
+        const tick = () => {
+          if (audio.paused || audio.ended) {
+            resolve(false);
+            return;
+          }
+
+          analyser.getByteTimeDomainData(data);
+          let sum = 0;
+          for (let i = 0; i < data.length; i++) {
+            const v = (data[i] - 128) / 128;
+            sum += v * v;
+          }
+          const rms = Math.sqrt(sum / data.length);
+
+          if (rms > 0.055) {
+            speechFrames += 1;
+          } else {
+            speechFrames = Math.max(0, speechFrames - 1);
+          }
+
+          if (speechFrames >= 4) {
+            resolve(true);
+            return;
+          }
+
+          requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function ttsSpeak(text, opts = {}){
+    const allowBargeIn = opts.allowBargeIn !== false;
+    setLoopState("SPEAKING");
+    const r = await fetch("/speak", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ text, voiceId: VOICE_ID, model_id: TTS_MODEL })
+    });
+    if(!r.ok){
+      const t = await r.text().catch(()=> "");
+      throw new Error(`/speak ${r.status} ${t}`);
+    }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    activeAudio = audio;
+
+    const interrupted = await new Promise((resolve, reject) => {
+      const done = () => {
+        resolve(false);
+      };
+
+      audio.onended = done;
+      audio.onerror = reject;
+      audio.play().then(async () => {
+        if (!allowBargeIn) return;
+        const detected = await monitorBargeIn(audio);
+        if (detected && !audio.paused && !audio.ended) {
+          try { audio.pause(); } catch(e) {}
+          resolve(true);
+        }
+      }).catch(reject);
+    });
+
+    if (activeAudio === audio) activeAudio = null;
+    URL.revokeObjectURL(url);
+    return { interrupted };
+  }
+
+  // ===== STT (Web Speech API) =====
+  const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let activeRec = null;
+  let sttStartLocked = false;
+
+  /**
+   * Egy sorozat több rövid STT-sessionből áll: több naturális szünetet összefűz,
+   * és nem vágja le a mondatot az első szünetnél (continuous + interim + csend).
+   */
+  async function listenOnce() {
+    if (sttStartLocked) return "";
+    if (!RecognitionCtor) {
+      throw new Error("A böngésző nem támogatja a SpeechRecognition-t (Web Speech API). Próbáld Chrome-ban.");
+    }
+    const MAX_EMPTY_RETRIES = 5;
+    for (let attempt = 0; attempt < MAX_EMPTY_RETRIES && running; attempt++) {
+      const text = await listenOnePass();
+      if (!running) return "";
+      if (text.trim()) return text.trim();
+      await new Promise((r) => setTimeout(r, 350));
+    }
+    return "";
+  }
+
+  async function listenOnePass() {
+    if (sttStartLocked) return "";
+
+    if (activeRec) {
+      try {
+        activeRec.onresult = null;
+        activeRec.onerror = null;
+        activeRec.onend = null;
+        activeRec.abort();
+      } catch (e) {}
+      activeRec = null;
+    }
+
+    const r = new RecognitionCtor();
+    r.lang = "hu-HU";
+    r.interimResults = true;
+    r.continuous = true;
+    r.maxAlternatives = 1;
+    activeRec = r;
+    sttStartLocked = true;
+
+    setLoopState("LISTENING");
+
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      let finalText = "";
+      let interimText = "";
+
+      let silenceTimer = null;
+      const clearSilenceTimer = () => {
+        if (silenceTimer) {
+          clearTimeout(silenceTimer);
+          silenceTimer = null;
+        }
+      };
+
+      const combined = () => (finalText + interimText).trim();
+
+      const settle = (text, err) => {
+        if (settled) return;
+        settled = true;
+        clearSilenceTimer();
+        clearTimeout(hardCap);
+        try {
+          r.abort();
+        } catch (e) {}
+        activeRec = null;
+        sttStartLocked = false;
+        if (err) reject(err);
+        else resolve((text || "").trim());
+      };
+
+      const scheduleSilenceEnd = () => {
+        clearSilenceTimer();
+        silenceTimer = setTimeout(() => {
+          settle(combined());
+        }, SILENCE_AFTER_WORD_MS);
+      };
+
+      const hardCap = setTimeout(() => settle(combined()), ABS_MAX_LISTEN_MS);
+
+      r.onresult = (ev) => {
+        let finals = "";
+        let interim = "";
+        for (let i = 0; i < ev.results.length; i++) {
+          const res = ev.results[i];
+          if (res.isFinal) finals += res[0].transcript;
+          else interim += res[0].transcript;
+        }
+        finalText = finals;
+        interimText = interim;
+        if (combined()) scheduleSilenceEnd();
+      };
+
+      r.onerror = (e) => {
+        const code = e?.error || "unknown";
+        if (code === "aborted") {
+          settle(combined());
+          return;
+        }
+        if (code === "no-speech") {
+          settle(combined() || "");
+          return;
+        }
+        settle("", new Error("STT error: " + code));
+      };
+
+      r.onend = () => {
+        if (settled) return;
+        settle(combined());
+      };
+
+      try {
+        r.start();
+      } catch (err) {
+        settle("", err);
+      }
+    });
+  }
+
+  async function think(text){
+    setLoopState("THINKING");
+    const data = await apiJSON("/think", { text, robot: activeRobotKey, history });
+    return data.text || "";
+  }
+
+  // ====== LOOP ======
+  async function handleTurn(userText, meta = "Te") {
+    addMsg("me", userText, meta);
+    history.push({ role:"user", content: userText });
+
+    const answer = await think(userText);
+    if(!running) return { interruptedText: "" };
+
+    addMsg("ai", answer, activeRobotTitle || "Ari");
+    history.push({ role:"assistant", content: answer });
+
+    return ttsSpeak(answer, { allowBargeIn: true });
+  }
+
+  async function loop(seedText = ""){
+    if(!running || busy) return;
+    busy = true;
+
+    try {
+      let currentInput = (seedText || "").trim();
+
+      while(running) {
+        if(!currentInput) {
+          // 1) hallgat
+          currentInput = await listenOnce();
+          if(!running){ busy=false; return; }
+
+          if(!currentInput){
+            silentTurns += 1;
+            if (silentTurns >= MAX_SILENT_TURNS) {
+              addMsg("ai", "Nem hallottam választ, ezért most leállok. Kattints újra egy robotra, ha folytatjuk.", "AIVIO");
+              stopAll();
+              return;
+            }
+            // csend → hallgasson tovább
+            busy = false;
+            setTimeout(loop, 200);
+            return;
+          }
+        }
+
+        silentTurns = 0;
+
+        const spoken = await handleTurn(currentInput, currentInput === seedText && seedText ? "Te (félbeszakítás)" : "Te");
+        if(!running){ busy=false; return; }
+
+        // user beleszólt az AI mondatába -> azonnal hallgatjuk a mondatát
+        if(spoken?.interrupted) {
+          const interruptedHeard = await listenOnce();
+          currentInput = interruptedHeard || "";
+          continue;
+        }
+
+        break;
+      }
+
+      // 5) újra
+      busy = false;
+      setTimeout(loop, 150);
+
+    } catch(err){
+      console.error(err);
+      setStatus("err", "ERROR");
+      setLoopState("ERROR");
+      addMsg("ai", (err && err.message) ? err.message : String(err), "Hiba");
+      busy = false;
+      running = false;
+    }
+  }
+
+  async function startForRobot(robotKey, robotTitle, intro){
+    // UI highlight
+    document.querySelectorAll(".card").forEach(c => c.classList.toggle("active", c.dataset.robot === robotKey));
+
+    activeRobotKey = robotKey;
+    activeRobotTitle = robotTitle;
+
+    activeRobotEl.textContent = robotTitle;
+    activeKeyEl.textContent = `(${robotKey})`;
+
+    setStatus("ok", "RUNNING");
+    running = true;
+    busy = false;
+    silentTurns = 0;
+
+    // intro chat + hang
+    addMsg("ai", intro, robotTitle);
+    history = [{ role:"assistant", content: intro }];
+
+    try {
+      await ttsSpeak(intro);
+    } catch(err){
+      console.error(err);
+      addMsg("ai", "Nem tudok beszélni (TTS hiba). Nézd a logot.", "Hiba");
+      running = false;
+      setStatus("err", "ERROR");
+      setLoopState("ERROR");
+      return;
+    }
+
+    // indul a loop
+    busy = false;
+    loop();
+  }
+
+  // fallback: kézi küldés (nem vár chatre, csak segéd)
+  async function sendText(){
+    const v = el("textInput").value.trim();
+    if(!v) return;
+    el("textInput").value = "";
+    if(!activeRobotKey){
+      addMsg("ai", "Válassz előbb egy robotot a kártyákra kattintva.", "AIVIO");
+      return;
+    }
+    addMsg("me", v, "Te");
+    history.push({ role:"user", content: v });
+
+    try{
+      const answer = await think(v);
+      addMsg("ai", answer, activeRobotTitle || "Ari");
+      history.push({ role:"assistant", content: answer });
+      const spoken = await ttsSpeak(answer, { allowBargeIn: true });
+      if (spoken?.interrupted) {
+        const interruptedHeard = await listenOnce();
+        loop(interruptedHeard || "");
+        return;
+      }
+    }catch(err){
+      addMsg("ai", err.message || String(err), "Hiba");
+    }
+  }
+
+  function stopAll(){
+    running = false;
+    busy = false;
+    stopActiveAudio();
+    silentTurns = 0;
+    setLoopState("IDLE");
+    setStatus("ok", "IDLE");
+    try { if(activeRec) activeRec.abort(); } catch(e){}
+    activeRec = null;
+    sttStartLocked = false;
+  }
+
+  // init: health + robots
+  (async () => {
+    try{
+      const h = await fetch("/health").then(r=>r.json());
+      revEl.textContent = `REV: ${h.rev || "?"}`;
+      backendEl.textContent = h.ok ? "OK" : "?"
+    }catch(e){
+      backendEl.textContent = "n/a";
+    }
+
+    try{
+      const data = await fetch("/robots").then(r=>r.json());
+      // a kártyák fixek, de a backend lista validálja
+      // ha akarod később innen generáljuk a kártyákat is
+    }catch(e){}
+  })();
+
+  // card click
+  document.getElementById("cards").addEventListener("click", async (e) => {
+    const card = e.target.closest(".card");
+    if(!card) return;
+    const key = card.dataset.robot;
+
+    // kérjünk robot intro-t a backendből (a rendszer prompt központi legyen)
+    try{
+      const data = await fetch("/robots").then(r=>r.json());
+      const item = (data.robots || []).find(x => x.key === key);
+      const title = item?.title || key;
+      const intro = item?.intro || "Szia! Ari vagyok.";
+      stopAll();
+      await startForRobot(key, title, intro);
+    }catch(err){
+      addMsg("ai", "Nem érem el a /robots endpointot.", "Hiba");
+    }
+  });
+
+  el("sendBtn").addEventListener("click", sendText);
+  el("textInput").addEventListener("keydown", (e)=> { if(e.key==="Enter") sendText(); });
+  el("stopBtn").addEventListener("click", stopAll);
+
+  setStatus("ok", "IDLE");
+  setLoopState("IDLE");
+})();
+</script>
+</body>
+</html>
