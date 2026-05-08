@@ -26,16 +26,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);trans
 .ni .ic{font-size:.95rem;width:1.15rem;text-align:center;}
 .sbb{margin-top:auto;padding:.8rem 1.4rem 0;border-top:1px solid var(--bd);}
 @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.main{margin-left:0!important;}}
+@media(max-width:768px){
+  .topbar{flex-wrap:wrap;padding:.6rem .85rem;gap:.45rem .4rem;align-items:center;}
+  .topbar .mb{order:1;flex-shrink:0;}
+  .topbar .tt{order:2;flex:1;min-width:0;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .topbar .tr{order:3;margin-left:auto;flex-shrink:0;}
+  .topbar .psw{order:4;flex:1 0 100%;width:100%;max-width:100%;margin-left:0;justify-content:stretch;}
+  .topbar .psw .pb{flex:1 1 0;min-width:0;padding:.26rem .45rem;font-size:.62rem;}
+  .topbar .sw{order:5;flex:1 0 100%;width:100%;max-width:100%;margin-left:0;}
+  .content{padding:1rem .85rem;}
+}
 @media(min-width:769px){.main{margin-left:var(--sw);}}
-.main{flex:1;display:flex;flex-direction:column;min-width:0;}
-.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100;}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;width:100%;max-width:100vw;overflow-x:hidden;}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100;width:100%;max-width:100%;box-sizing:border-box;min-width:0;}
 .mb{display:none;background:none;border:none;color:var(--tx);font-size:1.3rem;cursor:pointer;padding:.2rem .4rem;border-radius:var(--rs);}
 @media(max-width:768px){.mb{display:block;}}
 .tt{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;white-space:nowrap;}
 .psw{display:flex;background:var(--s2);border:1px solid var(--bd);border-radius:100px;overflow:hidden;margin-left:.5rem;flex-shrink:0;}
 .pb{padding:.28rem .8rem;font-size:.7rem;font-family:'DM Sans',sans-serif;color:var(--dim);background:transparent;border:none;cursor:pointer;transition:all .2s;}
 .pb.active{background:var(--cyan-dim);color:var(--cyan);}
-.sw{flex:1;max-width:350px;position:relative;}
+.sw{flex:1;max-width:350px;min-width:0;position:relative;}
 .si-w{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.42rem 1rem .42rem 2.1rem;font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;transition:border-color .2s;}
 .si-w::placeholder{color:var(--mu);}.si-w:focus{border-color:var(--cyan);}
 .si{position:absolute;left:.72rem;top:50%;transform:translateY(-50%);font-size:.75rem;color:var(--mu);}
@@ -47,7 +57,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);trans
 .tbb:hover{border-color:var(--cyan);color:var(--cyan);}
 .bpp{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;}
 .bpp:hover{opacity:.85;}
-.content{padding:1.5rem;overflow-y:auto;flex:1;}
+.content{padding:1.5rem;overflow-y:auto;flex:1;min-width:0;width:100%;box-sizing:border-box;}
 .page{display:none;animation:fadeIn .22s ease;}.page.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* KPI */
@@ -183,6 +193,7 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
     <div class="nl" data-i18n="nav_finance">Pénzügy</div>
     <div class="ni active" onclick="nav('dashboard',this)"><span class="ic">📊</span><span data-i18n="nav_dashboard">Dashboard</span></div>
     <div class="ni" onclick="nav('out-invoices',this)"><span class="ic">📤</span><span data-i18n="nav_out">Kimenő számlák</span></div>
+    <div class="ni" onclick="nav('customers',this)"><span class="ic">👤</span><span data-i18n="nav_customers">Vevők</span></div>
     <div class="ni" onclick="nav('in-invoices',this)"><span class="ic">📥</span><span data-i18n="nav_in">Bejövő számlák</span></div>
     <div class="ni" onclick="nav('payments',this)"><span class="ic">💳</span><span data-i18n="nav_pay">Fizetések</span></div>
   </div>
@@ -398,6 +409,26 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
         <th data-i18n="th_status">Státusz</th>
       </tr></thead>
       <tbody id="vnBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ VEVŐK ══ -->
+<div class="page" id="pg-customers">
+  <div class="phd"><h1 data-i18n="h1_cu">👤 Vevők</h1><button class="bpp" onclick="nav('new-customer',null)" data-i18n="btn_new_cu">+ Új vevő</button></div>
+  <div class="card">
+    <div class="cs"><span class="si">🔍</span><input type="text" id="cuSearch" oninput="renderCU()" data-i18n-placeholder="ph_cu" placeholder="Keresés: vevő, kategória..."></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th onclick="srt('cu','name',this)"><span data-i18n="th_cu_name">Vevő</span> <span class="si2"></span></th>
+        <th onclick="srt('cu','country',this)"><span data-i18n="th_country">Ország</span> <span class="si2"></span></th>
+        <th onclick="srt('cu','category',this)"><span data-i18n="th_cat">Kategória</span> <span class="si2"></span></th>
+        <th onclick="srt('cu','invoices',this)"><span data-i18n="th_invoices">Számlák</span> <span class="si2"></span></th>
+        <th onclick="srt('cu','total_revenue',this)"><span data-i18n="th_revenue">Bevétel</span> <span class="si2"></span></th>
+        <th onclick="srt('cu','avg_pay_days',this)"><span data-i18n="th_pay_days">Átl. fizetés</span> <span class="si2"></span></th>
+        <th data-i18n="th_status">Státusz</th>
+      </tr></thead>
+      <tbody id="cuBody"></tbody>
     </table></div>
   </div>
 </div>
@@ -877,6 +908,92 @@ tbody tr{cursor:pointer;}tbody tr:hover td{background:var(--s2);}
   </div>
 </div>
 
+<!-- ══ ÚJ VEVŐ ══ -->
+<div class="page" id="pg-new-customer">
+  <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
+  <div class="phd"><h1 data-i18n="page_new_cu">👤 Új vevő rögzítése</h1></div>
+  <div class="card">
+    <div class="ch"><span class="ct">Alapadatok</span><span style="font-size:.72rem;color:var(--mu)">res.partner · customer_rank &gt; 0</span></div>
+    <div class="form-grid cols3">
+      <div class="form-group span2">
+        <label class="form-label">Cégnév <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="pl. Minta Kft.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adószám <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="12345678-2-42" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kapcsolattartó neve</label>
+        <input class="form-input" type="text" placeholder="pl. Kovács János">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email <span class="req">*</span></label>
+        <input class="form-input" type="email" placeholder="szamla@ceg.hu">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon</label>
+        <input class="form-input" type="tel" placeholder="+36 1 234 5678" style="font-family:'DM Mono',monospace">
+      </div>
+      <hr class="form-divider">
+      <div class="form-section-title">Cím</div>
+      <div class="form-group span2">
+        <label class="form-label">Utca, házszám <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="pl. Váci út 45.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Irányítószám</label>
+        <input class="form-input" type="text" placeholder="1134" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Város <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="Budapest">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ország</label>
+        <select class="form-select"><option>Magyarország</option><option>Ausztria</option><option>Németország</option><option>Románia</option><option>Szlovákia</option></select>
+      </div>
+      <hr class="form-divider">
+      <div class="form-section-title">Pénzügyi beállítások</div>
+      <div class="form-group">
+        <label class="form-label">Vevő szegmens / kategória</label>
+        <select class="form-select">
+          <option>KKV</option><option>Nagyvállalat</option><option>Közület</option><option>Viszonteladó</option>
+          <option>IT / SaaS</option><option>E-kereskedelem</option><option>Gyártás</option><option>Egyéb</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fizetési feltétel</label>
+        <select class="form-select"><option>Azonnali</option><option>15 nap nettó</option><option>30 nap nettó</option><option>45 nap nettó</option><option>60 nap nettó</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pénznem</label>
+        <select class="form-select"><option>HUF</option><option>EUR</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hitelkeret (HUF)</label>
+        <input class="form-input" type="number" placeholder="0" min="0" style="font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bankszámla (beérkeztetéshez)</label>
+        <input class="form-input" type="text" placeholder="HU12 … (opcionális)" style="font-family:'DM Mono',monospace;font-size:.76rem">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Átlagos fizetési nap (becslés)</label>
+        <input class="form-input" type="number" placeholder="30" min="0">
+      </div>
+      <div class="form-group span3">
+        <label class="form-label">Megjegyzés</label>
+        <textarea class="form-textarea" placeholder="Számlázási megjegyzés, EDI, kötelező mezők…"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="navBack()" data-i18n="btn_cancel">Mégsem</button>
+    <button class="btn-save" onclick="showToast(t('toast_cu'))" data-i18n="btn_cu_save">Vevő mentése</button>
+  </div>
+</div>
+
 <!-- ══ ÚJ ÁRUBEVÉTEL ══ -->
 <div class="page" id="pg-new-receipt">
   <div class="detail-back" onclick="navBack()" data-i18n="back">← Vissza</div>
@@ -971,10 +1088,10 @@ let LANG = localStorage.getItem(LS_KEY_ERP) || 'hu';
 let currentNavPage = 'dashboard';
 const PAGE_KEY = {
   dashboard:'page_dashboard','out-invoices':'page_out_invoices','in-invoices':'page_in_invoices',
-  payments:'page_payments',purchase:'page_purchase',vendors:'page_vendors',receipts:'page_receipts',
+  payments:'page_payments',purchase:'page_purchase',customers:'page_customers',vendors:'page_vendors',receipts:'page_receipts',
   ledger:'page_ledger',cashflow:'page_cashflow',detail:'page_detail',
   'new-out-invoice':'page_new_oi','new-in-invoice':'page_new_ii','new-payment':'page_new_pay',
-  'new-purchase':'page_new_po','new-vendor':'page_new_vn','new-receipt':'page_new_rc'
+  'new-purchase':'page_new_po','new-customer':'page_new_cu','new-vendor':'page_new_vn','new-receipt':'page_new_rc'
 };
 function t(k){ return (window.KaizoERP_i18n && window.KaizoERP_i18n[LANG] && window.KaizoERP_i18n[LANG][k]) || k; }
 function setLang(lang){
@@ -984,7 +1101,7 @@ function setLang(lang){
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
   applyStaticI18n();
   applyPeriod(activePeriod);
-  renderOI(); renderII(); renderPO(); renderVN(); renderPay(); renderRC(); renderLD();
+  renderOI(); renderII(); renderPO(); renderCU(); renderVN(); renderPay(); renderRC(); renderLD();
   if(el('tbTitle') && currentNavPage && PAGE_KEY[currentNavPage]) el('tbTitle').textContent = t(PAGE_KEY[currentNavPage]);
   document.title = t('doc_title');
   i18nPayDirection();
@@ -1062,6 +1179,16 @@ let VN=[
   {id:6,name:'LogiTrans Zrt.',email:'info@logitrans.hu',phone:'+36 20 789 0123',country:'Magyarország',category:'Logisztika',orders:9,total_spend:3314700,avg_delivery:2,payment_term:'30 nap',status:'active'},
   {id:7,name:'Épület Kft.',email:'iroda@epulet.hu',phone:'+36 1 890 1234',country:'Magyarország',category:'Ingatlan',orders:2,total_spend:1651000,avg_delivery:14,payment_term:'60 nap',status:'inactive'},
   {id:8,name:'Bútor Zrt.',email:'rend@butor.hu',phone:'+36 30 901 2345',country:'Magyarország',category:'Berendezés',orders:1,total_spend:482600,avg_delivery:10,payment_term:'30 nap',status:'active'},
+];
+/* Vevők — Odoo: res.partner, customer_rank > 0 (vagy customer = True); összekapcsolható account.move out_invoice partner_id-val */
+let CU=[
+  {id:1,name:'Kovács Bt.',email:'penzugy@kovacs.hu',phone:'+36 1 100 1001',country:'Magyarország',category:'Gyártás',invoices:1,total_revenue:3048000,avg_pay_days:32,payment_term:'30 nap',status:'active'},
+  {id:2,name:'Tech Kft.',email:'szamla@tech.hu',phone:'+36 1 100 1002',country:'Magyarország',category:'IT / SaaS',invoices:1,total_revenue:2349500,avg_pay_days:18,payment_term:'30 nap',status:'active'},
+  {id:3,name:'Gyártó Zrt.',email:'konyveles@gyarto.hu',phone:'+36 1 100 1003',country:'Magyarország',category:'Ipar',invoices:1,total_revenue:7874000,avg_pay_days:45,payment_term:'45 nap',status:'active'},
+  {id:4,name:'Logisztika Kft.',email:'ar@logi.hu',phone:'+36 1 100 1004',country:'Magyarország',category:'Logisztika',invoices:1,total_revenue:3937000,avg_pay_days:52,payment_term:'30 nap',status:'active'},
+  {id:5,name:'Retail Zrt.',email:'ap@retail.hu',phone:'+36 1 100 1005',country:'Magyarország',category:'Kiskereskedelem',invoices:1,total_revenue:1244600,avg_pay_days:14,payment_term:'15 nap',status:'active'},
+  {id:6,name:'Holding Group',email:'treasury@holding.hu',phone:'+36 1 100 1006',country:'Magyarország',category:'Holding',invoices:1,total_revenue:10795000,avg_pay_days:38,payment_term:'60 nap',status:'active'},
+  {id:7,name:'E-com Kft.',email:'billing@ecom.hu',phone:'+36 1 100 1007',country:'Magyarország',category:'E-kereskedelem',invoices:0,total_revenue:0,avg_pay_days:0,payment_term:'30 nap',status:'active'},
 ];
 let PAY=[
   {id:1,name:'PAY/2025/00045',partner:'Kovács Bt.',date:'2025-03-18',typeKey:'in',journal:'OTP Bank',amount:2349500,state:'posted'},
@@ -1149,9 +1276,9 @@ function srt(ds,field,th) {
   const k=ds+'.'+field, asc=SS[k]!=='asc'; SS[k]=asc?'asc':'desc';
   th.closest('table').querySelectorAll('th').forEach(t=>t.classList.remove('sa','sd'));
   th.classList.add(asc?'sa':'sd');
-  const map={oi:OI,ii:II,po:PO_DATA,vn:VN,pay:PAY,rc:RC,ld:LD};
+  const map={oi:OI,ii:II,po:PO_DATA,cu:CU,vn:VN,pay:PAY,rc:RC,ld:LD};
   map[ds].sort((a,b)=>{let va=a[field],vb=b[field];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return asc?(va>vb?1:va<vb?-1:0):(va<vb?1:va>vb?-1:0);});
-  ({oi:renderOI,ii:renderII,po:renderPO,vn:renderVN,pay:renderPay,rc:renderRC,ld:renderLD})[ds]();
+  ({oi:renderOI,ii:renderII,po:renderPO,cu:renderCU,vn:renderVN,pay:renderPay,rc:renderRC,ld:renderLD})[ds]();
 }
 
 /* ══ PERIOD ══ */
@@ -1297,6 +1424,22 @@ function renderPO() {
   </tr>`).join('');
 }
 
+function renderCU() {
+  const qs = q('cuSearch');
+  const list = CU.filter(c=>!qs||c.name.toLowerCase().includes(qs)||c.category.toLowerCase().includes(qs));
+  const body = el('cuBody');
+  if (!body) return;
+  body.innerHTML = list.map(c => `<tr onclick="showDetail('cu',${c.id})">
+    <td data-label="${t('th_cu_name')}"><strong>${c.name}</strong></td>
+    <td data-label="${t('th_country')}">${c.country}</td>
+    <td data-label="${t('th_cat')}" style="font-size:.74rem;color:var(--dim)">${c.category}</td>
+    <td data-label="${t('th_invoices')}" style="font-family:'DM Mono',monospace">${c.invoices}</td>
+    <td data-label="${t('th_revenue')}" style="font-family:'DM Mono',monospace;color:var(--green)">${c.total_revenue>0?fM(c.total_revenue):'—'}</td>
+    <td data-label="${t('th_pay_days')}" style="font-family:'DM Mono',monospace">${c.avg_pay_days>0?c.avg_pay_days+t('th_days'):'—'}</td>
+    <td data-label="${t('th_status')}"><span class="badge ${c.status==='active'?'bpa':'bdr'}">${c.status==='active'?t('cn_active'):t('cn_inactive')}</span></td>
+  </tr>`).join('');
+}
+
 function renderVN() {
   const qs = q('vnSearch');
   const list = VN.filter(v=>!qs||v.name.toLowerCase().includes(qs)||v.category.toLowerCase().includes(qs));
@@ -1354,10 +1497,10 @@ function renderLD() {
 
 /* ══ DETAIL NÉZET ══ */
 function showDetail(type, id) {
-  const maps = {oi:OI,ii:II,po:PO_DATA,vn:VN,pay:PAY,rc:RC};
+  const maps = {oi:OI,ii:II,po:PO_DATA,cu:CU,vn:VN,pay:PAY,rc:RC};
   const item = maps[type]?.find(x=>x.id===id);
   if (!item) return;
-  detailBackPage = {oi:'out-invoices',ii:'in-invoices',po:'purchase',vn:'vendors',pay:'payments',rc:'receipts'}[type];
+  detailBackPage = {oi:'out-invoices',ii:'in-invoices',po:'purchase',cu:'customers',vn:'vendors',pay:'payments',rc:'receipts'}[type];
 
   let html = '';
   if (type==='oi'||type==='ii') {
@@ -1444,6 +1587,40 @@ function showDetail(type, id) {
           </tbody>
         </table></div>
       </div>`;
+  } else if (type==='cu') {
+    const invs = OI.filter(i=>i.partner===item.name);
+    const avgInv = item.invoices>0 ? item.total_revenue/item.invoices : 0;
+    html = `
+      <div class="detail-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div><div class="detail-title">${item.name}</div><div class="detail-sub">${item.category} · ${item.country}</div></div>
+          <span class="badge ${item.status==='active'?'bpa':'bdr'}" style="font-size:.78rem;padding:.3rem .8rem">${item.status==='active'?t('cn_active_long'):t('cn_inactive')}</span>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="df-label">Email</div><div class="df-value">${item.email}</div></div>
+        <div class="detail-field"><div class="df-label">Telefon</div><div class="df-value mono">${item.phone}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_country')}</div><div class="df-value">${item.country}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_cat')}</div><div class="df-value">${item.category}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_payment_term')}</div><div class="df-value">${item.payment_term}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_pay_days')}</div><div class="df-value mono">${item.avg_pay_days>0?item.avg_pay_days+t('th_days'):'—'}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_invoices')}</div><div class="df-value mono">${item.invoices} ${t('kpi_unit_db')}</div></div>
+        <div class="detail-field"><div class="df-label">${t('th_revenue')}</div><div class="df-value mono" style="color:var(--green)">${item.total_revenue>0?fM(item.total_revenue):'—'}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_avg_inv')}</div><div class="df-value mono">${avgInv>0?fM(avgInv):'—'}</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">${t('df_related_oi')}</span><span style="font-size:.72rem;color:var(--mu)">account.move · out_invoice · partner_id</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>${t('df_invoice_no')}</th><th>${t('th_date')}</th><th>${t('th_gross')}</th><th>${t('th_status')}</th></tr></thead>
+          <tbody>${invs.map(i=>`
+            <tr onclick="showDetail('oi',${i.id})">
+              <td style="font-family:'DM Mono',monospace;font-size:.74rem;color:var(--cyan)">${i.name}</td>
+              <td>${dateCell(i.invoice_date)}</td>
+              <td style="font-family:'DM Mono',monospace">${fM(i.amount_total)}</td>
+              <td>${payStateHtml(i.payment_state)}</td>
+            </tr>`).join('')||`<tr><td colspan="4" style="color:var(--mu);text-align:center;padding:1rem">${t('detail_no_invoices')}</td></tr>`}</tbody>
+        </table></div>
+      </div>`;
   } else if (type==='vn') {
     html = `
       <div class="detail-header">
@@ -1457,7 +1634,7 @@ function showDetail(type, id) {
         <div class="detail-field"><div class="df-label">Telefon</div><div class="df-value mono">${item.phone}</div></div>
         <div class="detail-field"><div class="df-label">${t('th_country')}</div><div class="df-value">${item.country}</div></div>
         <div class="detail-field"><div class="df-label">${t('th_cat')}</div><div class="df-value">${item.category}</div></div>
-        <div class="detail-field"><div class="df-label">Fizetési feltétel</div><div class="df-value">${item.payment_term}</div></div>
+        <div class="detail-field"><div class="df-label">${t('df_payment_term')}</div><div class="df-value">${item.payment_term}</div></div>
         <div class="detail-field"><div class="df-label">${t('th_del')}</div><div class="df-value mono">${item.avg_delivery}${t('th_days')}</div></div>
         <div class="detail-field"><div class="df-label">${t('th_orders')}</div><div class="df-value mono">${item.orders} ${t('kpi_unit_db')}</div></div>
         <div class="detail-field"><div class="df-label">${t('th_spend')}</div><div class="df-value mono" style="color:var(--red)">${fM(item.total_spend)}</div></div>
@@ -1569,8 +1746,8 @@ function renderCFCharts(d) {
 function gSearchFn() {
   const v = el('gSearch').value;
   const pg = document.querySelector('.page.active')?.id?.replace('pg-','').replace('-','');
-  const map={'outinvoices':'oiSearch','ininvoices':'iiSearch',purchase:'poSearch',vendors:'vnSearch',payments:'paySearch',receipts:'rcSearch',ledger:'ldSearch'};
-  const fnMap={'outinvoices':renderOI,'ininvoices':renderII,purchase:renderPO,vendors:renderVN,payments:renderPay,receipts:renderRC,ledger:renderLD};
+  const map={'outinvoices':'oiSearch','ininvoices':'iiSearch',purchase:'poSearch',customers:'cuSearch',vendors:'vnSearch',payments:'paySearch',receipts:'rcSearch',ledger:'ldSearch'};
+  const fnMap={'outinvoices':renderOI,'ininvoices':renderII,purchase:renderPO,customers:renderCU,vendors:renderVN,payments:renderPay,receipts:renderRC,ledger:renderLD};
   const sid=map[pg]; if(sid){const e=el(sid);if(e)e.value=v;}
   fnMap[pg]?.();
 }
@@ -1578,6 +1755,8 @@ function gSearchFn() {
 /* ══ NAV ══ */
 function nav(page, navEl) {
   currentNavPage = page;
+  const formBack = {'new-out-invoice':'out-invoices','new-in-invoice':'in-invoices','new-payment':'payments','new-purchase':'purchase','new-customer':'customers','new-vendor':'vendors','new-receipt':'receipts'};
+  if (formBack[page]) detailBackPage = formBack[page];
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-'+page).classList.add('active');
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
