@@ -1,33 +1,66 @@
 /**
- * Kaizo: hangos AI ügynök modul — saját UI. Külső szolgáltatás: HTTP API (/think, /speak, /robots, /health) + média.
- * Kaizo.hu és más origintól: a szerveren kötelező CORS (Access-Control-Allow-Origin + POST + OPTIONS).
+ * Kaizo hangos ügynök demó: külső HTTP API nélkül.
+ * Adatok és „válaszok” helyben vannak; STT: Web Speech API; TTS: speechSynthesis.
  */
 (() => {
-  /** Alap felismerés + TTS háttér báziscím; felülírható a #kaizo-ai-agents elem data-agent-api attribútumával. */
-  const FALLBACK_ORIGIN =
-    'https://aivio-592551502751.europe-central2.run.app'.replace(/\/$/, '');
-  const VOICE_ID = '7B7mSWflzRSaO1yGeJH6';
-  const TTS_MODEL = 'eleven_flash_v2_5';
   const ABS_MAX_LISTEN_MS = 38000;
   const SILENCE_AFTER_WORD_MS = 1800;
   const MAX_SILENT_TURNS = 6;
 
+  /** Ugyanaz a szerepkör-kulcs mint korábban a szerveren — itt csak helyi választógéphez kell. */
+  const LOCAL_AGENTS = [
+    {
+      key: 'outbound_sales',
+      titles: { hu: 'Sales ügynök', en: 'Sales agent' },
+      intros: {
+        hu:
+          'Szia, Mihály vagyok — a Kaizo sales demó ügynök. Segítek egy rövid szinten tisztázni, mire lenne időpont, és elmondom a következő lépést. Ez statikus demó: nem hívunk háttér-szolgáltatást, mikrofon és gépelés is megy.',
+        en:
+          'Hi, I am Mihály — Kaizo sales demo agent. I can sketch what a call would cover and the next step. This is a static demo with no backend.',
+      },
+      hint: { hu: 'időpont, demo, kapcsolat', en: 'appointment, demo, contact' },
+    },
+    {
+      key: 'email_sales',
+      titles: { hu: 'Ügyfélszolgálat', en: 'Customer support' },
+      intros: {
+        hu:
+          'Ricsi vagyok — időpont- és ügyfélszolgálati demó. Írd vagy mondd el, miben segíthetek; lokális példaválaszokat adok, hogy lásd a Kaizo folyamatot.',
+        en:
+          'I am Ricsi — scheduling and support demo. Ask in text or voice; I answer with local scripted responses.',
+      },
+      hint: { hu: 'időpont, ügyfél, üzenet', en: 'appointment, client, message' },
+    },
+    {
+      key: 'support_inbound',
+      titles: { hu: 'Bejövő ügyfélszolgálat', en: 'Inbound support' },
+      intros: {
+        hu:
+          'Ari vagyok — bejövő támogatási demó. Mondd el röviden a problémát; demó módban iránymutatást kapsz, élő rendszer nélkül.',
+        en:
+          'I am Ari — inbound support demo. Briefly describe your issue; you get guidance text only, no live ticket system.',
+      },
+      hint: { hu: 'hiba, bejelentés, jegy', en: 'error, issue, ticket' },
+    },
+    {
+      key: 'customer_satisfaction',
+      titles: { hu: 'Elégedettségmérés', en: 'Satisfaction survey' },
+      intros: {
+        hu:
+          'Adél vagyok — elégedettségi demó. Tudok rögzíteni példa visszajelzést (szövegből), és összegzem, mit mérnél élőben.',
+        en:
+          'I am Adél — satisfaction demo. I capture example feedback and summarise what you would measure live.',
+      },
+      hint: { hu: 'elégedett, értékelés, javaslat', en: 'rating, feedback, suggestion' },
+    },
+  ];
+
   const el = (id) => document.getElementById(id);
-
-  function apiOrigin() {
-    const raw =
-      document.getElementById('kaizo-ai-agents')?.getAttribute?.('data-agent-api')?.trim?.() || '';
-    return (raw.replace(/\/$/, '') || FALLBACK_ORIGIN).replace(/\/$/, '');
-  }
-
-  const api = (path) => apiOrigin() + (path.startsWith('/') ? path : '/' + path);
 
   let chatEl,
     statusEl,
     loopEl,
     dotEl,
-    revEl,
-    backendEl,
     activeNameEl,
     activeKeyEl,
     inputEl;
@@ -37,9 +70,8 @@
   let running = false;
   let busy = false;
   let history = [];
-  let activeAudio = null;
-  let micStream = null;
   let silentTurns = 0;
+  let replyTurn = 0;
 
   function english() {
     return document.documentElement.lang === 'en';
@@ -49,19 +81,23 @@
     const en = english();
     const M = {
       pickRobot: en ? 'Pick an agent card first.' : 'Válassz előbb egy ügynököt.',
-      robotsFail: en
-        ? 'Cannot load agents (/robots). Enable CORS on the API host for this origin.'
-        : 'Nem érem el az ügynök-listát (/robots). Engedélyezd az API gépen a CORS-t ennél az oldalon.',
-      ttsFail: en ? 'Speech playback failed (TTS).' : 'Nem megy a felolvasás (TTS).',
+      ttsFail: en ? 'Speech output failed (browser TTS).' : 'A böngésző felolvasása nem indult el.',
       stopSilent: en
-        ? 'No usable speech — stopping. Tap an agent card again to continue.'
+        ? 'No speech detected — stopping. Tap an agent card again to continue.'
         : 'Nincs beszédbejegyzés — leállok. Nyomj új ügynök kártyát a folytatáshoz.',
-      errMeta: en ? 'Error' : 'Hiba',
+      errMeta: en ? 'Note' : 'Megjegyzés',
       agentMeta: en ? 'Agents' : 'Ügynökök',
       youMeta: en ? 'You' : 'Te',
       interruptMeta: en ? 'You (interrupted)' : 'Te (megszólaltál)',
+      demoNote: en
+        ? 'This is offline copy: no cloud API. Replies are scripted heuristics.'
+        : 'Ez offline demó: nincs felhő API, a válaszok helyi, mintapéldák.',
     };
     return M[code] || code;
+  }
+
+  function agentByKey(key) {
+    return LOCAL_AGENTS.find((a) => a.key === key) || null;
   }
 
   function setStatus(kind, text) {
@@ -87,106 +123,45 @@
     return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  async function apiJSON(url, payload) {
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!r.ok) throw new Error(url + ' ' + r.status + ' ' + (await r.text().catch(() => '')));
-    return r.json();
+  function pickVoice(langCode) {
+    const list = speechSynthesis.getVoices?.() || [];
+    const want = langCode === 'en' ? 'en' : 'hu';
+    return list.find((v) => (v.lang || '').toLowerCase().startsWith(want)) || list[0] || null;
   }
 
-  function haltAudio() {
-    if (!activeAudio) return;
-    try {
-      activeAudio.pause();
-      activeAudio.currentTime = 0;
-    } catch (e) {}
-    activeAudio = null;
-  }
-
-  async function micStreamAcquire() {
-    if (micStream) return micStream;
-    const g = navigator.mediaDevices?.getUserMedia;
-    if (!g) throw new Error(english() ? 'Microphone unsupported.' : 'Nincs mikrofon támogatás.');
-    micStream = await g({
-      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-    });
-    return micStream;
-  }
-
-  async function bargeProbe(audioEl) {
-    try {
-      const stream = await micStreamAcquire();
-      const ACtx = window.AudioContext || window.webkitAudioContext;
-      if (!ACtx) return false;
-      const ctx = new ACtx();
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 1024;
-      ctx.createMediaStreamSource(stream).connect(analyser);
-      const data = new Uint8Array(analyser.fftSize);
-      return await new Promise((resolve) => {
-        let speechFrames = 0;
-        const tick = () => {
-          if (audioEl.paused || audioEl.ended) {
-            resolve(false);
-            return;
-          }
-          analyser.getByteTimeDomainData(data);
-          let sum = 0;
-          for (let i = 0; i < data.length; i++) {
-            const v = (data[i] - 128) / 128;
-            sum += v * v;
-          }
-          const rms = Math.sqrt(sum / data.length);
-          if (rms > 0.055) speechFrames += 1;
-          else speechFrames = Math.max(0, speechFrames - 1);
-          if (speechFrames >= 4) {
-            resolve(true);
-            return;
-          }
-          requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      });
-    } catch (e) {
-      return false;
-    }
-  }
-
-  async function playTtsChunk(text, opts) {
-    const allowIn = opts?.allowBargeIn !== false;
+  /** @param {{ allowBargeIn?: boolean }} [opts] — barge-in nincs böngészős TTS-hez kötve */
+  function speakBrowser(text, opts) {
+    const allowIn = opts?.allowBargeIn === true;
+    void allowIn;
     setLoopState('SPEAKING');
-    const r = await fetch(api('/speak'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voiceId: VOICE_ID, model_id: TTS_MODEL }),
+    speechSynthesis.cancel();
+    return new Promise((resolve) => {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = english() ? 'en-US' : 'hu-HU';
+
+      const attachVoice = () => {
+        const voice = pickVoice(english() ? 'en' : 'hu');
+        if (voice) u.voice = voice;
+      };
+      attachVoice();
+      if (!(speechSynthesis.getVoices?.() || []).length) {
+        speechSynthesis.addEventListener('voiceschanged', attachVoice, { once: true });
+      }
+
+      u.onend = () => resolve({ interrupted: false });
+      u.onerror = () => resolve({ interrupted: false });
+      try {
+        speechSynthesis.speak(u);
+      } catch (e) {
+        resolve({ interrupted: false });
+      }
     });
-    if (!r.ok) throw new Error(await r.text().catch(() => ''));
-    const blob = await r.blob();
-    const u = URL.createObjectURL(blob);
-    const au = new Audio(u);
-    activeAudio = au;
-    const interrupted = await new Promise((resolve, reject) => {
-      au.onended = () => resolve(false);
-      au.onerror = reject;
-      au.play()
-        .then(async () => {
-          if (!allowIn) return;
-          const bump = await bargeProbe(au);
-          if (bump && !au.paused && !au.ended) {
-            try {
-              au.pause();
-            } catch (e) {}
-            resolve(true);
-          }
-        })
-        .catch(reject);
-    });
-    if (activeAudio === au) activeAudio = null;
-    URL.revokeObjectURL(u);
-    return { interrupted };
+  }
+
+  function haltSpeech() {
+    try {
+      speechSynthesis.cancel();
+    } catch (e) {}
   }
 
   const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -293,10 +268,74 @@
     });
   }
 
+  function localThink(userLine, key) {
+    const en = english();
+    replyTurn++;
+    const a = agentByKey(key);
+    const line = (userLine || '').toLowerCase();
+    const fallback = [
+      () =>
+        en
+          ? `Understood («${escapeHtmlThink(userLine)}»). Tip: keywords for this persona — ${a?.hint?.en || 'appointment, feedback'}. ${t('demoNote')}`
+          : `Értettem („${escapeHtmlThink(userLine)}”). Tipp ennél az ügynöknél: ${a?.hint?.hu || 'időpont, visszajelzés'}. ${t('demoNote')}`,
+      () =>
+        en
+          ? 'Recorded. In production this would branch to workflows, calendars, ERP and CRM integrations.'
+          : 'Rögzítve. Éles rendszerben innen vezérlődnének a naptár, CRM és ERP lépések.',
+      () =>
+        en
+          ? 'Thanks — that input would feed the next automation step in Kaizo.'
+          : 'Köszönöm — ez a bemenet a Kaizo következő automatizált lépéséhez csatlakozna.',
+    ];
+    const pick = fallback[(replyTurn + (userLine?.length || 0)) % fallback.length];
+
+    const greet = /\b(szia|szevasz|helló|hello|jó napot|jó reggelt|hey)\b/i.test(userLine);
+    const thanks = /\b(köszön|thanks|thank you|thx)\b/i.test(userLine);
+
+    if (en) {
+      if (greet) return `Hi! ${a?.intros?.en?.split('.')[0] || 'How can I help?'}`;
+      if (thanks) return 'You are welcome. Anything else I should note for the demo?';
+      if (key === 'outbound_sales' && /\b(appointment|slot|call|demo|meeting|price|cost)\b/i.test(line)) {
+        return 'For a real rollout we would book a slot in your calendar stack and send a confirmation. Here: pick a time window and I will echo it as a demo record.';
+      }
+      if (key === 'email_sales' && /\b(book|schedule|slot|complaint|email)\b/i.test(line)) {
+        return 'Scheduling path: we capture channel, topic, and preferred time; then push to your queue. Say a date or “next week morning”.';
+      }
+      if (key === 'support_inbound' && /\b(error|bug|broken|down|ticket|issue)\b/i.test(line)) {
+        return 'Triage step: severity, product area, and whether it blocks work. I would open a ticket ID and suggest the first fix article.';
+      }
+      if (key === 'customer_satisfaction' && /\b(score|rate|scale|satisfied|recommend|nps)\b/i.test(line)) {
+        return 'Survey flow: one main score plus one free-text reason. I will store your last message as example feedback for reporting.';
+      }
+      return pick();
+    }
+
+    if (greet) return `Szia! ${a?.intros?.hu?.split('.')[0] || 'Miben segíthetek?'}`;
+    if (thanks) return 'Szívesen. Van még valami, amit jegyezzek a demóhoz?';
+    if (key === 'outbound_sales' && /\b(időpont|demo|hívás|ár|árak|kapcsolat|árajánlat)\b/.test(line)) {
+      return 'Élesben naptáradhoz kötnénk a szabad idősávot és visszaigazolást küldenénk. Demóban: mondj egy időablakot, és azt visszhangként rögzítem.';
+    }
+    if (key === 'email_sales' && /\b(időpont|foglal|ügyfél|panasz|email|üzenet)\b/.test(line)) {
+      return 'Foglalási lépések: csatorna, téma, preferált idő — majd sorba tesszük. Mondd például: „jövő hét kedd délután”.';
+    }
+    if (key === 'support_inbound' && /\b(hiba|nem működik|leállt|jegy|ticket|probléma)\b/.test(line)) {
+      return 'Első szűrés: súlyosság, termékterület, blokkol-e a munkát. Innen nyílna a jegy és a javasolt első lépés.';
+    }
+    if (key === 'customer_satisfaction' && /\b(eléged|értékel|pont|skála|nps|javaslat)\b/.test(line)) {
+      return 'Mérési folyamat: egy fő pontszám + szabad szöveges indoklás. Az utolsó üzenetedet demó jelleggel visszajelzésként kezelem.';
+    }
+    return pick();
+  }
+
+  function escapeHtmlThink(s) {
+    const x = (s || '').slice(0, 200);
+    return x.replace(/</g, '');
+  }
+
   async function thinkLine(text) {
     setLoopState('THINK');
-    const data = await apiJSON(api('/think'), { text, robot: activeRobotKey, history });
-    return data.text || '';
+    await new Promise((r) => setTimeout(r, 120));
+    return localThink(text, activeRobotKey);
   }
 
   async function handleLine(userText, meta) {
@@ -304,9 +343,9 @@
     history.push({ role: 'user', content: userText });
     const reply = await thinkLine(userText);
     if (!running) return {};
-    addMsg('ai', reply, activeRobotTitle || 'AI');
+    addMsg('ai', reply, activeRobotTitle || 'Kaizo');
     history.push({ role: 'assistant', content: reply });
-    return playTtsChunk(reply, { allowBargeIn: true });
+    return speakBrowser(reply, {});
   }
 
   async function mainLoop(seed) {
@@ -336,14 +375,10 @@
 
         silentTurns = 0;
         const meta = cur === seed && seed ? t('interruptMeta') : t('youMeta');
-        const spoken = await handleLine(cur, meta);
+        await handleLine(cur, meta);
         if (!running) {
           busy = false;
           return;
-        }
-        if (spoken?.interrupted) {
-          cur = (await listenOnce()) || '';
-          continue;
         }
         break;
       }
@@ -360,24 +395,28 @@
     }
   }
 
-  async function startAgent(key, title, intro) {
+  async function startAgent(key) {
+    const def = agentByKey(key);
+    if (!def) return;
     document.querySelectorAll('.kaizo-agent-picker .kaizo-agent-card').forEach((c) =>
       c.classList.toggle('is-active', c.getAttribute('data-robot') === key),
     );
     activeRobotKey = key;
-    activeRobotTitle = title;
-    if (activeNameEl) activeNameEl.textContent = title;
+    activeRobotTitle = english() ? def.titles.en : def.titles.hu;
+    if (activeNameEl) activeNameEl.textContent = activeRobotTitle;
     if (activeKeyEl) activeKeyEl.textContent = '(' + key + ')';
 
     setStatus('ok', 'RUN');
     running = true;
     busy = false;
     silentTurns = 0;
+    replyTurn = 0;
 
-    addMsg('ai', intro, title);
+    const intro = english() ? def.intros.en : def.intros.hu;
+    addMsg('ai', intro, activeRobotTitle);
     history = [{ role: 'assistant', content: intro }];
     try {
-      await playTtsChunk(intro);
+      await speakBrowser(intro, {});
     } catch (err) {
       console.error(err);
       addMsg('ai', t('ttsFail'), t('errMeta'));
@@ -403,10 +442,9 @@
     history.push({ role: 'user', content: v });
     try {
       const answer = await thinkLine(v);
-      addMsg('ai', answer, activeRobotTitle || 'AI');
+      addMsg('ai', answer, activeRobotTitle || 'Kaizo');
       history.push({ role: 'assistant', content: answer });
-      const spoken = await playTtsChunk(answer, { allowBargeIn: true });
-      if (spoken?.interrupted) mainLoop((await listenOnce()) || '');
+      await speakBrowser(answer, {});
     } catch (err) {
       addMsg('ai', err.message || String(err), t('errMeta'));
     }
@@ -415,7 +453,7 @@
   function halt() {
     running = false;
     busy = false;
-    haltAudio();
+    haltSpeech();
     silentTurns = 0;
     setLoopState('IDLE');
     setStatus('ok', 'IDLE');
@@ -426,48 +464,23 @@
     recLock = false;
   }
 
-  function wireThumbs() {
-    const base = apiOrigin();
-    document.querySelectorAll('.kaizo-agent-picker .kaizo-agent-card[data-img]').forEach((card) => {
-      const img = card.querySelector('.kaizo-agent-thumb img');
-      const p = card.getAttribute('data-img');
-      if (img && p) img.src = base + (p.startsWith('/') ? p : '/' + p);
-    });
-  }
-
   function bind() {
     chatEl = el('kaizo-agent-chat');
     statusEl = el('kaizo-agent-status');
     loopEl = el('kaizo-agent-loop');
     dotEl = el('kaizo-agent-dot');
-    revEl = el('kaizo-agent-rev');
-    backendEl = el('kaizo-agent-backend');
     activeNameEl = el('kaizo-agent-active');
     activeKeyEl = el('kaizo-agent-key');
     inputEl = el('kaizo-agent-input');
 
-    wireThumbs();
-
-    const picker = document.querySelector('.kaizo-agent-picker');
-    if (picker) {
-      picker.addEventListener('click', async (e) => {
-        const card = e.target.closest('.kaizo-agent-card');
-        if (!card) return;
-        const key = card.getAttribute('data-robot');
-        if (!key) return;
-        try {
-          const data = await fetch(api('/robots')).then((r) => r.json());
-          const item = (data.robots || []).find((x) => x.key === key);
-          const title = item?.title || key;
-          const intro =
-            item?.intro || (english() ? 'Hello. I am your agent.' : 'Szia, ügynök vagyok.');
-          halt();
-          await startAgent(key, title, intro);
-        } catch (err) {
-          addMsg('ai', t('robotsFail'), t('errMeta'));
-        }
-      });
-    }
+    document.querySelector('.kaizo-agent-picker')?.addEventListener('click', (e) => {
+      const card = e.target.closest('.kaizo-agent-card');
+      if (!card) return;
+      const key = card.getAttribute('data-robot');
+      if (!key) return;
+      halt();
+      void startAgent(key);
+    });
 
     el('kaizo-agent-send')?.addEventListener('click', sendTyped);
     inputEl?.addEventListener('keydown', (e) => {
@@ -475,15 +488,9 @@
     });
     el('kaizo-agent-halt')?.addEventListener('click', halt);
 
-    (async () => {
-      try {
-        const h = await fetch(api('/health')).then((r) => r.json());
-        if (revEl) revEl.textContent = ' · ' + (h.rev || '?');
-        if (backendEl) backendEl.textContent = h.ok ? 'OK' : '?';
-      } catch (e) {
-        if (backendEl) backendEl.textContent = 'CORS?';
-      }
-    })();
+    if (speechSynthesis.getVoices?.().length === 0) {
+      speechSynthesis.addEventListener('voiceschanged', () => {}, { once: true });
+    }
 
     setStatus('ok', 'IDLE');
     setLoopState('IDLE');

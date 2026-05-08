@@ -473,7 +473,7 @@
 
   @media (max-width: 640px) { .demo-cards { grid-template-columns: 1fr; } }
 
-  /* Kaizo AI ügynök modul (nincs iframe; API + média háttér-címen — CORS) */
+  /* Kaizo AI ügynök modul — teljesen helyi demó (speechSynthesis + Web Speech, nincs külső HTTP) */
   #kaizo-ai-agents {
     scroll-margin-top: 96px;
     margin-top: 3rem;
@@ -540,11 +540,28 @@
     box-shadow: 0 0 0 6px rgba(41,172,217,0.08);
     border-color: rgba(41,172,217,0.4);
   }
-  .kaizo-agent-thumb { height: clamp(168px, 22vw, 208px); background: #06060a; position: relative; }
-  .kaizo-agent-thumb img {
-    width: 100%; height: 100%; object-fit: cover;
-    filter: saturate(1.03) contrast(1.03);
-    display: block;
+  .kaizo-agent-thumb {
+    height: clamp(168px, 22vw, 208px);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 7.5vw, 3.35rem);
+    letter-spacing: -0.06em;
+    color: rgba(240, 239, 237, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: linear-gradient(145deg, rgba(41,172,217,0.38), rgba(255,255,255,0.05));
+  }
+  .kaizo-agent-picker .kaizo-agent-card:nth-child(2) .kaizo-agent-thumb {
+    background: linear-gradient(145deg, rgba(147,164,199,0.42), rgba(255,255,255,0.06));
+  }
+  .kaizo-agent-picker .kaizo-agent-card:nth-child(3) .kaizo-agent-thumb {
+    background: linear-gradient(145deg, rgba(110,90,200,0.35), rgba(41,172,217,0.12));
+  }
+  .kaizo-agent-picker .kaizo-agent-card:nth-child(4) .kaizo-agent-thumb {
+    background: linear-gradient(145deg, rgba(241,180,90,0.28), rgba(41,172,217,0.12));
   }
   .kaizo-agent-chip {
     position: absolute;
@@ -974,9 +991,9 @@
         Próbáld ki élőben.
       </h2>
       <p class="section-body reveal d2" style="text-align:center;max-width:620px;margin:0 auto"
-         data-hu="CRM és ERP: kattintgatható demó példaadatokkal. AI ügynökök: válassz robotkártyát (hang + chat) — Chrome és mikrofon engedély ajánlott."
-         data-en="CRM & ERP: clickable demo with sample data. AI agents: pick a robot card (voice + chat) — Chrome and microphone permission recommended.">
-        CRM és ERP: kattintgatható demó példaadatokkal. AI ügynökök: válassz robotkártyát (hang + chat) — Chrome és mikrofon engedély ajánlott.
+         data-hu="CRM és ERP: demó példaadatokkal. AI ügynökök: hang + gépelés, böngészőben, külső API nélkül — Chrome és mikrofon ajánlott."
+         data-en="CRM & ERP: sample-data demos. AI agents run in the browser (voice + typing), no cloud API — Chrome and microphone recommended.">
+        CRM és ERP: demó példaadatokkal. AI ügynökök: hang + gépelés, böngészőben, külső API nélkül — Chrome és mikrofon ajánlott.
       </p>
       <div class="demo-cards reveal d3">
         <a class="demo-card" href="kaizo-crm.html" target="_blank">
@@ -1012,54 +1029,54 @@
             <div class="demo-card-sub" data-hu="Ügyfélszolgálat · időpont · elégedettség" data-en="Support · scheduling · satisfaction">Ügyfélszolgálat · időpont · elégedettség</div>
           </div>
           <p class="demo-card-desc"
-             data-hu="Hang + gépelés: négy előre bekötött Kaizo-demó személyzet, ugyanannak a háttér-API-nak megfelelő logikával (nem külön weblap)."
-             data-en="Voice + typing: four built-in Kaizo demo personas against the same hosted API backend (no separate webpage).">
-            Hang + gépelés: négy előre bekötött Kaizo-demó személyzet, ugyanannak a háttér-API-nak megfelelő logikával (nem külön weblap).
+             data-hu="Hang + gépelés: négy előre bekötött demó személyzet, helyben generált példaválaszokkal — nincs külső szerverhívás."
+             data-en="Voice + typing: four built-in Kaizo demo personas with scripted local replies — no external API calls.">
+            Hang + gépelés: négy előre bekötött demó személyzet, helyben generált példaválaszokkal — nincs külső szerverhívás.
           </p>
           <span class="demo-card-cta" data-hu="Megnyitás a demó részben" data-en="Open demo section">Megnyitás a demó részben</span>
         </a>
       </div>
-      <div id="kaizo-ai-agents" class="reveal d3" data-agent-api="https://aivio-592551502751.europe-central2.run.app">
+      <div id="kaizo-ai-agents" class="reveal d3">
         <p class="section-body kaizo-agent-lead"
            style="max-width: 720px; margin: 0 auto 1.35rem; text-align:center; opacity: .92"
-           data-hu="Válassz ügynököt lent: először bemutatkozik (hanggal), ezután a böngésző beszédfelismeréssel figyeli a válaszod — vagy gépelhetsz fallbackként is. Chrome és mikrofon engedély javasolt. A funkció háttér-API-val beszél; ha nem tölt az állapotjelző, állítsd be a megfelelő CORS-t az API gépen ennél az oldalon."
-           data-en="Pick an agent below: an intro plays first (audio), then the browser listens with speech recognition — or type as fallback. Chrome and microphone work best. Calls a hosted API backend; if the status never turns OK, enable CORS for this site on that API server.">
-          Válassz ügynököt lent: először bemutatkozik (hanggal), ezután a böngésző beszédfelismeréssel figyeli a válaszod — vagy gépelhetsz fallbackként is. Chrome és mikrofon engedély javasolt. A funkció háttér-API-val beszél; ha nem tölt az állapotjelző, állítsd be a megfelelő CORS-t az API gépen ennél az oldalon.
+           data-hu="Teljesen ez az oldalon fut: bemutatkozás hangosan (böngésző felolvasás), válasz gépeléssel vagy magyar beszédfelismeréssel — a szövegeket és ügynök-információt a lap tartalmazza, nincs háttér HTTP (LLM / TTS szerver nélkül)."
+           data-en="Runs entirely on this page: intro via browser speech synthesis, then you type or use speech recognition — copy and agent info are embedded here; there is no backend LLM or hosted TTS API.">
+          Teljesen ez az oldalon fut: bemutatkozás hangosan (böngésző felolvasás), válasz gépeléssel vagy magyar beszédfelismeréssel — a szövegeket és ügynök-információt a lap tartalmazza, nincs háttér HTTP (LLM / TTS szerver nélkül).
         </p>
         <div class="kaizo-agent-topbar">
           <span class="kaizo-agent-pill"><span id="kaizo-agent-dot" class="kaizo-agent-dot" aria-hidden="true"></span>
-            <b id="kaizo-agent-status">IDLE</b><span id="kaizo-agent-rev"></span></span>
-          <span class="kaizo-agent-pill"><span data-hu="Háttér:" data-en="Backend:">Háttér:</span> <strong id="kaizo-agent-backend">…</strong></span>
+            <b id="kaizo-agent-status">IDLE</b></span>
+          <span class="kaizo-agent-pill"><span data-hu="Motor:" data-en="Engine:">Motor:</span> <strong id="kaizo-agent-engine" data-hu="speechSynthesis + Web Speech · offline" data-en="speechSynthesis + Web Speech · offline">speechSynthesis + Web Speech · offline</strong></span>
           <span class="kaizo-agent-pill"><span id="kaizo-agent-loop" style="font-weight:700;color:var(--white)">IDLE</span></span>
         </div>
 
         <div class="kaizo-agent-picker" role="group" aria-label="Ügynökök">
-          <button type="button" class="kaizo-agent-card" data-robot="outbound_sales" data-img="/img/outbound-email.jpg">
-            <div class="kaizo-agent-thumb"><img alt="" width="560" height="320" decoding="async" /></div>
+          <button type="button" class="kaizo-agent-card" data-robot="outbound_sales">
+            <div class="kaizo-agent-thumb" aria-hidden="true">M</div>
             <span class="kaizo-agent-chip">Mihály</span>
             <div class="kaizo-agent-card-bd">
               <h3 data-hu="Sales ügynök" data-en="Sales agent">Sales ügynök</h3>
               <p data-hu="Telefonos időpont egyeztetés." data-en="Phone appointment scheduling.">Telefonos időpont egyeztetés.</p>
             </div>
           </button>
-          <button type="button" class="kaizo-agent-card" data-robot="email_sales" data-img="/img/data-collection.jpg">
-            <div class="kaizo-agent-thumb"><img alt="" width="560" height="320" decoding="async" /></div>
+          <button type="button" class="kaizo-agent-card" data-robot="email_sales">
+            <div class="kaizo-agent-thumb" aria-hidden="true">R</div>
             <span class="kaizo-agent-chip">Ricsi</span>
             <div class="kaizo-agent-card-bd">
               <h3 data-hu="Ügyfélszolgálat" data-en="Support">Ügyfélszolgálat</h3>
               <p data-hu="Időpontfoglaló folyamat." data-en="Scheduling flow.">Időpontfoglaló folyamat.</p>
             </div>
           </button>
-          <button type="button" class="kaizo-agent-card" data-robot="support_inbound" data-img="/img/outbound-phone.jpg">
-            <div class="kaizo-agent-thumb"><img alt="" width="560" height="320" decoding="async" /></div>
+          <button type="button" class="kaizo-agent-card" data-robot="support_inbound">
+            <div class="kaizo-agent-thumb" aria-hidden="true">A</div>
             <span class="kaizo-agent-chip">Ari</span>
             <div class="kaizo-agent-card-bd">
               <h3 data-hu="Bejövő ügyfélszolgálat" data-en="Inbound support">Bejövő ügyfélszolgálat</h3>
               <p data-hu="Telefonos támogatás." data-en="Phone assistance.">Telefonos támogatás.</p>
             </div>
           </button>
-          <button type="button" class="kaizo-agent-card" data-robot="customer_satisfaction" data-img="/img/inbound-support.jpg">
-            <div class="kaizo-agent-thumb"><img alt="" width="560" height="320" decoding="async" /></div>
+          <button type="button" class="kaizo-agent-card" data-robot="customer_satisfaction">
+            <div class="kaizo-agent-thumb" aria-hidden="true">Á</div>
             <span class="kaizo-agent-chip">Adél</span>
             <div class="kaizo-agent-card-bd">
               <h3 data-hu="Elégedettségmérés" data-en="Satisfaction survey">Elégedettségmérés</h3>
