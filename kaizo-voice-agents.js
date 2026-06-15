@@ -51,8 +51,8 @@
   const TTS_MODEL = 'eleven_flash_v2_5';
 
   const ABS_MAX_LISTEN_MS = 38000;
-  const SILENCE_FINAL_MS = 700;
-  const SILENCE_INTERIM_MS = 1000;
+  const SILENCE_FINAL_MS = 1300;
+  const SILENCE_INTERIM_MS = 1650;
   const LOOP_IDLE_MS = 40;
   const LISTEN_RETRY_MS = 120;
   const MAX_SILENT_TURNS = 6;
@@ -298,8 +298,14 @@
 
       const armSilence = () => {
         wipeSilence();
-        const delay = finals.trim() ? SILENCE_FINAL_MS : SILENCE_INTERIM_MS;
-        silenceT = setTimeout(() => finalize(textOut()), delay);
+        const delay = interim.trim() ? SILENCE_INTERIM_MS : SILENCE_FINAL_MS;
+        silenceT = setTimeout(() => {
+          if (interim.trim()) {
+            armSilence();
+            return;
+          }
+          finalize(textOut());
+        }, delay);
       };
 
       const hardStop = setTimeout(() => finalize(textOut()), ABS_MAX_LISTEN_MS);
@@ -314,14 +320,7 @@
         }
         finals = f;
         interim = i;
-        if (textOut()) {
-          if (ev.results[ev.results.length - 1]?.isFinal) {
-            wipeSilence();
-            silenceT = setTimeout(() => finalize(textOut()), SILENCE_FINAL_MS);
-          } else {
-            armSilence();
-          }
-        }
+        if (textOut()) armSilence();
       };
 
       r.onerror = (ev) => {
