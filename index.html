@@ -473,7 +473,7 @@
 
   @media (max-width: 640px) { .demo-cards { grid-template-columns: 1fr; } }
 
-  /* Kaizo AI ügynök: Web Speech + szerver /think, /speak, /robots, /health (CORS kell Kaizo hu-ról) */
+  /* Kaizo AI ügynök: Web Speech + szerver /think, /speak, /robots, /health (same-origin proxy vagy Aivio API) */
   #kaizo-ai-agents {
     scroll-margin-top: 96px;
     margin-top: 3rem;
@@ -1020,19 +1020,19 @@
             <div class="demo-card-sub" data-hu="Ügyfélszolgálat · időpont · elégedettség" data-en="Support · scheduling · satisfaction">Ügyfélszolgálat · időpont · elégedettség</div>
           </div>
           <p class="demo-card-desc"
-             data-hu="Hang + gépelés: négy demó személyzet; bemutatkozás és válasz a Kaizo háttér-API-tól (/robots szöveg, /think / /speak), CORS nélkül kaizo.hu-ról nem tölt."
-             data-en="Voice + typing: four demo personas — intro and replies from the Kaizo-hosted API (/robots, /think, /speak); CORS required from kaizo.hu.">
-            Hang + gépelés: négy demó személyzet; bemutatkozás és válasz a Kaizo háttér-API-tól (/robots szöveg, /think / /speak), CORS nélkül kaizo.hu-ról nem tölt.
+             data-hu="Hang + gépelés: négy demó ügynök; bemutatkozás és válasz az Aivio háttér-API-tól (/robots, /think, /speak)."
+             data-en="Voice + typing: four demo agents — intro and replies from the Aivio API (/robots, /think, /speak).">
+            Hang + gépelés: négy demó ügynök; bemutatkozás és válasz az Aivio háttér-API-tól (/robots, /think, /speak).
           </p>
           <span class="demo-card-cta" data-hu="Megnyitás a demó részben" data-en="Open demo section">Megnyitás a demó részben</span>
         </a>
       </div>
-      <div id="kaizo-ai-agents" class="reveal d3" data-agent-api="https://aivio-592551502751.europe-central2.run.app">
+      <div id="kaizo-ai-agents" class="reveal d3" data-agent-api="same-origin">
         <p class="section-body kaizo-agent-lead"
            style="max-width: 720px; margin: 0 auto 1.35rem; text-align:center; opacity: .92"
-           data-hu="Hangos bemutatkozás (TTS a szerverről), utána magyar beszédfelismerés és írás. A háttér-API végpontja a data-agent-api attribútumban állítható — kaizo.hu-ról CORS kell rá; helyben teszteled előnézet localhosttal is."
-           data-en="Voice intro plays from the server TTS endpoint, then speech recognition (Hungarian) and typing. Backend base URL is in data-agent-api — enable CORS for kaizo.hu; localhost preview works too.">
-          Hangos bemutatkozás (TTS a szerverről), utána magyar beszédfelismerés és írás. A háttér-API végpontja a data-agent-api attribútumban állítható — kaizo.hu-ról CORS kell rá; helyben teszteled előnézet localhosttal is.
+           data-hu="Hangos bemutatkozás (TTS a szerverről), utána magyar beszédfelismerés és írás. kaizo.hu-n az API same-origin proxyn keresztül fut; helyi előnézetnél közvetlenül az Aivio API-t használja."
+           data-en="Voice intro from server TTS, then Hungarian speech recognition and typing. On kaizo.hu the API is proxied same-origin; local preview talks to Aivio directly.">
+          Hangos bemutatkozás (TTS a szerverről), utána magyar beszédfelismerés és írás. kaizo.hu-n az API same-origin proxyn keresztül fut; helyi előnézetnél közvetlenül az Aivio API-t használja.
         </p>
         <div class="kaizo-agent-topbar">
           <span class="kaizo-agent-pill"><span id="kaizo-agent-dot" class="kaizo-agent-dot" aria-hidden="true"></span>
