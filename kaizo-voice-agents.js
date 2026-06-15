@@ -51,7 +51,10 @@
   const TTS_MODEL = 'eleven_flash_v2_5';
 
   const ABS_MAX_LISTEN_MS = 38000;
-  const SILENCE_AFTER_WORD_MS = 1800;
+  const SILENCE_FINAL_MS = 700;
+  const SILENCE_INTERIM_MS = 1000;
+  const LOOP_IDLE_MS = 40;
+  const LISTEN_RETRY_MS = 120;
   const MAX_SILENT_TURNS = 6;
 
   const el = (id) => document.getElementById(id);
@@ -242,7 +245,7 @@
       const line = await listenSegment();
       if (!running) return '';
       if (line.trim()) return line.trim();
-      await new Promise((r) => setTimeout(r, 350));
+      await new Promise((r) => setTimeout(r, LISTEN_RETRY_MS));
     }
     return '';
   }
@@ -295,7 +298,8 @@
 
       const armSilence = () => {
         wipeSilence();
-        silenceT = setTimeout(() => finalize(textOut()), SILENCE_AFTER_WORD_MS);
+        const delay = finals.trim() ? SILENCE_FINAL_MS : SILENCE_INTERIM_MS;
+        silenceT = setTimeout(() => finalize(textOut()), delay);
       };
 
       const hardStop = setTimeout(() => finalize(textOut()), ABS_MAX_LISTEN_MS);
@@ -310,7 +314,14 @@
         }
         finals = f;
         interim = i;
-        if (textOut()) armSilence();
+        if (textOut()) {
+          if (ev.results[ev.results.length - 1]?.isFinal) {
+            wipeSilence();
+            silenceT = setTimeout(() => finalize(textOut()), SILENCE_FINAL_MS);
+          } else {
+            armSilence();
+          }
+        }
       };
 
       r.onerror = (ev) => {
@@ -372,7 +383,7 @@
               return;
             }
             busy = false;
-            setTimeout(mainLoop, 200);
+            setTimeout(mainLoop, LOOP_IDLE_MS);
             return;
           }
         }
@@ -392,7 +403,7 @@
       }
 
       busy = false;
-      setTimeout(mainLoop, 150);
+      setTimeout(mainLoop, LOOP_IDLE_MS);
     } catch (err) {
       console.error(err);
       setStatus('err', 'ERROR');
@@ -419,6 +430,8 @@
 
     addMsg('ai', intro, robotTitle);
     history = [{ role: 'assistant', content: intro }];
+
+    micStreamAcquire().catch(() => {});
 
     try {
       await playTtsChunk(intro, { allowBargeIn: true });
