@@ -1,0 +1,9 @@
+[build]
+  publish = "."
+
+# Same-origin proxy to Aivio API — avoids browser CORS on kaizo.hu.
+[[redirects]]
+  from = "/agent-api/*"
+  to = "https://aivio3.netlify.app/:splat"
+  status = 200
+  force = true

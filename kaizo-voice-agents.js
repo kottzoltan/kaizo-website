@@ -1,10 +1,52 @@
 /**
  * Kaizo hang + chat ügynökök: állapot a böngészőben; beszélgetés háttér-API-val.
- * Könnyebb path: állítsd a #kaizo-ai-agents data-agent-api értékét és engedélyezd a CORS-t a szerveren.
+ * API: same-origin /agent-api proxy (Netlify) vagy közvetlenül aivio3.netlify.app (CORS).
  */
 (() => {
-  const FALLBACK_ORIGIN =
-    'https://aivio-592551502751.europe-central2.run.app'.replace(/\/$/, '');
+  const FALLBACK_ORIGIN = 'https://aivio3.netlify.app';
+
+  const LEGACY_API_HOSTS = [
+    'aivio-592551502751.europe-central2.run.app',
+    'europe-central2.run.app',
+  ];
+
+  function isKaizoSiteHost(hostname) {
+    const h = (hostname || '').toLowerCase();
+    return h === 'kaizo.hu' || h.endsWith('.kaizo.hu');
+  }
+
+  function normalizeApiOrigin(raw) {
+    let origin = (raw || '').replace(/\/$/, '') || FALLBACK_ORIGIN;
+    try {
+      const host = new URL(origin).hostname.toLowerCase();
+      if (LEGACY_API_HOSTS.some((h) => host === h || host.endsWith('.' + h))) {
+        return FALLBACK_ORIGIN;
+      }
+    } catch (_) {
+      return FALLBACK_ORIGIN;
+    }
+    return origin;
+  }
+
+  function apiOrigin() {
+    const raw =
+      document.getElementById('kaizo-ai-agents')?.getAttribute?.('data-agent-api')?.trim?.() || '';
+    const siteOrigin = window.location.origin.replace(/\/$/, '');
+    const onKaizo = isKaizoSiteHost(window.location.hostname);
+
+    if (raw === 'same-origin' || raw === '/agent-api') {
+      return onKaizo ? siteOrigin + '/agent-api' : FALLBACK_ORIGIN;
+    }
+
+    if (!raw && onKaizo) {
+      return siteOrigin + '/agent-api';
+    }
+
+    return normalizeApiOrigin(raw);
+  }
+
+  const api = (path) => apiOrigin() + (path.startsWith('/') ? path : '/' + path);
+
   const VOICE_ID = '7B7mSWflzRSaO1yGeJH6';
   const TTS_MODEL = 'eleven_flash_v2_5';
 
@@ -13,14 +55,6 @@
   const MAX_SILENT_TURNS = 6;
 
   const el = (id) => document.getElementById(id);
-
-  function apiOrigin() {
-    const raw =
-      document.getElementById('kaizo-ai-agents')?.getAttribute?.('data-agent-api')?.trim?.() || '';
-    return (raw.replace(/\/$/, '') || FALLBACK_ORIGIN).replace(/\/$/, '');
-  }
-
-  const api = (path) => apiOrigin() + (path.startsWith('/') ? path : '/' + path);
 
   let chatEl,
     statusEl,
@@ -50,8 +84,8 @@
     const M = {
       pickRobot: en ? 'Pick an agent card first.' : 'Válassz előbb egy ügynököt.',
       robotsFail: en
-        ? 'Cannot load robots (/robots). Enable CORS on the API host for this origin.'
-        : 'Nem érem el az ügynök-listát (/robots). Engedélyezd az API gépen a CORS-t ennél az oldalon.',
+        ? 'Cannot load robots (/robots). Check the agent API connection.'
+        : 'Nem érem el az ügynök-listát (/robots). Ellenőrizd az API kapcsolatot.',
       ttsFail: en ? 'TTS playback failed.' : 'A felolvasás (TTS) nem járt el.',
       stopSilent: en
         ? 'No speech — stopping. Tap an agent again to resume.'
@@ -494,7 +528,7 @@
         if (backendEl) backendEl.textContent = h.ok ? 'OK' : '?';
       } catch (e) {
         if (revEl) revEl.textContent = '';
-        if (backendEl) backendEl.textContent = english() ? 'CORS / net' : 'CORS / háló';
+        if (backendEl) backendEl.textContent = english() ? 'offline' : 'nem elérhető';
       }
     })();
 
