@@ -798,6 +798,10 @@
   .cf-textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
   .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
   @media (max-width: 520px) { .cf-row { grid-template-columns: 1fr; } }
+  .cf-status { font-size: .82rem; margin-bottom: .8rem; line-height: 1.5; }
+  .cf-status.ok { color: #34c759; }
+  .cf-status.err { color: #ff6b6b; }
+  #contact-submit:disabled { opacity: .65; cursor: wait; }
 </style>
 </head>
 <body>
@@ -1136,15 +1140,29 @@
       </div>
       <div class="contact-form-card reveal d1">
         <div class="contact-form-title" data-hu="Küldj üzenetet" data-en="Send a message">Küldj üzenetet</div>
-        <div class="cf-row">
-          <div><label class="cf-label" data-hu="Neved" data-en="Your name">Neved</label><input class="cf-input" type="text" placeholder="Kovács János"></div>
-          <div><label class="cf-label" data-hu="Cégnév" data-en="Company">Cégnév</label><input class="cf-input" type="text" placeholder="Acme Kft."></div>
-        </div>
-        <label class="cf-label">Email</label>
-        <input class="cf-input" type="email" placeholder="janos@acme.hu">
-        <label class="cf-label" data-hu="Üzenet" data-en="Message">Üzenet</label>
-        <textarea class="cf-textarea" placeholder="Miről szeretnél többet tudni?"></textarea>
-        <button onclick="this.textContent='✓ Elküldve!';this.style.color='#34c759';this.style.borderColor='rgba(52,199,89,0.4)';setTimeout(()=>{this.textContent=this.dataset.orig;this.style.color='';this.style.borderColor='';},3000)" data-orig="Üzenet küldése" class="btn btn-cyan" style="width:100%;text-align:center;display:block;cursor:pointer;" data-hu="Üzenet küldése" data-en="Send message">Üzenet küldése</button>
+        <form id="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="contact">
+          <input type="hidden" name="subject" value="Új üzenet a kaizo.hu kapcsolati űrlapról">
+          <p hidden>
+            <label>Ne töltsd ki: <input name="bot-field"></label>
+          </p>
+          <div class="cf-row">
+            <div>
+              <label class="cf-label" for="cf-name" data-hu="Neved" data-en="Your name">Neved</label>
+              <input class="cf-input" id="cf-name" type="text" name="name" required placeholder="Kovács János" data-hu-placeholder="Kovács János" data-en-placeholder="John Smith">
+            </div>
+            <div>
+              <label class="cf-label" for="cf-company" data-hu="Cégnév" data-en="Company">Cégnév</label>
+              <input class="cf-input" id="cf-company" type="text" name="company" placeholder="Acme Kft." data-hu-placeholder="Acme Kft." data-en-placeholder="Acme Ltd.">
+            </div>
+          </div>
+          <label class="cf-label" for="cf-email">Email</label>
+          <input class="cf-input" id="cf-email" type="email" name="email" required placeholder="janos@acme.hu" data-hu-placeholder="janos@acme.hu" data-en-placeholder="john@acme.com">
+          <label class="cf-label" for="cf-message" data-hu="Üzenet" data-en="Message">Üzenet</label>
+          <textarea class="cf-textarea" id="cf-message" name="message" required placeholder="Miről szeretnél többet tudni?" data-hu-placeholder="Miről szeretnél többet tudni?" data-en-placeholder="What would you like to know more about?"></textarea>
+          <p id="contact-form-status" class="cf-status" hidden aria-live="polite"></p>
+          <button type="submit" id="contact-submit" class="btn btn-cyan" style="width:100%;text-align:center;display:block;cursor:pointer;" data-hu="Üzenet küldése" data-en="Send message">Üzenet küldése</button>
+        </form>
       </div>
     </div>
   </section>
@@ -1294,6 +1312,63 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
   btn.addEventListener('click', () => applyLang(btn.dataset.lang));
 });
 applyLang(document.documentElement.lang || 'hu');
+
+/* ── CONTACT FORM (Netlify Forms) ── */
+(function () {
+  const form = document.getElementById('contact-form');
+  const submitBtn = document.getElementById('contact-submit');
+  const statusEl = document.getElementById('contact-form-status');
+  if (!form || !submitBtn || !statusEl) return;
+
+  const copy = {
+    sending: { hu: 'Küldés…', en: 'Sending…' },
+    success: { hu: '✓ Köszönjük! Hamarosan visszajelzünk.', en: '✓ Thanks! We’ll get back to you soon.' },
+    error: { hu: 'Nem sikerült elküldeni. Próbáld újra, vagy írj közvetlenül: info@kaizo.hu', en: 'Could not send. Try again or email us at info@kaizo.hu' },
+  };
+
+  function lang() {
+    return document.documentElement.lang === 'en' ? 'en' : 'hu';
+  }
+
+  function setStatus(kind, message) {
+    statusEl.hidden = false;
+    statusEl.className = 'cf-status ' + (kind === 'ok' ? 'ok' : 'err');
+    statusEl.textContent = message;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const l = lang();
+    submitBtn.disabled = true;
+    statusEl.hidden = true;
+    submitBtn.textContent = copy.sending[l];
+
+    try {
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(new FormData(form)).toString(),
+      });
+      if (!res.ok) throw new Error('submit failed');
+      form.reset();
+      setStatus('ok', copy.success[l]);
+      submitBtn.textContent = copy.success[l];
+      submitBtn.style.color = '#34c759';
+      submitBtn.style.borderColor = 'rgba(52,199,89,0.4)';
+      setTimeout(() => {
+        submitBtn.textContent = submitBtn.getAttribute('data-' + l) || 'Üzenet küldése';
+        submitBtn.style.color = '';
+        submitBtn.style.borderColor = '';
+        statusEl.hidden = true;
+      }, 4000);
+    } catch {
+      setStatus('err', copy.error[l]);
+      submitBtn.textContent = submitBtn.getAttribute('data-' + l) || 'Üzenet küldése';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+})();
 </script>
 <script defer src="kaizo-voice-agents.js"></script>
 </body>
