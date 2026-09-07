@@ -1,8 +1,8 @@
 import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
-import { db } from "../../db/index.js";
-import { invoices } from "../../db/schema.js";
-import { error, json, requireAuthOrg } from "./_shared/http.js";
+import { db } from "../../db/index";
+import { invoices } from "../../db/schema";
+import { error, json, requireAuthOrg } from "./_shared/http";
 
 export default async (req: Request, context: Context) => {
   const gate = await requireAuthOrg(req);

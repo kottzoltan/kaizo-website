@@ -9,7 +9,7 @@
   external_node_modules = ["drizzle-orm", "@netlify/database", "@netlify/identity"]
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
   KAIZO_TRIAL_DAYS = "60"
 
 # Same-origin proxy to Aivio API — voice agents on the public demo site.

@@ -1,8 +1,8 @@
 import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
-import { db } from "../../db/index.js";
-import { feeLines } from "../../db/schema.js";
-import { error, json, requireAuthOrg } from "./_shared/http.js";
+import { db } from "../../db/index";
+import { feeLines } from "../../db/schema";
+import { error, json, requireAuthOrg } from "./_shared/http";
 
 function lineAmount(quantity: string | number, unitPrice: string | number) {
   return (Number(quantity) * Number(unitPrice)).toFixed(2);

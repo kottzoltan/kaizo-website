@@ -1,8 +1,8 @@
 import type { Config, Context } from "@netlify/functions";
 import { eq } from "drizzle-orm";
-import { db } from "../../db/index.js";
-import { memberships, organizations } from "../../db/schema.js";
-import { error, json, requireAuthOrg, requireUser, slugify } from "./_shared/http.js";
+import { db } from "../../db/index";
+import { memberships, organizations } from "../../db/schema";
+import { error, json, requireAuthOrg, requireUser, slugify } from "./_shared/http";
 
 export default async (req: Request, _context: Context) => {
   if (req.method === "GET") {
