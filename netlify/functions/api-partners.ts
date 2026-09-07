@@ -41,6 +41,9 @@ export default async (req: Request, context: Context) => {
         email: body.email || null,
         phone: body.phone || null,
         company: body.company || null,
+        taxId: body.taxId || null,
+        city: body.city || null,
+        status: body.status || "active",
         notes: body.notes || null,
       })
       .returning();
@@ -50,7 +53,16 @@ export default async (req: Request, context: Context) => {
   if (req.method === "PATCH" && id) {
     const body = await req.json().catch(() => ({}));
     const patch: Record<string, unknown> = { updatedAt: new Date() };
-    for (const key of ["name", "email", "phone", "company", "notes"] as const) {
+    for (const key of [
+      "name",
+      "email",
+      "phone",
+      "company",
+      "taxId",
+      "city",
+      "status",
+      "notes",
+    ] as const) {
       if (body[key] !== undefined) patch[key] = body[key];
     }
     const [row] = await db

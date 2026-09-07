@@ -4,6 +4,11 @@ import { db } from "./_shared/db/index";
 import { invoices } from "./_shared/db/schema";
 import { error, json, requireAuthOrg } from "./_shared/http";
 
+function residualFrom(total: string | number, paid: string | number) {
+  const r = Number(total) - Number(paid);
+  return (r > 0 ? r : 0).toFixed(2);
+}
+
 export default async (req: Request, context: Context) => {
   const gate = await requireAuthOrg(req);
   if (gate.response) return gate.response;
@@ -31,6 +36,10 @@ export default async (req: Request, context: Context) => {
 
   if (req.method === "POST" && !id) {
     const body = await req.json().catch(() => ({}));
+    const total = body.total != null ? String(body.total) : "0";
+    const amountPaid = body.amountPaid != null ? String(body.amountPaid) : "0";
+    const amountResidual =
+      body.amountResidual != null ? String(body.amountResidual) : residualFrom(total, amountPaid);
     const [row] = await db
       .insert(invoices)
       .values({
@@ -43,7 +52,9 @@ export default async (req: Request, context: Context) => {
         issuedOn: body.issuedOn || null,
         dueOn: body.dueOn || null,
         currency: body.currency || "HUF",
-        total: body.total != null ? String(body.total) : "0",
+        total,
+        amountPaid,
+        amountResidual,
         notes: body.notes || null,
       })
       .returning();
@@ -67,6 +78,19 @@ export default async (req: Request, context: Context) => {
       if (body[key] !== undefined) patch[key] = body[key];
     }
     if (body.total !== undefined) patch.total = String(body.total);
+    if (body.amountPaid !== undefined) patch.amountPaid = String(body.amountPaid);
+    if (body.amountResidual !== undefined) patch.amountResidual = String(body.amountResidual);
+    else if (body.total !== undefined || body.amountPaid !== undefined) {
+      const [existing] = await db
+        .select()
+        .from(invoices)
+        .where(and(eq(invoices.orgId, orgId), eq(invoices.id, id)))
+        .limit(1);
+      if (!existing) return error("Not found", 404);
+      const t = body.total != null ? body.total : existing.total;
+      const p = body.amountPaid != null ? body.amountPaid : existing.amountPaid;
+      patch.amountResidual = residualFrom(t, p);
+    }
     const [row] = await db
       .update(invoices)
       .set(patch)

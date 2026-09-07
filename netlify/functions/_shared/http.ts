@@ -63,3 +63,14 @@ export function slugify(name: string) {
     .replace(/^-|-$/g, "")
     .slice(0, 60) || `org-${Date.now()}`;
 }
+
+const WRITE_ROLES = new Set(["owner", "admin", "member"]);
+const ADMIN_ROLES = new Set(["owner", "admin"]);
+
+export function canWrite(role: string | null | undefined) {
+  return WRITE_ROLES.has(role || "");
+}
+
+export function canAdmin(role: string | null | undefined) {
+  return ADMIN_ROLES.has(role || "");
+}
