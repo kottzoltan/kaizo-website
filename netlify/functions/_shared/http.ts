@@ -1,7 +1,7 @@
 import { getUser } from "@netlify/identity";
 import { and, eq } from "drizzle-orm";
-import { db } from "../../db/index";
-import { memberships, organizations } from "../../db/schema";
+import { db } from "./db/index";
+import { memberships, organizations } from "./db/schema";
 
 export function json(data: unknown, status = 200) {
   return Response.json(data, {

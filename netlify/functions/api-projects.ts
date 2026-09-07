@@ -1,7 +1,7 @@
 import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
-import { db } from "../../db/index";
-import { projects } from "../../db/schema";
+import { db } from "./_shared/db/index";
+import { projects } from "./_shared/db/schema";
 import { error, json, requireAuthOrg } from "./_shared/http";
 
 export default async (req: Request, context: Context) => {

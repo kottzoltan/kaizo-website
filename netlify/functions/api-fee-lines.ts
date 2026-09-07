@@ -1,7 +1,7 @@
 import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
-import { db } from "../../db/index";
-import { feeLines } from "../../db/schema";
+import { db } from "./_shared/db/index";
+import { feeLines } from "./_shared/db/schema";
 import { error, json, requireAuthOrg } from "./_shared/http";
 
 function lineAmount(quantity: string | number, unitPrice: string | number) {
