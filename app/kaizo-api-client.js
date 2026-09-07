@@ -1,12 +1,12 @@
 /**
- * Kaizo API client — Identity session + org header.
- * Betöltés: <script type="module" src="/kaizo-api-client.js"></script>
+ * Kaizo App API client — csak az /app éles felülethez.
  */
 import { getUser, logout } from 'https://esm.sh/@netlify/identity@2.0.0';
 
 const ORG_KEY = 'kaizo_org_id';
+const LOGIN = '/app/login.html';
 
-export async function ensureLoggedIn(loginPath = '/login.html') {
+export async function ensureLoggedIn(loginPath = LOGIN) {
   const user = await getUser().catch(() => null);
   if (!user) {
     const next = encodeURIComponent(location.pathname + location.search);
@@ -53,7 +53,7 @@ export async function bootstrapOrg(defaultName) {
 export async function signOut() {
   await logout();
   localStorage.removeItem(ORG_KEY);
-  location.href = '/login.html';
+  location.href = LOGIN;
 }
 
 window.KaizoApi = { ensureLoggedIn, api, bootstrapOrg, signOut, getUser };

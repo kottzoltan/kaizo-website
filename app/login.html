@@ -62,8 +62,8 @@
 </head>
 <body>
   <div class="shell">
-    <h1 class="brand">Kaizo</h1>
-    <p class="lead">A CRM és ERP kipróbálásához bejelentkezés kell. Trial: szervezet létrehozása után azonnal használható.</p>
+    <h1 class="brand">Kaizo App</h1>
+    <p class="lead">Éles CRM / ERP kipróbálása. A publikus demó (kaizo.hu) változatlan — itt a saját trial fiókod indul.</p>
     <div class="panel">
       <label for="email">Email</label>
       <input id="email" type="email" autocomplete="username" placeholder="te@ceged.hu" />
@@ -76,15 +76,15 @@
         <button class="ghost" id="btn-signup" type="button">Regisztráció</button>
       </div>
       <div class="msg" id="msg"></div>
-      <p class="hint">Sikeres belépés után a CRM / ERP megnyílik. Identity a Netlify dashboardon legyen bekapcsolva.</p>
-      <p class="hint"><a href="/">← Vissza a főoldalra</a></p>
+      <p class="hint">Regisztráció után trial szervezet jön létre. Identity a Netlify dashboardon legyen bekapcsolva.</p>
+      <p class="hint"><a href="/">← Vissza a nyilvános oldalra</a> · <a href="/kaizo-crm.html">Demó CRM</a></p>
     </div>
   </div>
   <script type="module">
     import { login, signup, getUser, AuthError } from 'https://esm.sh/@netlify/identity@2.0.0';
 
     const params = new URLSearchParams(location.search);
-    const next = params.get('next') || '/kaizo-crm.html';
+    const next = params.get('next') || '/app/';
     const msg = document.getElementById('msg');
     const nameInput = document.getElementById('name');
     const nameLabel = document.getElementById('name-label');

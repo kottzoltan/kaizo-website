@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kaizo App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #121a2b;
+      --line: rgba(255,255,255,.1);
+      --text: #eef3fb;
+      --muted: #93a0b5;
+      --accent: #3d8bfd;
+      --ok: #3dd68c;
+      --warn: #f0b429;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: linear-gradient(165deg, #0b1220, #152238 55%, #101827);
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--line);
+      background: rgba(0,0,0,.2);
+    }
+    .brand { font-family: Syne, sans-serif; font-weight: 700; font-size: 1.2rem; margin: 0; }
+    .meta { color: var(--muted); font-size: .85rem; }
+    header .actions { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    button, .btn {
+      border: 0; border-radius: 999px; padding: .55rem .95rem; font: inherit; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .primary { background: var(--accent); color: #041018; }
+    .ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    main { padding: 1.25rem; max-width: 1100px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+      padding: 1rem 1.1rem 1.15rem;
+    }
+    .card h2 { margin: 0 0 .35rem; font-family: Syne, sans-serif; font-size: 1.05rem; }
+    .card p { margin: 0 0 .9rem; color: var(--muted); font-size: .9rem; line-height: 1.45; }
+    .list { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+    .list li {
+      border: 1px solid var(--line); border-radius: 10px; padding: .65rem .75rem;
+      background: rgba(255,255,255,.03); font-size: .9rem;
+    }
+    .list .t { font-weight: 600; }
+    .list .s { color: var(--muted); font-size: .78rem; margin-top: .2rem; font-family: "DM Mono", monospace; }
+    .status { font-size: .85rem; color: var(--muted); margin-bottom: 1rem; }
+    .status.ok { color: var(--ok); }
+    .status.err { color: #ff6b7a; }
+    .empty { color: var(--muted); font-size: .9rem; }
+    form.row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .85rem; }
+    form.row input {
+      flex: 1; min-width: 160px; border: 1px solid var(--line); background: rgba(0,0,0,.25);
+      color: var(--text); border-radius: 10px; padding: .55rem .7rem; font: inherit;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 class="brand">Kaizo App</h1>
+      <div class="meta" id="who">Betöltés…</div>
+    </div>
+    <div class="actions">
+      <a class="btn ghost" href="/">Nyilvános oldal</a>
+      <button class="ghost" type="button" id="logout">Kijelentkezés</button>
+    </div>
+  </header>
+  <main>
+    <p class="status" id="status">Auth ellenőrzés…</p>
+    <div class="grid">
+      <section class="card">
+        <h2>CRM — Leadek</h2>
+        <p>Élő adat a Kaizo backendről. A publikus demó CRM külön marad.</p>
+        <ul class="list" id="leads"><li class="empty">…</li></ul>
+        <form class="row" id="lead-form">
+          <input name="title" required placeholder="Új lead címe" />
+          <button class="primary" type="submit">Lead mentése</button>
+        </form>
+      </section>
+      <section class="card">
+        <h2>ERP — Projektek</h2>
+        <p>Projekt · TIG · díj · számla API már kész; itt a projektlista indul.</p>
+        <ul class="list" id="projects"><li class="empty">…</li></ul>
+        <form class="row" id="project-form">
+          <input name="name" required placeholder="Új projekt neve" />
+          <button class="primary" type="submit">Projekt mentése</button>
+        </form>
+      </section>
+    </div>
+  </main>
+  <script type="module">
+    import { ensureLoggedIn, bootstrapOrg, signOut, api } from '/app/kaizo-api-client.js';
+
+    const statusEl = document.getElementById('status');
+    const whoEl = document.getElementById('who');
+    document.getElementById('logout').onclick = () => signOut();
+
+    function renderList(el, rows, mapFn) {
+      if (!rows.length) {
+        el.innerHTML = '<li class="empty">Még nincs adat — hozz létre egyet.</li>';
+        return;
+      }
+      el.innerHTML = rows.map(mapFn).join('');
+    }
+
+    async function refresh() {
+      const [{ leads }, { projects }] = await Promise.all([
+        api('/api/v1/leads'),
+        api('/api/v1/projects'),
+      ]);
+      renderList(
+        document.getElementById('leads'),
+        leads,
+        (l) => `<li><div class="t">${escapeHtml(l.title)}</div><div class="s">${escapeHtml(l.stage)} · ${escapeHtml(l.expectedRevenue || '0')} HUF</div></li>`,
+      );
+      renderList(
+        document.getElementById('projects'),
+        projects,
+        (p) => `<li><div class="t">${escapeHtml(p.name)}</div><div class="s">${escapeHtml(p.status)} · budget ${escapeHtml(p.budget || '0')}</div></li>`,
+      );
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    const user = await ensureLoggedIn('/app/login.html');
+    if (!user) throw new Error('redirect');
+
+    try {
+      const me = await bootstrapOrg(user.email);
+      const org = me.organizations?.[0];
+      whoEl.textContent = `${user.email} · ${org?.name || 'org'} · trial`;
+      statusEl.textContent = 'Éles API aktív — az adatok a te szervezetedhez tartoznak.';
+      statusEl.className = 'status ok';
+      await refresh();
+    } catch (err) {
+      statusEl.textContent = 'API hiba: ' + (err.message || err) + ' — Identity + Database deploy kell.';
+      statusEl.className = 'status err';
+    }
+
+    document.getElementById('lead-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const title = new FormData(e.target).get('title');
+      await api('/api/v1/leads', { method: 'POST', body: JSON.stringify({ title, stage: 'new' }) });
+      e.target.reset();
+      await refresh();
+    };
+
+    document.getElementById('project-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const name = new FormData(e.target).get('name');
+      await api('/api/v1/projects', { method: 'POST', body: JSON.stringify({ name, status: 'active' }) });
+      e.target.reset();
+      await refresh();
+    };
+  </script>
+</body>
+</html>

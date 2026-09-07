@@ -12,9 +12,16 @@
   NODE_VERSION = "20"
   KAIZO_TRIAL_DAYS = "60"
 
-# Same-origin proxy to Aivio API — voice agents (deferred product-wise, still available).
+# Same-origin proxy to Aivio API — voice agents on the public demo site.
 [[redirects]]
   from = "/agent-api/*"
   to = "https://aivio3.netlify.app/:splat"
   status = 200
+  force = true
+
+# Legacy login URL → production app
+[[redirects]]
+  from = "/login.html"
+  to = "/app/login.html"
+  status = 301
   force = true

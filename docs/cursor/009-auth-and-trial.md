@@ -8,12 +8,12 @@
 2. A deploy automatikusan provisionálja a **Netlify Database**-t (`@netlify/database`)
 3. Migration: `netlify/database/migrations/20260907180000_kaizo_v1_core.sql` a deploy során lefut
 
-## Próba
+## Próba (éles app — nem a demó)
 
-1. https://&lt;site&gt;/login.html  
+1. https://&lt;site&gt;/app/login.html  
 2. Regisztráció / belépés  
-3. CRM vagy ERP megnyitása — trial org + példa lead/projekt létrejön  
-4. API: `GET /api/v1/me` (bejelentkezve)
+3. `/app/` — trial org + élő lead/projekt  
+4. A publikus `/kaizo-crm.html` / `/kaizo-erp.html` **marad demó**, login nélkül
 
 ## Árazás (később)
 
