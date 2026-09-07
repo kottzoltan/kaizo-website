@@ -76,12 +76,22 @@
         <button class="ghost" id="btn-signup" type="button">Regisztráció</button>
       </div>
       <div class="msg" id="msg"></div>
-      <p class="hint">Regisztráció után trial szervezet jön létre. Identity a Netlify dashboardon legyen bekapcsolva.</p>
+      <p class="hint">
+        A megerősítő email linkjét ezen az oldalon kell megnyitni
+        (Netlify Identity → Site URL: <code>https://kaizo.hu/app/login.html</code>).
+        Fejlesztéshez kapcsold be az <b>Autoconfirm</b>-ot az Identity beállításokban.
+      </p>
       <p class="hint"><a href="/">← Vissza a nyilvános oldalra</a> · <a href="/kaizo-crm.html">Demó CRM</a></p>
     </div>
   </div>
   <script type="module">
-    import { login, signup, getUser, AuthError } from 'https://esm.sh/@netlify/identity@2.0.0';
+    import {
+      login,
+      signup,
+      getUser,
+      handleAuthCallback,
+      AuthError,
+    } from 'https://esm.sh/@netlify/identity@2.0.0';
 
     const params = new URLSearchParams(location.search);
     const next = params.get('next') || '/app/';
@@ -99,9 +109,37 @@
       nameLabel.style.display = on ? 'block' : 'none';
     }
 
+    function friendlyAuthError(e) {
+      const raw = e instanceof AuthError ? e.message : String(e);
+      if (/email not confirmed/i.test(raw) || /invalid_grant/i.test(raw)) {
+        return 'Az email még nincs megerősítve. Nyisd meg újra a megerősítő linket ebben a böngészőben, vagy Identity → Autoconfirm ON, majd regisztrálj újra.';
+      }
+      if (e instanceof AuthError && e.status === 401) return 'Hibás email vagy jelszó.';
+      return raw;
+    }
+
     async function goApp(user) {
       localStorage.setItem('kaizo_user_email', user.email || '');
       location.href = next;
+    }
+
+    // Email confirm / invite / recovery / OAuth hash feldolgozás
+    try {
+      setMsg('Megerősítés ellenőrzése…');
+      const result = await handleAuthCallback();
+      if (result?.type === 'confirmation' && result.user) {
+        setMsg('Email megerősítve — beléptetünk…', 'ok');
+        await goApp(result.user);
+      } else if (result?.type === 'oauth' && result.user) {
+        await goApp(result.user);
+      } else if (result?.type === 'recovery') {
+        setMsg('Jelszó-visszaállítás: add meg az új jelszót a következő képernyőn, vagy lépj be ha már kész.', 'ok');
+      } else if (!result) {
+        msg.textContent = '';
+        msg.className = 'msg';
+      }
+    } catch (e) {
+      setMsg(friendlyAuthError(e), 'err');
     }
 
     const existing = await getUser().catch(() => null);
@@ -117,7 +155,7 @@
         );
         await goApp(user);
       } catch (e) {
-        setMsg(e instanceof AuthError ? (e.status === 401 ? 'Hibás email vagy jelszó.' : e.message) : String(e), 'err');
+        setMsg(friendlyAuthError(e), 'err');
       }
     };
 
@@ -135,9 +173,14 @@
           { full_name: nameInput.value.trim() || undefined },
         );
         if (user.emailVerified) await goApp(user);
-        else setMsg('Nézd meg az emailed a megerősítéshez, utána lépj be.', 'ok');
+        else {
+          setMsg(
+            'Küldtünk megerősítő emailt. A linket ezen az oldalon nyisd meg (ugyanaz a böngésző). Utána automatikusan belépsz.',
+            'ok',
+          );
+        }
       } catch (e) {
-        setMsg(e instanceof AuthError ? e.message : String(e), 'err');
+        setMsg(friendlyAuthError(e), 'err');
       }
     };
   </script>
