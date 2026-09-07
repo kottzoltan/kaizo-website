@@ -74,8 +74,3 @@ export function canWrite(role: string | null | undefined) {
 export function canAdmin(role: string | null | undefined) {
   return ADMIN_ROLES.has(role || "");
 }
-
-export function normalizeBrand(value: unknown, fallback = "ICE") {
-  const v = String(value || fallback).toUpperCase();
-  return ["ICE", "STAR", "COOP"].includes(v) ? v : fallback;
-}

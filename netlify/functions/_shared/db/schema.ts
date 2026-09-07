@@ -37,7 +37,7 @@ export const memberships = pgTable("memberships", {
   ...timestamps,
 });
 
-/** CRM — ügyfél / partner (brand: ICE | STAR | COOP) */
+/** CRM — ügyfél / partner (általános KKV) */
 export const partners = pgTable("partners", {
   id: uuid().primaryKey().defaultRandom(),
   orgId: uuid("org_id")
@@ -47,7 +47,8 @@ export const partners = pgTable("partners", {
   email: varchar({ length: 255 }),
   phone: varchar({ length: 64 }),
   company: varchar({ length: 255 }),
-  brand: varchar({ length: 16 }).default("ICE"),
+  /** legacy column — unused in Kaizo KKV app */
+  brand: varchar({ length: 16 }),
   taxId: varchar("tax_id", { length: 64 }),
   city: varchar({ length: 128 }),
   status: varchar({ length: 32 }).default("active"),
@@ -64,7 +65,8 @@ export const catalogItems = pgTable("catalog_items", {
   name: varchar({ length: 255 }).notNull(),
   sku: varchar({ length: 64 }),
   kind: varchar({ length: 32 }).notNull().default("service"),
-  brand: varchar({ length: 16 }).default("ICE"),
+  /** legacy — unused */
+  brand: varchar({ length: 16 }),
   unit: varchar({ length: 32 }).default("db"),
   unitPrice: numeric("unit_price", { precision: 14, scale: 2 }).notNull().default("0"),
   currency: varchar({ length: 8 }).notNull().default("HUF"),
@@ -99,7 +101,8 @@ export const projects = pgTable("projects", {
   partnerId: uuid("partner_id").references(() => partners.id, { onDelete: "set null" }),
   name: varchar({ length: 255 }).notNull(),
   code: varchar({ length: 64 }),
-  brand: varchar({ length: 16 }).default("ICE"),
+  /** legacy — unused */
+  brand: varchar({ length: 16 }),
   status: varchar({ length: 32 }).notNull().default("draft"),
   description: text(),
   budget: numeric({ precision: 14, scale: 2 }).default("0"),
@@ -178,7 +181,8 @@ export const invoices = pgTable("invoices", {
     onDelete: "set null",
   }),
   number: varchar({ length: 64 }),
-  brand: varchar({ length: 16 }).default("ICE"),
+  /** legacy — unused */
+  brand: varchar({ length: 16 }),
   status: varchar({ length: 32 }).notNull().default("draft"),
   issuedOn: date("issued_on"),
   dueOn: date("due_on"),
@@ -200,9 +204,6 @@ export type Project = typeof projects.$inferSelect;
 export type CompletionCertificate = typeof completionCertificates.$inferSelect;
 export type FeeLine = typeof feeLines.$inferSelect;
 export type Invoice = typeof invoices.$inferSelect;
-
-export const BRANDS = ["ICE", "STAR", "COOP"] as const;
-export type Brand = (typeof BRANDS)[number];
 
 export const MEMBER_ROLES = ["owner", "admin", "member", "viewer"] as const;
 export type MemberRole = (typeof MEMBER_ROLES)[number];

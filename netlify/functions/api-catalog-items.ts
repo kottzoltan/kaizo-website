@@ -2,7 +2,7 @@ import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "./_shared/db/index";
 import { catalogItems } from "./_shared/db/schema";
-import { error, json, normalizeBrand, requireAuthOrg } from "./_shared/http";
+import { error, json, requireAuthOrg } from "./_shared/http";
 
 export default async (req: Request, context: Context) => {
   const gate = await requireAuthOrg(req);
@@ -12,10 +12,8 @@ export default async (req: Request, context: Context) => {
   const url = new URL(req.url);
 
   if (req.method === "GET" && !id) {
-    const brand = url.searchParams.get("brand");
     const kind = url.searchParams.get("kind");
     const conditions = [eq(catalogItems.orgId, orgId)];
-    if (brand) conditions.push(eq(catalogItems.brand, brand.toUpperCase()));
     if (kind) conditions.push(eq(catalogItems.kind, kind));
     const rows = await db
       .select()
@@ -47,7 +45,6 @@ export default async (req: Request, context: Context) => {
         name,
         sku: body.sku || null,
         kind,
-        brand: normalizeBrand(body.brand),
         unit: body.unit || "db",
         unitPrice: body.unitPrice != null ? String(body.unitPrice) : "0",
         currency: body.currency || "HUF",
@@ -65,7 +62,6 @@ export default async (req: Request, context: Context) => {
       if (body[key] !== undefined) patch[key] = body[key];
     }
     if (body.kind !== undefined) patch.kind = body.kind === "product" ? "product" : "service";
-    if (body.brand !== undefined) patch.brand = normalizeBrand(body.brand);
     if (body.unitPrice !== undefined) patch.unitPrice = String(body.unitPrice);
     if (body.active !== undefined) patch.active = Boolean(body.active);
     const [row] = await db

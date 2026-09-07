@@ -2,28 +2,20 @@ import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "./_shared/db/index";
 import { projects } from "./_shared/db/schema";
-import { error, json, normalizeBrand, requireAuthOrg } from "./_shared/http";
+import { error, json, requireAuthOrg } from "./_shared/http";
 
 export default async (req: Request, context: Context) => {
   const gate = await requireAuthOrg(req);
   if (gate.response) return gate.response;
   const orgId = gate.org!.id;
   const id = context.params?.id;
-  const url = new URL(req.url);
 
   if (req.method === "GET" && !id) {
-    const brand = url.searchParams.get("brand");
-    const rows = brand
-      ? await db
-          .select()
-          .from(projects)
-          .where(and(eq(projects.orgId, orgId), eq(projects.brand, brand.toUpperCase())))
-          .orderBy(desc(projects.createdAt))
-      : await db
-          .select()
-          .from(projects)
-          .where(eq(projects.orgId, orgId))
-          .orderBy(desc(projects.createdAt));
+    const rows = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.orgId, orgId))
+      .orderBy(desc(projects.createdAt));
     return json({ projects: rows });
   }
 
@@ -48,7 +40,6 @@ export default async (req: Request, context: Context) => {
         name,
         code: body.code || null,
         partnerId: body.partnerId || null,
-        brand: normalizeBrand(body.brand),
         status: body.status || "draft",
         description: body.description || null,
         budget: body.budget != null ? String(body.budget) : "0",
@@ -73,7 +64,6 @@ export default async (req: Request, context: Context) => {
     ] as const) {
       if (body[key] !== undefined) patch[key] = body[key];
     }
-    if (body.brand !== undefined) patch.brand = normalizeBrand(body.brand);
     if (body.budget !== undefined) patch.budget = String(body.budget);
     const [row] = await db
       .update(projects)

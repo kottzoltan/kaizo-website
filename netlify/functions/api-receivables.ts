@@ -9,18 +9,8 @@ export default async (req: Request, _context: Context) => {
   const gate = await requireAuthOrg(req);
   if (gate.response) return gate.response;
   const orgId = gate.org!.id;
-  const url = new URL(req.url);
-  const brand = url.searchParams.get("brand")?.toUpperCase();
 
   if (req.method !== "GET") return error("Method not allowed", 405);
-
-  const conditions = [
-    eq(invoices.orgId, orgId),
-    ne(invoices.status, "draft"),
-    ne(invoices.status, "paid"),
-    ne(invoices.status, "cancelled"),
-  ];
-  if (brand) conditions.push(eq(invoices.brand, brand));
 
   const rows = await db
     .select({
@@ -29,7 +19,14 @@ export default async (req: Request, _context: Context) => {
     })
     .from(invoices)
     .leftJoin(partners, eq(invoices.partnerId, partners.id))
-    .where(and(...conditions))
+    .where(
+      and(
+        eq(invoices.orgId, orgId),
+        ne(invoices.status, "draft"),
+        ne(invoices.status, "paid"),
+        ne(invoices.status, "cancelled"),
+      ),
+    )
     .orderBy(desc(invoices.dueOn), desc(invoices.createdAt));
 
   const today = new Date().toISOString().slice(0, 10);

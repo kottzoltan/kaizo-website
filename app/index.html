@@ -1,552 +1,671 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="hu" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kaizo App</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #0b1220;
-      --panel: #121a2b;
-      --line: rgba(255,255,255,.1);
-      --text: #eef3fb;
-      --muted: #93a0b5;
-      --accent: #3d8bfd;
-      --ok: #3dd68c;
-      --warn: #f0b429;
-      --err: #ff6b7a;
-      --ice: #3d8bfd;
-      --star: #f0b429;
-      --coop: #3dd68c;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; color: var(--text);
-      font-family: "DM Sans", system-ui, sans-serif;
-      background:
-        radial-gradient(800px 400px at 0% 0%, rgba(61,139,253,.15), transparent 50%),
-        linear-gradient(165deg, #0b1220, #152238 55%, #101827);
-    }
-    header {
-      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-      padding: 1rem 1.25rem; border-bottom: 1px solid var(--line);
-      background: rgba(0,0,0,.25); position: sticky; top: 0; z-index: 20;
-      backdrop-filter: blur(10px);
-    }
-    .brand { font-family: Syne, sans-serif; font-weight: 700; font-size: 1.2rem; margin: 0; }
-    .meta { color: var(--muted); font-size: .85rem; }
-    header .actions { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
-    button, .btn {
-      border: 0; border-radius: 999px; padding: .5rem .9rem; font: inherit; font-weight: 600;
-      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: .35rem;
-    }
-    .primary { background: var(--accent); color: #041018; }
-    .ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
-    main { padding: 1.1rem 1.25rem 2.5rem; max-width: 1180px; margin: 0 auto; }
-    .kpis {
-      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin-bottom: 1rem;
-    }
-    @media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
-    .kpi {
-      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-      padding: .85rem 1rem;
-    }
-    .kpi .l { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; }
-    .kpi .v { font-family: Syne, sans-serif; font-size: 1.35rem; margin-top: .25rem; }
-    .kpi .s { color: var(--muted); font-size: .78rem; margin-top: .15rem; }
-    .brand-bar { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: 1rem; }
-    .brand-bar button {
-      border-radius: 10px; padding: .4rem .75rem; font-size: .82rem;
-      border: 1px solid var(--line); background: rgba(255,255,255,.03); color: var(--muted);
-    }
-    .brand-bar button.on { color: #041018; font-weight: 700; }
-    .brand-bar button[data-b="ALL"].on { background: var(--accent); }
-    .brand-bar button[data-b="ICE"].on { background: var(--ice); }
-    .brand-bar button[data-b="STAR"].on { background: var(--star); }
-    .brand-bar button[data-b="COOP"].on { background: var(--coop); }
-    .tabs {
-      display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: 1rem;
-      border-bottom: 1px solid var(--line); padding-bottom: .65rem;
-    }
-    .tabs button {
-      border-radius: 10px; background: transparent; color: var(--muted);
-      border: 1px solid transparent; font-size: .86rem; padding: .45rem .75rem;
-    }
-    .tabs button.on { color: var(--text); border-color: var(--line); background: rgba(255,255,255,.05); }
-    .panel {
-      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
-      padding: 1rem 1.1rem 1.15rem; display: none;
-    }
-    .panel.on { display: block; }
-    .panel h2 { margin: 0 0 .3rem; font-family: Syne, sans-serif; font-size: 1.05rem; }
-    .panel .desc { margin: 0 0 .9rem; color: var(--muted); font-size: .88rem; line-height: 1.45; }
-    .list { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
-    .list li {
-      border: 1px solid var(--line); border-radius: 10px; padding: .65rem .75rem;
-      background: rgba(255,255,255,.03); font-size: .9rem;
-      display: flex; justify-content: space-between; gap: .75rem; align-items: flex-start; flex-wrap: wrap;
-    }
-    .list .t { font-weight: 600; }
-    .list .s { color: var(--muted); font-size: .78rem; margin-top: .2rem; font-family: "DM Mono", monospace; }
-    .badge {
-      font-size: .68rem; font-weight: 700; letter-spacing: .04em; padding: .2rem .45rem;
-      border-radius: 6px; align-self: center;
-    }
-    .b-ICE { background: rgba(61,139,253,.2); color: #9bc4ff; }
-    .b-STAR { background: rgba(240,180,41,.2); color: #ffd778; }
-    .b-COOP { background: rgba(61,214,140,.2); color: #8ff0bf; }
-    .b-over { background: rgba(255,107,122,.2); color: #ff9aa5; }
-    .status { font-size: .85rem; color: var(--muted); margin-bottom: .85rem; }
-    .status.ok { color: var(--ok); }
-    .status.err { color: var(--err); }
-    .empty { color: var(--muted); font-size: .9rem; }
-    form.row { display: flex; gap: .45rem; flex-wrap: wrap; margin-top: .85rem; align-items: center; }
-    form.row input, form.row select {
-      flex: 1; min-width: 120px; border: 1px solid var(--line); background: rgba(0,0,0,.25);
-      color: var(--text); border-radius: 10px; padding: .5rem .65rem; font: inherit;
-    }
-    form.row button { flex: 0 0 auto; }
-    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 800px) { .split { grid-template-columns: 1fr; } }
+    :root{--cyan:#29acd9;--cyan-dim:rgba(41,172,217,0.15);--green:#34c759;--orange:#ff9500;--red:#ff3b30;--purple:#af52de;--r:14px;--rs:8px;--sw:220px;}
+    [data-theme="dark"]{--bg:#06070f;--sf:#0e1018;--s2:#151722;--bd:rgba(255,255,255,0.07);--tx:#f0efed;--dim:rgba(240,239,237,0.45);--mu:rgba(240,239,237,0.22);--sh:0 4px 24px rgba(0,0,0,0.4);}
+    [data-theme="light"]{--bg:#f0f2f7;--sf:#fff;--s2:#f7f8fc;--bd:rgba(0,0,0,0.07);--tx:#0e1018;--dim:rgba(14,16,24,0.55);--mu:rgba(14,16,24,0.28);--sh:0 4px 24px rgba(0,0,0,0.08);}
+    *{margin:0;padding:0;box-sizing:border-box;}html,body{height:100%;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);transition:background .3s,color .3s;overflow-x:hidden;}
+    .app{display:flex;min-height:100vh;}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:199;}.overlay.open{display:block;}
+    .sidebar{width:var(--sw);flex-shrink:0;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:1.4rem 0;position:fixed;top:0;left:0;height:100vh;z-index:200;transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;}
+    .sl{padding:0 1.4rem 1.2rem;border-bottom:1px solid var(--bd);margin-bottom:.8rem;}
+    .lt{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--cyan);letter-spacing:.05em;}
+    .ls{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);margin-top:.15rem;}
+    .ns{padding:0 .8rem;margin-bottom:.4rem;}
+    .nl{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mu);padding:0 .6rem;margin-bottom:.25rem;}
+    .ni{display:flex;align-items:center;gap:.6rem;padding:.52rem .7rem;border-radius:var(--rs);font-size:.82rem;color:var(--dim);cursor:pointer;transition:all .18s;user-select:none;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;}
+    .ni:hover{background:var(--s2);color:var(--tx);}.ni.active{background:var(--cyan-dim);color:var(--cyan);}
+    .ni .ic{font-size:.95rem;width:1.15rem;text-align:center;}
+    .sbb{margin-top:auto;padding:.8rem 1.4rem 0;border-top:1px solid var(--bd);display:grid;gap:.45rem;}
+    .sbb button,.sbb a{width:100%;justify-content:center;}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.main{margin-left:0!important;}}
+    @media(min-width:769px){.main{margin-left:var(--sw);}}
+    .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100;flex-wrap:wrap;}
+    .mb{display:none;background:none;border:none;color:var(--tx);font-size:1.3rem;cursor:pointer;padding:.2rem .4rem;border-radius:var(--rs);}
+    @media(max-width:768px){.mb{display:block;}}
+    .tt{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;white-space:nowrap;min-width:0;}
+    .sw{flex:1;max-width:380px;min-width:0;position:relative;}
+    .si-w{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.42rem 1rem .42rem 2.1rem;font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;}
+    .si-w::placeholder{color:var(--mu);}.si-w:focus{border-color:var(--cyan);}
+    .si{position:absolute;left:.72rem;top:50%;transform:translateY(-50%);font-size:.75rem;color:var(--mu);}
+    .tr{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+    .tbb{background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:.28rem .75rem;font-size:.7rem;color:var(--dim);cursor:pointer;font-family:'DM Sans',sans-serif;}
+    .bpp{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1rem;font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;}
+    .bpp:hover{opacity:.85;}
+    .ghost{background:transparent;border:1px solid var(--bd);border-radius:100px;padding:.38rem 1rem;font-size:.76rem;color:var(--dim);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;}
+    .content{padding:1.5rem;overflow-y:auto;flex:1;}
+    .page{display:none;animation:fadeIn .22s ease;}.page.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.2rem;}
+    @media(max-width:900px){.kgrid{grid-template-columns:repeat(2,1fr);}}
+    .kc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem 1.2rem;box-shadow:var(--sh);}
+    .kl{font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem;}
+    .kv{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;line-height:1;color:var(--tx);}
+    .kd{margin-top:.35rem;font-size:.7rem;color:var(--mu);}
+    .kd.up{color:var(--green);}.kd.dn{color:var(--red);}.kd.wa{color:var(--orange);}
+    .phd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.6rem;}
+    .phd h1{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;}
+    .card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:1rem;}
+    .ch{padding:.9rem 1.2rem .75rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:.5rem;}
+    .ct{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;}
+    .ca{font-size:.68rem;color:var(--cyan);cursor:pointer;background:none;border:none;font-family:inherit;}
+    .r2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    @media(max-width:768px){.r2{grid-template-columns:1fr;}}
+    .tw{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;min-width:480px;}
+    th{text-align:left;font-size:.61rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);padding:.65rem 1rem;background:var(--s2);border-bottom:1px solid var(--bd);}
+    td{padding:.68rem 1rem;font-size:.78rem;border-bottom:1px solid var(--bd);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tbody tr:hover td{background:var(--s2);}
+    .badge{display:inline-flex;align-items:center;padding:.15rem .55rem;border-radius:100px;font-size:.63rem;font-weight:500;white-space:nowrap;}
+    .bn{background:rgba(41,172,217,.15);color:var(--cyan);}
+    .bq{background:rgba(255,149,0,.15);color:var(--orange);}
+    .bw{background:rgba(52,199,89,.15);color:var(--green);}
+    .bl{background:rgba(255,59,48,.15);color:var(--red);}
+    .bdr{background:rgba(255,255,255,.07);color:var(--mu);}
+    .funnel-wrap{padding:1rem 1.2rem;}
+    .f-stage{margin-bottom:.45rem;}
+    .f-row{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:.2rem;color:var(--dim);}
+    .f-bg{background:var(--s2);border-radius:4px;overflow:hidden;height:20px;}
+    .f-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:.5rem;font-size:.66rem;font-family:'DM Mono',monospace;color:rgba(255,255,255,.8);}
+    .act-list{padding:0 1.2rem;}
+    .act-item{display:flex;gap:.7rem;padding:.8rem 0;border-bottom:1px solid var(--bd);align-items:flex-start;}
+    .act-item:last-child{border-bottom:none;}
+    .act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.3rem;}
+    .act-info{flex:1;min-width:0;}
+    .act-title{font-size:.78rem;font-weight:500;margin-bottom:.18rem;}
+    .act-meta{font-size:.68rem;color:var(--mu);}
+    .act-date{font-family:'DM Mono',monospace;font-size:.66rem;white-space:nowrap;color:var(--mu);}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1.4rem;}
+    @media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+    .fg{display:flex;flex-direction:column;gap:.35rem;}
+    .fg.span2{grid-column:span 2;}
+    @media(max-width:700px){.fg.span2{grid-column:span 1;}}
+    .form-label{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);font-weight:500;}
+    .form-input,.form-select{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:.55rem .8rem;font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--tx);outline:none;width:100%;}
+    .form-input:focus,.form-select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,172,217,.12);}
+    .form-actions{padding:1rem 1.4rem;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:.7rem;flex-wrap:wrap;}
+    .btn-save{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:.38rem 1.2rem;font-size:.76rem;cursor:pointer;font-family:inherit;}
+    .empty{padding:1.2rem;color:var(--mu);font-size:.85rem;}
+    .status-banner{font-size:.82rem;color:var(--mu);margin-bottom:1rem;}
+    .status-banner.ok{color:var(--green);}
+    .status-banner.err{color:var(--red);}
+    .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;padding:1rem 1.2rem 1.2rem;}
+    @media(max-width:700px){.quick{grid-template-columns:1fr;}}
+    .qbtn{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:1rem;text-align:left;cursor:pointer;color:var(--tx);font-family:inherit;transition:border-color .18s,transform .15s;}
+    .qbtn:hover{border-color:var(--cyan);transform:translateY(-1px);}
+    .qbtn .qh{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;margin-bottom:.25rem;}
+    .qbtn .qd{font-size:.72rem;color:var(--mu);line-height:1.4;}
+    .mono{font-family:'DM Mono',monospace;}
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1 class="brand">Kaizo App</h1>
-      <div class="meta" id="who">Betöltés…</div>
+<div class="overlay" id="overlay" onclick="closeSB()"></div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sl">
+      <div class="lt">KAIZO</div>
+      <div class="ls">KKV CRM · ERP</div>
     </div>
-    <div class="actions">
-      <a class="btn ghost" href="/">Nyilvános oldal</a>
+    <div class="ns">
+      <div class="nl">Áttekintés</div>
+      <button class="ni active" data-nav="dashboard"><span class="ic">📊</span>Dashboard</button>
+    </div>
+    <div class="ns">
+      <div class="nl">CRM</div>
+      <button class="ni" data-nav="partners"><span class="ic">👥</span>Partnerek</button>
+      <button class="ni" data-nav="contacts"><span class="ic">📇</span>Kapcsolattartók</button>
+      <button class="ni" data-nav="leads"><span class="ic">📋</span>Leadek</button>
+    </div>
+    <div class="ns">
+      <div class="nl">ERP</div>
+      <button class="ni" data-nav="projects"><span class="ic">📁</span>Projektek</button>
+      <button class="ni" data-nav="catalog"><span class="ic">📦</span>Termékek / szolg.</button>
+      <button class="ni" data-nav="tig"><span class="ic">✅</span>TIG</button>
+      <button class="ni" data-nav="invoices"><span class="ic">📤</span>Számlák</button>
+      <button class="ni" data-nav="receivables"><span class="ic">💰</span>Kinnlevőségek</button>
+    </div>
+    <div class="ns">
+      <div class="nl">Beállítások</div>
+      <button class="ni" data-nav="users"><span class="ic">🔐</span>Felhasználók</button>
+    </div>
+    <div class="sbb">
+      <a class="ghost" href="/">Nyilvános oldal</a>
       <button class="ghost" type="button" id="logout">Kijelentkezés</button>
     </div>
-  </header>
-  <main>
-    <p class="status" id="status">Auth ellenőrzés…</p>
-    <div class="kpis">
-      <div class="kpi"><div class="l">Kinnlevőség</div><div class="v" id="kpi-ar">—</div><div class="s" id="kpi-ar-s">nyitott</div></div>
-      <div class="kpi"><div class="l">Partnerek</div><div class="v" id="kpi-partners">—</div><div class="s">ICE / STAR / COOP</div></div>
-      <div class="kpi"><div class="l">Projektek</div><div class="v" id="kpi-projects">—</div><div class="s">aktív munkák</div></div>
-      <div class="kpi"><div class="l">Felhasználók</div><div class="v" id="kpi-users">—</div><div class="s">szerepkörök</div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="mb" type="button" onclick="toggleSB()">☰</button>
+      <div class="tt" id="tbTitle">Dashboard</div>
+      <div class="sw">
+        <span class="si">🔍</span>
+        <input class="si-w" id="who" type="text" readonly placeholder="Felhasználó…" />
+      </div>
+      <div class="tr">
+        <button class="tbb" type="button" id="themeBtn" title="Téma">🌙</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <p class="status-banner" id="status">Auth ellenőrzés…</p>
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="pg-dashboard">
+        <div class="kgrid">
+          <div class="kc"><div class="kl">Partnerek</div><div class="kv" id="kpi-partners">—</div><div class="kd">aktív ügyfelek</div></div>
+          <div class="kc"><div class="kl">Kinnlevőség</div><div class="kv" id="kpi-ar">—</div><div class="kd wa" id="kpi-ar-s">nyitott</div></div>
+          <div class="kc"><div class="kl">Projektek</div><div class="kv" id="kpi-projects">—</div><div class="kd">folyamatban</div></div>
+          <div class="kc"><div class="kl">Leadek</div><div class="kv" id="kpi-leads">—</div><div class="kd">pipeline</div></div>
+        </div>
+        <div class="r2">
+          <div class="card">
+            <div class="ch"><span class="ct">Lead funnel</span></div>
+            <div class="funnel-wrap" id="dash-funnel"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">Gyors műveletek</span></div>
+            <div class="quick">
+              <button class="qbtn" type="button" data-jump="partners"><div class="qh">+ Partner</div><div class="qd">Ügyfél / szállító felvitele</div></button>
+              <button class="qbtn" type="button" data-jump="projects"><div class="qh">+ Projekt</div><div class="qd">Munka + szolgáltatások</div></button>
+              <button class="qbtn" type="button" data-jump="invoices"><div class="qh">+ Számla</div><div class="qd">TIG utáni számlázás</div></button>
+              <button class="qbtn" type="button" data-jump="tig"><div class="qh">+ TIG</div><div class="qd">Teljesítésigazolás</div></button>
+              <button class="qbtn" type="button" data-jump="receivables"><div class="qh">Kinnlevőségek</div><div class="qd">Nyitott / lejárt tételek</div></button>
+              <button class="qbtn" type="button" data-jump="users"><div class="qh">Jogosultságok</div><div class="qd">Felhasználók és szerepkörök</div></button>
+            </div>
+          </div>
+        </div>
+        <div class="r2">
+          <div class="card">
+            <div class="ch"><span class="ct">Legutóbbi partnerek</span><button class="ca" type="button" data-jump="partners">Összes →</button></div>
+            <div class="act-list" id="dash-partners"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">Nyitott kinnlevőségek</span><button class="ca" type="button" data-jump="receivables">Összes →</button></div>
+            <div class="act-list" id="dash-recv"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PARTNERS -->
+      <div class="page" id="pg-partners">
+        <div class="phd"><h1>Partnerek</h1><button class="bpp" type="button" onclick="document.getElementById('partner-form').scrollIntoView({behavior:'smooth'})">+ Új partner</button></div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Név</th><th>Email</th><th>Telefon</th><th>Státusz</th></tr></thead><tbody id="tb-partners"></tbody></table></div>
+        </div>
+        <div class="card" id="partner-form">
+          <div class="ch"><span class="ct">Új partner</span></div>
+          <form id="form-partner">
+            <div class="form-grid">
+              <div class="fg"><label class="form-label">Név</label><input class="form-input" name="name" required /></div>
+              <div class="fg"><label class="form-label">Email</label><input class="form-input" name="email" type="email" /></div>
+              <div class="fg"><label class="form-label">Telefon</label><input class="form-input" name="phone" /></div>
+              <div class="fg"><label class="form-label">Város</label><input class="form-input" name="city" /></div>
+            </div>
+            <div class="form-actions"><button class="btn-save" type="submit">Mentés</button></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- CONTACTS -->
+      <div class="page" id="pg-contacts">
+        <div class="phd"><h1>Kapcsolattartók</h1></div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Név</th><th>Email</th><th>Telefon</th><th>Szerep</th></tr></thead><tbody id="tb-contacts"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Új kapcsolattartó</span></div>
+          <form id="form-contact">
+            <div class="form-grid">
+              <div class="fg"><label class="form-label">Név</label><input class="form-input" name="name" required /></div>
+              <div class="fg"><label class="form-label">Email</label><input class="form-input" name="email" type="email" /></div>
+              <div class="fg span2"><label class="form-label">Partner</label><select class="form-select" name="partnerId" id="contact-partner" required></select></div>
+            </div>
+            <div class="form-actions"><button class="btn-save" type="submit">Mentés</button></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- LEADS -->
+      <div class="page" id="pg-leads">
+        <div class="phd"><h1>Leadek</h1></div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Cím</th><th>Fázis</th><th>Érték</th></tr></thead><tbody id="tb-leads"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Új lead</span></div>
+          <form id="form-lead">
+            <div class="form-grid">
+              <div class="fg span2"><label class="form-label">Cím</label><input class="form-input" name="title" required /></div>
+            </div>
+            <div class="form-actions"><button class="btn-save" type="submit">Mentés</button></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="page" id="pg-projects">
+        <div class="phd"><h1>Projektek</h1></div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Név</th><th>Státusz</th><th>Budget</th></tr></thead><tbody id="tb-projects"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Új projekt</span></div>
+          <form id="form-project">
+            <div class="form-grid">
+              <div class="fg"><label class="form-label">Név</label><input class="form-input" name="name" required /></div>
+              <div class="fg"><label class="form-label">Partner</label><select class="form-select" name="partnerId" id="project-partner"></select></div>
+            </div>
+            <div class="form-actions"><button class="btn-save" type="submit">Mentés</button></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- CATALOG -->
+      <div class="page" id="pg-catalog">
+        <div class="phd"><h1>Termékek / szolgáltatások</h1></div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Megnevezés</th><th>Típus</th><th>Egységár</th></tr></thead><tbody id="tb-catalog"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Új tétel</span></div>
+          <form id="form-catalog">
+            <div class="form-grid">
+              <div class="fg"><label class="form-label">Megnevezés</label><input class="form-input" name="name" required /></div>
+              <div class="fg"><label class="form-label">Típus</label>
+                <select class="form-select" name="kind"><option value="service">Szolgáltatás</option><option value="product">Termék</option></select>
+              </div>
+              <div class="fg"><label class="form-label">Egységár (Ft)</label><input class="form-input" name="unitPrice" type="number" step="1" /></div>
+            </div>
+            <div class="form-actions"><button class="btn-save" type="submit">Mentés</button></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- TIG -->
+      <div class="page" id="pg-tig">
+        <div class="phd"><h1>Teljesítésigazolások (TIG)</h1></div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Cím</th><th>Státusz</th><th>Összeg</th></tr></thead><tbody id="tb-tig"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Új TIG</span></div>
+          <form id="form-tig">
+            <div class="form-grid">
+              <div class="fg"><label class="form-label">Cím</label><input class="form-input" name="title" required /></div>
+              <div class="fg"><label class="form-label">Projekt</label><select class="form-select" name="projectId" id="tig-project" required></select></div>
+              <div class="fg"><label class="form-label">Összeg</label><input class="form-input" name="amount" type="number" step="1" /></div>
+            </div>
+            <div class="form-actions"><button class="btn-save" type="submit">Mentés</button></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- INVOICES -->
+      <div class="page" id="pg-invoices">
+        <div class="phd"><h1>Számlák</h1></div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Szám</th><th>Státusz</th><th>Összeg</th><th>Nyitott</th><th>Esedékes</th></tr></thead><tbody id="tb-invoices"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Új számla</span></div>
+          <form id="form-invoice">
+            <div class="form-grid">
+              <div class="fg"><label class="form-label">Számlaszám</label><input class="form-input" name="number" placeholder="INV/2026/001" /></div>
+              <div class="fg"><label class="form-label">Partner</label><select class="form-select" name="partnerId" id="invoice-partner"></select></div>
+              <div class="fg"><label class="form-label">Összeg</label><input class="form-input" name="total" type="number" step="1" required /></div>
+              <div class="fg"><label class="form-label">Esedékes</label><input class="form-input" name="dueOn" type="date" /></div>
+              <div class="fg"><label class="form-label">Státusz</label>
+                <select class="form-select" name="status">
+                  <option value="sent">Kiküldve</option>
+                  <option value="draft">Piszkozat</option>
+                  <option value="partial">Részben fizetve</option>
+                  <option value="paid">Fizetve</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions"><button class="btn-save" type="submit">Mentés</button></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- RECEIVABLES -->
+      <div class="page" id="pg-receivables">
+        <div class="phd"><h1>Kinnlevőségek</h1></div>
+        <div class="kgrid">
+          <div class="kc"><div class="kl">Nyitott db</div><div class="kv" id="recv-cnt">0</div><div class="kd">számla</div></div>
+          <div class="kc"><div class="kl">Összesen</div><div class="kv" id="recv-sum">0</div><div class="kd">Ft</div></div>
+          <div class="kc"><div class="kl">Lejárt</div><div class="kv" id="recv-over">0</div><div class="kd dn">azonnali</div></div>
+          <div class="kc"><div class="kl">Pénznem</div><div class="kv" style="font-size:1.2rem">HUF</div><div class="kd">alapértelmezett</div></div>
+        </div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Számla</th><th>Partner</th><th>Esedékes</th><th>Nyitott</th><th>Státusz</th></tr></thead><tbody id="tb-receivables"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="page" id="pg-users">
+        <div class="phd"><h1>Felhasználók / jogosultságok</h1></div>
+        <p class="status-banner">Szerepkörök: owner · admin · member · viewer. Nincs HR / bérszámfejtés.</p>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Email</th><th>Szerep</th></tr></thead><tbody id="tb-users"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Felhasználó hozzáadása</span></div>
+          <form id="form-member">
+            <div class="form-grid">
+              <div class="fg"><label class="form-label">Email</label><input class="form-input" name="email" type="email" required /></div>
+              <div class="fg"><label class="form-label">Szerep</label>
+                <select class="form-select" name="role">
+                  <option value="member">member</option>
+                  <option value="admin">admin</option>
+                  <option value="viewer">viewer</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions"><button class="btn-save" type="submit">Hozzáadás</button></div>
+          </form>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div class="brand-bar" id="brand-bar">
-      <button type="button" data-b="ALL" class="on">Összes</button>
-      <button type="button" data-b="ICE">ICE</button>
-      <button type="button" data-b="STAR">STAR</button>
-      <button type="button" data-b="COOP">COOP</button>
-    </div>
+<script type="module">
+  import { ensureLoggedIn, bootstrapOrg, signOut, api } from '/app/kaizo-api-client.js';
 
-    <nav class="tabs" id="tabs">
-      <button type="button" data-tab="partners" class="on">Partnerek</button>
-      <button type="button" data-tab="contacts">Kapcsolattartók</button>
-      <button type="button" data-tab="projects">Projektek</button>
-      <button type="button" data-tab="catalog">Termékek / szolgáltatások</button>
-      <button type="button" data-tab="tig">TIG</button>
-      <button type="button" data-tab="invoices">Számlák</button>
-      <button type="button" data-tab="receivables">Kinnlevőségek</button>
-      <button type="button" data-tab="users">Felhasználók</button>
-      <button type="button" data-tab="leads">Leadek</button>
-    </nav>
+  const TITLES = {
+    dashboard: 'Dashboard',
+    partners: 'Partnerek',
+    contacts: 'Kapcsolattartók',
+    leads: 'Leadek',
+    projects: 'Projektek',
+    catalog: 'Termékek / szolgáltatások',
+    tig: 'TIG',
+    invoices: 'Számlák',
+    receivables: 'Kinnlevőségek',
+    users: 'Felhasználók',
+  };
 
-    <section class="panel on" id="tab-partners">
-      <h2>Partnerek</h2>
-      <p class="desc">Ügyfelek / partnerek ICE · STAR · COOP üzleti egység szerint.</p>
-      <ul class="list" id="list-partners"><li class="empty">…</li></ul>
-      <form class="row" id="form-partner">
-        <input name="name" required placeholder="Partner neve" />
-        <input name="email" type="email" placeholder="Email" />
-        <select name="brand"><option>ICE</option><option>STAR</option><option>COOP</option></select>
-        <button class="primary" type="submit">Mentés</button>
-      </form>
-    </section>
+  const statusEl = document.getElementById('status');
+  const whoEl = document.getElementById('who');
+  document.getElementById('logout').onclick = () => signOut();
 
-    <section class="panel" id="tab-contacts">
-      <h2>Kapcsolattartók</h2>
-      <p class="desc">Partnerhez vagy projekthez kötött kapcsolattartók (nem tagok / HR).</p>
-      <ul class="list" id="list-contacts"><li class="empty">…</li></ul>
-      <form class="row" id="form-contact">
-        <input name="name" required placeholder="Név" />
-        <input name="email" type="email" placeholder="Email" />
-        <select name="partnerId" id="contact-partner"><option value="">— Partner —</option></select>
-        <button class="primary" type="submit">Mentés</button>
-      </form>
-    </section>
+  window.toggleSB = () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  };
+  window.closeSB = () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  };
 
-    <section class="panel" id="tab-projects">
-      <h2>Projektek</h2>
-      <p class="desc">Projektek szolgáltatásokkal / termékekkel; TIG és számlázás innen indul.</p>
-      <ul class="list" id="list-projects"><li class="empty">…</li></ul>
-      <form class="row" id="form-project">
-        <input name="name" required placeholder="Projekt neve" />
-        <select name="brand"><option>ICE</option><option>STAR</option><option>COOP</option></select>
-        <select name="partnerId" id="project-partner"><option value="">— Partner —</option></select>
-        <button class="primary" type="submit">Mentés</button>
-      </form>
-    </section>
+  document.getElementById('themeBtn').onclick = () => {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+  };
 
-    <section class="panel" id="tab-catalog">
-      <h2>Termékek / szolgáltatások</h2>
-      <p class="desc">Katalógus a projektek és TIG tételekhez.</p>
-      <ul class="list" id="list-catalog"><li class="empty">…</li></ul>
-      <form class="row" id="form-catalog">
-        <input name="name" required placeholder="Megnevezés" />
-        <select name="kind"><option value="service">Szolgáltatás</option><option value="product">Termék</option></select>
-        <input name="unitPrice" type="number" step="1" placeholder="Egységár" />
-        <select name="brand"><option>ICE</option><option>STAR</option><option>COOP</option></select>
-        <button class="primary" type="submit">Mentés</button>
-      </form>
-    </section>
+  let cache = {
+    partners: [], projects: [], contacts: [], catalog: [],
+    tig: [], invoices: [], receivables: [], members: [], leads: [],
+    recvSummary: null,
+  };
 
-    <section class="panel" id="tab-tig">
-      <h2>Teljesítésigazolások (TIG)</h2>
-      <p class="desc">TIG → díjsor → számla folyamat.</p>
-      <ul class="list" id="list-tig"><li class="empty">…</li></ul>
-      <form class="row" id="form-tig">
-        <input name="title" required placeholder="TIG címe" />
-        <select name="projectId" id="tig-project" required><option value="">— Projekt —</option></select>
-        <input name="amount" type="number" step="1" placeholder="Összeg" />
-        <button class="primary" type="submit">TIG mentése</button>
-      </form>
-    </section>
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function money(n) {
+    return Number(n || 0).toLocaleString('hu-HU');
+  }
+  function statusBadge(st) {
+    const m = { active:'bw', draft:'bdr', sent:'bn', paid:'bw', partial:'bq', overdue:'bl', new:'bn', cancelled:'bl' };
+    return `<span class="badge ${m[st] || 'bdr'}">${esc(st || '—')}</span>`;
+  }
+  function emptyRow(cols) {
+    return `<tr><td colspan="${cols}" class="empty">Még nincs adat.</td></tr>`;
+  }
 
-    <section class="panel" id="tab-invoices">
-      <h2>Számlák</h2>
-      <p class="desc">Kimenő számlák; kinnlevőség a nyitott tételekből.</p>
-      <ul class="list" id="list-invoices"><li class="empty">…</li></ul>
-      <form class="row" id="form-invoice">
-        <input name="number" placeholder="Számlaszám pl. INV/2026/001" />
-        <select name="partnerId" id="invoice-partner"><option value="">— Partner —</option></select>
-        <select name="brand"><option>ICE</option><option>STAR</option><option>COOP</option></select>
-        <input name="total" type="number" step="1" required placeholder="Összeg" />
-        <input name="dueOn" type="date" />
-        <select name="status">
-          <option value="sent">Kiküldve</option>
-          <option value="draft">Piszkozat</option>
-          <option value="partial">Részben fizetve</option>
-          <option value="paid">Fizetve</option>
-        </select>
-        <button class="primary" type="submit">Számla mentése</button>
-      </form>
-    </section>
+  function nav(page) {
+    document.querySelectorAll('.ni').forEach((b) => b.classList.toggle('active', b.dataset.nav === page));
+    document.querySelectorAll('.page').forEach((p) => p.classList.toggle('active', p.id === `pg-${page}`));
+    document.getElementById('tbTitle').textContent = TITLES[page] || page;
+    closeSB();
+  }
+  window.nav = nav;
 
-    <section class="panel" id="tab-receivables">
-      <h2>Kinnlevőségek</h2>
-      <p class="desc">Nyitott és lejárt követelések — a demó ERP „Kintlévőség” logikája élesen.</p>
-      <ul class="list" id="list-receivables"><li class="empty">…</li></ul>
-    </section>
+  document.querySelectorAll('[data-nav]').forEach((b) => {
+    b.onclick = () => nav(b.dataset.nav);
+  });
+  document.querySelectorAll('[data-jump]').forEach((b) => {
+    b.onclick = () => nav(b.dataset.jump);
+  });
 
-    <section class="panel" id="tab-users">
-      <h2>Felhasználók / jogosultságok</h2>
-      <p class="desc">Szervezeti tagok szerepkörei: owner · admin · member · viewer. Nincs HR / bérszámfejtés.</p>
-      <ul class="list" id="list-users"><li class="empty">…</li></ul>
-      <form class="row" id="form-member">
-        <input name="email" type="email" required placeholder="új.user@ceged.hu" />
-        <select name="role">
-          <option value="member">member</option>
-          <option value="admin">admin</option>
-          <option value="viewer">viewer</option>
-        </select>
-        <button class="primary" type="submit">Felhasználó hozzáadása</button>
-      </form>
-    </section>
+  function fillPartnerSelects() {
+    const opts = ['<option value="">— Partner —</option>']
+      .concat(cache.partners.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`))
+      .join('');
+    for (const id of ['contact-partner', 'project-partner', 'invoice-partner']) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = opts;
+    }
+  }
+  function fillProjectSelect() {
+    document.getElementById('tig-project').innerHTML = ['<option value="">— Projekt —</option>']
+      .concat(cache.projects.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`))
+      .join('');
+  }
 
-    <section class="panel" id="tab-leads">
-      <h2>Leadek</h2>
-      <p class="desc">CRM pipeline — élő API.</p>
-      <ul class="list" id="list-leads"><li class="empty">…</li></ul>
-      <form class="row" id="form-lead">
-        <input name="title" required placeholder="Lead címe" />
-        <button class="primary" type="submit">Lead mentése</button>
-      </form>
-    </section>
-  </main>
-  <script type="module">
-    import { ensureLoggedIn, bootstrapOrg, signOut, api } from '/app/kaizo-api-client.js';
+  function paintFunnel() {
+    const stages = ['new', 'qualified', 'proposal', 'negotiation', 'won'];
+    const labels = { new:'Új', qualified:'Minősített', proposal:'Ajánlat', negotiation:'Tárgyalás', won:'Megnyert' };
+    const colors = ['#29acd9','#ff9500','#af52de','#ff6b35','#34c759'];
+    const counts = stages.map((s) => cache.leads.filter((l) => (l.stage || 'new') === s).length);
+    const max = Math.max(1, ...counts, cache.leads.length);
+    document.getElementById('dash-funnel').innerHTML = stages.map((s, i) => {
+      const pct = Math.round((counts[i] / max) * 100);
+      return `<div class="f-stage"><div class="f-row"><span>${labels[s]}</span><span>${counts[i]} lead</span></div>
+        <div class="f-bg"><div class="f-fill" style="width:${Math.max(pct, counts[i]?8:0)}%;background:${colors[i]}">${pct || ''}%</div></div></div>`;
+    }).join('') || '<div class="empty">Még nincs lead.</div>';
+  }
 
-    const statusEl = document.getElementById('status');
-    const whoEl = document.getElementById('who');
-    document.getElementById('logout').onclick = () => signOut();
+  function paintDashLists() {
+    const partners = cache.partners.slice(0, 5);
+    document.getElementById('dash-partners').innerHTML = partners.length
+      ? partners.map((p) => `<div class="act-item"><div class="act-dot" style="background:var(--cyan)"></div>
+          <div class="act-info"><div class="act-title">${esc(p.name)}</div><div class="act-meta">${esc(p.email || p.city || '—')}</div></div>
+          <div class="act-date">${statusBadge(p.status || 'active')}</div></div>`).join('')
+      : '<div class="empty">Még nincs partner.</div>';
 
-    let brandFilter = 'ALL';
-    let cache = {
-      partners: [], projects: [], contacts: [], catalog: [],
-      tig: [], invoices: [], receivables: [], members: [], leads: [],
-      recvSummary: null,
+    const recv = cache.receivables.slice(0, 5);
+    document.getElementById('dash-recv').innerHTML = recv.length
+      ? recv.map((r) => `<div class="act-item"><div class="act-dot" style="background:${r.overdue?'var(--red)':'var(--orange)'}"></div>
+          <div class="act-info"><div class="act-title">${esc(r.number || 'számla')} · ${esc(r.partnerName || '—')}</div>
+          <div class="act-meta">${money(r.openAmount)} Ft</div></div>
+          <div class="act-date">${r.overdue ? '<span class="badge bl">LEJÁRT</span>' : esc(r.dueOn || '—')}</div></div>`).join('')
+      : '<div class="empty">Nincs nyitott kinnlevőség.</div>';
+  }
+
+  function paint() {
+    document.getElementById('kpi-partners').textContent = String(cache.partners.length);
+    document.getElementById('kpi-projects').textContent = String(cache.projects.length);
+    document.getElementById('kpi-leads').textContent = String(cache.leads.length);
+    document.getElementById('kpi-ar').textContent = money(cache.recvSummary?.totalOpen || 0);
+    document.getElementById('kpi-ar-s').textContent =
+      `${cache.recvSummary?.count || 0} nyitott · lejárt ${money(cache.recvSummary?.totalOverdue || 0)} Ft`;
+
+    document.getElementById('recv-cnt').textContent = String(cache.recvSummary?.count || 0);
+    document.getElementById('recv-sum').textContent = money(cache.recvSummary?.totalOpen || 0);
+    document.getElementById('recv-over').textContent = money(cache.recvSummary?.totalOverdue || 0);
+
+    const tb = (id, rows, map, cols) => {
+      document.getElementById(id).innerHTML = rows.length ? rows.map(map).join('') : emptyRow(cols);
     };
 
-    function esc(s) {
-      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-    function money(n) {
-      const v = Number(n || 0);
-      return v.toLocaleString('hu-HU') + ' Ft';
-    }
-    function brandBadge(b) {
-      const x = (b || 'ICE').toUpperCase();
-      return `<span class="badge b-${esc(x)}">${esc(x)}</span>`;
-    }
-    function qBrand(path) {
-      if (brandFilter === 'ALL') return path;
-      const sep = path.includes('?') ? '&' : '?';
-      return `${path}${sep}brand=${brandFilter}`;
-    }
-    function renderList(el, rows, mapFn) {
-      if (!rows.length) {
-        el.innerHTML = '<li class="empty">Még nincs adat — hozz létre egyet.</li>';
-        return;
-      }
-      el.innerHTML = rows.map(mapFn).join('');
-    }
-    function fillPartnerSelects() {
-      const opts = ['<option value="">— Partner —</option>']
-        .concat(cache.partners.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`))
-        .join('');
-      for (const id of ['contact-partner', 'project-partner', 'invoice-partner']) {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = opts;
-      }
-    }
-    function fillProjectSelect() {
-      const el = document.getElementById('tig-project');
-      el.innerHTML = ['<option value="">— Projekt —</option>']
-        .concat(cache.projects.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`))
-        .join('');
-    }
+    tb('tb-partners', cache.partners, (p) =>
+      `<tr><td>${esc(p.name)}</td><td>${esc(p.email || '—')}</td><td>${esc(p.phone || '—')}</td><td>${statusBadge(p.status || 'active')}</td></tr>`, 4);
+    tb('tb-contacts', cache.contacts, (c) =>
+      `<tr><td>${esc(c.name)}</td><td>${esc(c.email || '—')}</td><td>${esc(c.phone || '—')}</td><td>${esc(c.role || 'contact')}</td></tr>`, 4);
+    tb('tb-leads', cache.leads, (l) =>
+      `<tr><td>${esc(l.title)}</td><td>${statusBadge(l.stage)}</td><td class="mono">${money(l.expectedRevenue)} Ft</td></tr>`, 3);
+    tb('tb-projects', cache.projects, (p) =>
+      `<tr><td>${esc(p.name)}</td><td>${statusBadge(p.status)}</td><td class="mono">${money(p.budget)} Ft</td></tr>`, 3);
+    tb('tb-catalog', cache.catalog, (i) =>
+      `<tr><td>${esc(i.name)}</td><td>${esc(i.kind === 'product' ? 'Termék' : 'Szolgáltatás')}</td><td class="mono">${money(i.unitPrice)} Ft</td></tr>`, 3);
+    tb('tb-tig', cache.tig, (t) =>
+      `<tr><td>${esc(t.title)}</td><td>${statusBadge(t.status)}</td><td class="mono">${money(t.amount)} Ft</td></tr>`, 3);
+    tb('tb-invoices', cache.invoices, (inv) =>
+      `<tr><td>${esc(inv.number || inv.id.slice(0,8))}</td><td>${statusBadge(inv.status)}</td><td class="mono">${money(inv.total)}</td><td class="mono">${money(inv.amountResidual)}</td><td>${esc(inv.dueOn || '—')}</td></tr>`, 5);
+    tb('tb-receivables', cache.receivables, (r) =>
+      `<tr><td>${esc(r.number || '—')}</td><td>${esc(r.partnerName || '—')}</td><td>${esc(r.dueOn || '—')}</td><td class="mono">${money(r.openAmount)}</td><td>${r.overdue ? '<span class="badge bl">lejárt</span>' : statusBadge(r.status)}</td></tr>`, 5);
+    tb('tb-users', cache.members, (m) =>
+      `<tr><td>${esc(m.email)}</td><td>
+        <select data-member-id="${esc(m.id)}" class="form-select role-sel" style="max-width:140px">
+          ${['owner','admin','member','viewer'].map((r) => `<option value="${r}" ${m.role===r?'selected':''}>${r}</option>`).join('')}
+        </select></td></tr>`, 2);
 
-    function paint() {
-      document.getElementById('kpi-ar').textContent = money(cache.recvSummary?.totalOpen || 0);
-      document.getElementById('kpi-ar-s').textContent =
-        `${cache.recvSummary?.count || 0} nyitott · lejárt ${money(cache.recvSummary?.totalOverdue || 0)}`;
-      document.getElementById('kpi-partners').textContent = String(cache.partners.length);
-      document.getElementById('kpi-projects').textContent = String(cache.projects.length);
-      document.getElementById('kpi-users').textContent = String(cache.members.length);
+    fillPartnerSelects();
+    fillProjectSelect();
+    paintFunnel();
+    paintDashLists();
 
-      renderList(document.getElementById('list-partners'), cache.partners, (p) =>
-        `<li><div><div class="t">${esc(p.name)}</div><div class="s">${esc(p.email || '—')} · ${esc(p.status || 'active')}</div></div>${brandBadge(p.brand)}</li>`);
-      renderList(document.getElementById('list-contacts'), cache.contacts, (c) =>
-        `<li><div><div class="t">${esc(c.name)}</div><div class="s">${esc(c.email || '—')} · ${esc(c.title || c.role || 'contact')}</div></div></li>`);
-      renderList(document.getElementById('list-projects'), cache.projects, (p) =>
-        `<li><div><div class="t">${esc(p.name)}</div><div class="s">${esc(p.status)} · budget ${esc(p.budget || '0')}</div></div>${brandBadge(p.brand)}</li>`);
-      renderList(document.getElementById('list-catalog'), cache.catalog, (i) =>
-        `<li><div><div class="t">${esc(i.name)}</div><div class="s">${esc(i.kind)} · ${money(i.unitPrice)} / ${esc(i.unit || 'db')}</div></div>${brandBadge(i.brand)}</li>`);
-      renderList(document.getElementById('list-tig'), cache.tig, (t) =>
-        `<li><div><div class="t">${esc(t.title)}</div><div class="s">${esc(t.status)} · ${money(t.amount)}</div></div></li>`);
-      renderList(document.getElementById('list-invoices'), cache.invoices, (inv) =>
-        `<li><div><div class="t">${esc(inv.number || inv.id.slice(0, 8))}</div><div class="s">${esc(inv.status)} · ${money(inv.total)} · nyitott ${money(inv.amountResidual)}</div></div>${brandBadge(inv.brand)}</li>`);
-      renderList(document.getElementById('list-receivables'), cache.receivables, (r) =>
-        `<li><div><div class="t">${esc(r.number || 'számla')} · ${esc(r.partnerName || '—')}</div><div class="s">esedékes ${esc(r.dueOn || '—')} · ${money(r.openAmount)}</div></div>${r.overdue ? '<span class="badge b-over">LEJÁRT</span>' : brandBadge(r.brand)}</li>`);
-      renderList(document.getElementById('list-users'), cache.members, (m) =>
-        `<li><div><div class="t">${esc(m.email)}</div><div class="s">${esc(m.role)}</div></div>
-          <select data-member-id="${esc(m.id)}" class="role-sel" style="border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--text);border-radius:8px;padding:.3rem .5rem">
-            ${['owner','admin','member','viewer'].map((r) => `<option value="${r}" ${m.role===r?'selected':''}>${r}</option>`).join('')}
-          </select></li>`);
-      renderList(document.getElementById('list-leads'), cache.leads, (l) =>
-        `<li><div><div class="t">${esc(l.title)}</div><div class="s">${esc(l.stage)} · ${money(l.expectedRevenue)}</div></div></li>`);
+    document.querySelectorAll('.role-sel').forEach((sel) => {
+      sel.onchange = async () => {
+        try {
+          await api(`/api/v1/members/${sel.dataset.memberId}`, {
+            method: 'PATCH', body: JSON.stringify({ role: sel.value }),
+          });
+          await refresh();
+        } catch (e) {
+          alert(e.message || e);
+          await refresh();
+        }
+      };
+    });
+  }
 
-      fillPartnerSelects();
-      fillProjectSelect();
+  async function refresh() {
+    const [partners, projects, contacts, catalog, tig, invoices, recv, members, leads] = await Promise.all([
+      api('/api/v1/partners'),
+      api('/api/v1/projects'),
+      api('/api/v1/contacts'),
+      api('/api/v1/catalog-items'),
+      api('/api/v1/completion-certificates'),
+      api('/api/v1/invoices'),
+      api('/api/v1/receivables'),
+      api('/api/v1/members'),
+      api('/api/v1/leads'),
+    ]);
+    cache.partners = partners.partners || [];
+    cache.projects = projects.projects || [];
+    cache.contacts = contacts.contacts || [];
+    cache.catalog = catalog.catalogItems || [];
+    cache.tig = tig.completionCertificates || [];
+    cache.invoices = invoices.invoices || [];
+    cache.receivables = recv.receivables || [];
+    cache.recvSummary = recv.summary || null;
+    cache.members = members.members || [];
+    cache.leads = leads.leads || [];
+    paint();
+  }
 
-      document.querySelectorAll('.role-sel').forEach((sel) => {
-        sel.onchange = async () => {
-          try {
-            await api(`/api/v1/members/${sel.dataset.memberId}`, {
-              method: 'PATCH',
-              body: JSON.stringify({ role: sel.value }),
-            });
-            await refresh();
-          } catch (e) {
-            alert(e.message || e);
-            await refresh();
-          }
-        };
-      });
-    }
+  const user = await ensureLoggedIn('/app/login.html');
+  if (!user) throw new Error('redirect');
 
-    async function refresh() {
-      const [
-        partners, projects, contacts, catalog, tig, invoices, recv, members, leads,
-      ] = await Promise.all([
-        api(qBrand('/api/v1/partners')),
-        api(qBrand('/api/v1/projects')),
-        api('/api/v1/contacts'),
-        api(qBrand('/api/v1/catalog-items')),
-        api('/api/v1/completion-certificates'),
-        api(qBrand('/api/v1/invoices')),
-        api(qBrand('/api/v1/receivables')),
-        api('/api/v1/members'),
-        api('/api/v1/leads'),
-      ]);
-      cache.partners = partners.partners || [];
-      cache.projects = projects.projects || [];
-      cache.contacts = contacts.contacts || [];
-      cache.catalog = catalog.catalogItems || [];
-      cache.tig = tig.completionCertificates || [];
-      cache.invoices = invoices.invoices || [];
-      cache.receivables = recv.receivables || [];
-      cache.recvSummary = recv.summary || null;
-      cache.members = members.members || [];
-      cache.leads = leads.leads || [];
-      paint();
-    }
+  try {
+    const me = await bootstrapOrg(user.email);
+    const org = me.organizations?.[0];
+    whoEl.value = `${user.email} · ${org?.name || 'org'} · ${org?.role || 'owner'}`;
+    statusEl.textContent = 'Éles Kaizo App — általános KKV CRM / ERP (nincs ICE / STAR / COOP).';
+    statusEl.className = 'status-banner ok';
+    await refresh();
+  } catch (err) {
+    statusEl.textContent = 'API hiba: ' + (err.message || err);
+    statusEl.className = 'status-banner err';
+  }
 
-    document.getElementById('tabs').onclick = (e) => {
-      const btn = e.target.closest('button[data-tab]');
-      if (!btn) return;
-      document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b === btn));
-      document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('on', p.id === `tab-${btn.dataset.tab}`));
-    };
-
-    document.getElementById('brand-bar').onclick = async (e) => {
-      const btn = e.target.closest('button[data-b]');
-      if (!btn) return;
-      brandFilter = btn.dataset.b;
-      document.querySelectorAll('#brand-bar button').forEach((b) => b.classList.toggle('on', b === btn));
-      await refresh();
-    };
-
-    const user = await ensureLoggedIn('/app/login.html');
-    if (!user) throw new Error('redirect');
-
+  document.getElementById('form-partner').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    await api('/api/v1/partners', { method: 'POST', body: JSON.stringify({
+      name: fd.get('name'), email: fd.get('email') || null, phone: fd.get('phone') || null, city: fd.get('city') || null,
+    })});
+    e.target.reset(); await refresh(); nav('partners');
+  };
+  document.getElementById('form-contact').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    await api('/api/v1/contacts', { method: 'POST', body: JSON.stringify({
+      name: fd.get('name'), email: fd.get('email') || null, partnerId: fd.get('partnerId'),
+    })});
+    e.target.reset(); await refresh();
+  };
+  document.getElementById('form-lead').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    await api('/api/v1/leads', { method: 'POST', body: JSON.stringify({ title: fd.get('title'), stage: 'new' }) });
+    e.target.reset(); await refresh();
+  };
+  document.getElementById('form-project').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    await api('/api/v1/projects', { method: 'POST', body: JSON.stringify({
+      name: fd.get('name'), partnerId: fd.get('partnerId') || null, status: 'active',
+    })});
+    e.target.reset(); await refresh();
+  };
+  document.getElementById('form-catalog').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    await api('/api/v1/catalog-items', { method: 'POST', body: JSON.stringify({
+      name: fd.get('name'), kind: fd.get('kind'), unitPrice: fd.get('unitPrice') || 0,
+    })});
+    e.target.reset(); await refresh();
+  };
+  document.getElementById('form-tig').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    await api('/api/v1/completion-certificates', { method: 'POST', body: JSON.stringify({
+      title: fd.get('title'), projectId: fd.get('projectId'), amount: fd.get('amount') || 0, status: 'draft',
+    })});
+    e.target.reset(); await refresh();
+  };
+  document.getElementById('form-invoice').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const total = fd.get('total') || 0;
+    const status = fd.get('status');
+    await api('/api/v1/invoices', { method: 'POST', body: JSON.stringify({
+      number: fd.get('number') || null,
+      partnerId: fd.get('partnerId') || null,
+      total,
+      amountPaid: status === 'paid' ? total : 0,
+      amountResidual: status === 'paid' ? 0 : total,
+      dueOn: fd.get('dueOn') || null,
+      status,
+      issuedOn: new Date().toISOString().slice(0, 10),
+    })});
+    e.target.reset(); await refresh();
+  };
+  document.getElementById('form-member').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
     try {
-      const me = await bootstrapOrg(user.email);
-      const org = me.organizations?.[0];
-      whoEl.textContent = `${user.email} · ${org?.name || 'org'} · ${org?.role || 'owner'} · trial`;
-      statusEl.textContent = 'Éles API — ICE / STAR / COOP szűrővel. Nincs tag / HR / bér modul.';
-      statusEl.className = 'status ok';
-      await refresh();
-    } catch (err) {
-      statusEl.textContent = 'API hiba: ' + (err.message || err);
-      statusEl.className = 'status err';
-    }
-
-    document.getElementById('form-partner').onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      await api('/api/v1/partners', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: fd.get('name'),
-          email: fd.get('email') || null,
-          brand: fd.get('brand'),
-        }),
-      });
-      e.target.reset();
-      await refresh();
-    };
-
-    document.getElementById('form-contact').onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const partnerId = fd.get('partnerId');
-      if (!partnerId) { alert('Válassz partnert'); return; }
-      await api('/api/v1/contacts', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: fd.get('name'),
-          email: fd.get('email') || null,
-          partnerId,
-        }),
-      });
-      e.target.reset();
-      await refresh();
-    };
-
-    document.getElementById('form-project').onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      await api('/api/v1/projects', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: fd.get('name'),
-          brand: fd.get('brand'),
-          partnerId: fd.get('partnerId') || null,
-          status: 'active',
-        }),
-      });
-      e.target.reset();
-      await refresh();
-    };
-
-    document.getElementById('form-catalog').onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      await api('/api/v1/catalog-items', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: fd.get('name'),
-          kind: fd.get('kind'),
-          unitPrice: fd.get('unitPrice') || 0,
-          brand: fd.get('brand'),
-        }),
-      });
-      e.target.reset();
-      await refresh();
-    };
-
-    document.getElementById('form-tig').onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      await api('/api/v1/completion-certificates', {
-        method: 'POST',
-        body: JSON.stringify({
-          title: fd.get('title'),
-          projectId: fd.get('projectId'),
-          amount: fd.get('amount') || 0,
-          status: 'draft',
-        }),
-      });
-      e.target.reset();
-      await refresh();
-    };
-
-    document.getElementById('form-invoice').onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const total = fd.get('total') || 0;
-      const status = fd.get('status');
-      const amountResidual = status === 'paid' ? 0 : total;
-      await api('/api/v1/invoices', {
-        method: 'POST',
-        body: JSON.stringify({
-          number: fd.get('number') || null,
-          partnerId: fd.get('partnerId') || null,
-          brand: fd.get('brand'),
-          total,
-          amountPaid: status === 'paid' ? total : 0,
-          amountResidual,
-          dueOn: fd.get('dueOn') || null,
-          status,
-          issuedOn: new Date().toISOString().slice(0, 10),
-        }),
-      });
-      e.target.reset();
-      await refresh();
-    };
-
-    document.getElementById('form-member').onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      try {
-        await api('/api/v1/members', {
-          method: 'POST',
-          body: JSON.stringify({ email: fd.get('email'), role: fd.get('role') }),
-        });
-        e.target.reset();
-        await refresh();
-      } catch (err) {
-        alert(err.message || err);
-      }
-    };
-
-    document.getElementById('form-lead').onsubmit = async (e) => {
-      e.preventDefault();
-      const title = new FormData(e.target).get('title');
-      await api('/api/v1/leads', { method: 'POST', body: JSON.stringify({ title, stage: 'new' }) });
-      e.target.reset();
-      await refresh();
-    };
-  </script>
+      await api('/api/v1/members', { method: 'POST', body: JSON.stringify({
+        email: fd.get('email'), role: fd.get('role'),
+      })});
+      e.target.reset(); await refresh();
+    } catch (err) { alert(err.message || err); }
+  };
+</script>
 </body>
 </html>

@@ -2,7 +2,7 @@ import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "./_shared/db/index";
 import { invoices } from "./_shared/db/schema";
-import { error, json, normalizeBrand, requireAuthOrg } from "./_shared/http";
+import { error, json, requireAuthOrg } from "./_shared/http";
 
 function residualFrom(total: string | number, paid: string | number) {
   const r = Number(total) - Number(paid);
@@ -14,21 +14,13 @@ export default async (req: Request, context: Context) => {
   if (gate.response) return gate.response;
   const orgId = gate.org!.id;
   const id = context.params?.id;
-  const url = new URL(req.url);
 
   if (req.method === "GET" && !id) {
-    const brand = url.searchParams.get("brand");
-    const rows = brand
-      ? await db
-          .select()
-          .from(invoices)
-          .where(and(eq(invoices.orgId, orgId), eq(invoices.brand, brand.toUpperCase())))
-          .orderBy(desc(invoices.createdAt))
-      : await db
-          .select()
-          .from(invoices)
-          .where(eq(invoices.orgId, orgId))
-          .orderBy(desc(invoices.createdAt));
+    const rows = await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.orgId, orgId))
+      .orderBy(desc(invoices.createdAt));
     return json({ invoices: rows });
   }
 
@@ -56,7 +48,6 @@ export default async (req: Request, context: Context) => {
         projectId: body.projectId || null,
         certificateId: body.certificateId || null,
         number: body.number || null,
-        brand: normalizeBrand(body.brand),
         status: body.status || "draft",
         issuedOn: body.issuedOn || null,
         dueOn: body.dueOn || null,
@@ -86,7 +77,6 @@ export default async (req: Request, context: Context) => {
     ] as const) {
       if (body[key] !== undefined) patch[key] = body[key];
     }
-    if (body.brand !== undefined) patch.brand = normalizeBrand(body.brand);
     if (body.total !== undefined) patch.total = String(body.total);
     if (body.amountPaid !== undefined) patch.amountPaid = String(body.amountPaid);
     if (body.amountResidual !== undefined) patch.amountResidual = String(body.amountResidual);
