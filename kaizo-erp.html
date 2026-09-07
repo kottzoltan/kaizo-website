@@ -1880,5 +1880,53 @@ addLine('oi'); addLine('oi');
 addLine('ii'); addLine('ii');
 addLine('po'); addLine('po');
 </script>
+<script type="module">
+  import { ensureLoggedIn, bootstrapOrg, signOut, api } from '/kaizo-api-client.js';
+
+  const bar = document.createElement('div');
+  bar.id = 'kaizo-auth-bar';
+  bar.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;background:#0c1220;color:#eef3fb;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:.55rem .8rem;font:500 12px/1.35 DM Sans,system-ui,sans-serif;display:flex;gap:.6rem;align-items:center;max-width:min(420px,92vw);box-shadow:0 8px 30px rgba(0,0,0,.35)';
+  bar.innerHTML = '<span id="kaizo-auth-status">Auth…</span><button type="button" id="kaizo-logout" style="border:0;border-radius:999px;padding:.35rem .7rem;background:#3d8bfd;color:#041018;font:inherit;cursor:pointer">Kijelentkezés</button>';
+  document.body.appendChild(bar);
+  document.getElementById('kaizo-logout').onclick = () => signOut();
+
+  const user = await ensureLoggedIn('/login.html');
+  if (!user) throw new Error('redirect');
+  try {
+    const me = await bootstrapOrg(user.email);
+    const org = me.organizations?.[0];
+    document.getElementById('kaizo-auth-status').textContent =
+      `${user.email} · ${org?.name || 'org'} · ERP API`;
+    const { projects } = await api('/api/v1/projects');
+    if (!projects.length) {
+      const { project } = await api('/api/v1/projects', {
+        method: 'POST',
+        body: JSON.stringify({ name: 'Első Kaizo projekt', status: 'active', budget: 1200000 }),
+      });
+      await api('/api/v1/completion-certificates', {
+        method: 'POST',
+        body: JSON.stringify({ projectId: project.id, title: '1. mérföldkő TIG', status: 'draft', amount: 400000 }),
+      });
+      await api('/api/v1/fee-lines', {
+        method: 'POST',
+        body: JSON.stringify({
+          projectId: project.id,
+          description: 'Tanácsadói napidíj',
+          quantity: 5,
+          unit: 'nap',
+          unitPrice: 80000,
+        }),
+      });
+      await api('/api/v1/invoices', {
+        method: 'POST',
+        body: JSON.stringify({ projectId: project.id, number: 'KAIZO-2026-001', status: 'draft', total: 400000 }),
+      });
+    }
+    window.KaizoLive = { user, org, api };
+  } catch (err) {
+    document.getElementById('kaizo-auth-status').textContent =
+      'API hiba: ' + (err.message || err) + ' (Identity + DB deploy kell)';
+  }
+</script>
 </body>
 </html>

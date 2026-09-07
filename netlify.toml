@@ -1,7 +1,18 @@
 [build]
+  command = "npm ci"
   publish = "."
+  functions = "netlify/functions"
 
-# Same-origin proxy to Aivio API — avoids browser CORS on kaizo.hu.
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["db/**", "netlify/functions/_shared/**"]
+  external_node_modules = ["drizzle-orm", "@netlify/database", "@netlify/identity"]
+
+[build.environment]
+  NODE_VERSION = "20"
+  KAIZO_TRIAL_DAYS = "60"
+
+# Same-origin proxy to Aivio API — voice agents (deferred product-wise, still available).
 [[redirects]]
   from = "/agent-api/*"
   to = "https://aivio3.netlify.app/:splat"

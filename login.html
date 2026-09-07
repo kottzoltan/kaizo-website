@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kaizo — Belépés</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg0: #0c1220;
+      --bg1: #152238;
+      --accent: #3d8bfd;
+      --text: #eef3fb;
+      --muted: #9aa8bc;
+      --card: rgba(255,255,255,.06);
+      --line: rgba(255,255,255,.12);
+      --ok: #3dd68c;
+      --err: #ff6b7a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(61,139,253,.28), transparent 55%),
+        radial-gradient(700px 420px at 100% 0%, rgba(61,214,140,.12), transparent 50%),
+        linear-gradient(160deg, var(--bg0), var(--bg1));
+      display: grid; place-items: center; padding: 1.5rem;
+    }
+    .shell { width: min(420px, 100%); }
+    .brand {
+      font-family: Syne, sans-serif; font-weight: 700; font-size: 1.8rem;
+      letter-spacing: -.02em; margin: 0 0 .35rem;
+    }
+    .lead { color: var(--muted); margin: 0 0 1.4rem; line-height: 1.45; font-size: .95rem; }
+    .panel {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 18px; padding: 1.35rem 1.4rem 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+    label { display: block; font-size: .78rem; color: var(--muted); margin: .85rem 0 .35rem; }
+    input {
+      width: 100%; border: 1px solid var(--line); background: rgba(0,0,0,.25);
+      color: var(--text); border-radius: 10px; padding: .7rem .85rem; font: inherit;
+      outline: none;
+    }
+    input:focus { border-color: var(--accent); }
+    .row { display: flex; gap: .6rem; margin-top: 1.15rem; }
+    button {
+      flex: 1; border: 0; border-radius: 999px; padding: .75rem 1rem;
+      font: inherit; font-weight: 600; cursor: pointer;
+    }
+    .primary { background: var(--accent); color: #041018; }
+    .ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    .msg { margin-top: 1rem; font-size: .88rem; min-height: 1.2em; }
+    .msg.ok { color: var(--ok); }
+    .msg.err { color: var(--err); }
+    .hint { margin-top: 1rem; font-size: .8rem; color: var(--muted); line-height: 1.4; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1 class="brand">Kaizo</h1>
+    <p class="lead">A CRM és ERP kipróbálásához bejelentkezés kell. Trial: szervezet létrehozása után azonnal használható.</p>
+    <div class="panel">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" placeholder="te@ceged.hu" />
+      <label for="password">Jelszó</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+      <label for="name" id="name-label" style="display:none">Név (regisztrációnál)</label>
+      <input id="name" type="text" style="display:none" placeholder="Teljes név" />
+      <div class="row">
+        <button class="primary" id="btn-login" type="button">Belépés</button>
+        <button class="ghost" id="btn-signup" type="button">Regisztráció</button>
+      </div>
+      <div class="msg" id="msg"></div>
+      <p class="hint">Sikeres belépés után a CRM / ERP megnyílik. Identity a Netlify dashboardon legyen bekapcsolva.</p>
+      <p class="hint"><a href="/">← Vissza a főoldalra</a></p>
+    </div>
+  </div>
+  <script type="module">
+    import { login, signup, getUser, AuthError } from 'https://esm.sh/@netlify/identity@2.0.0';
+
+    const params = new URLSearchParams(location.search);
+    const next = params.get('next') || '/kaizo-crm.html';
+    const msg = document.getElementById('msg');
+    const nameInput = document.getElementById('name');
+    const nameLabel = document.getElementById('name-label');
+
+    function setMsg(text, kind) {
+      msg.textContent = text;
+      msg.className = 'msg ' + (kind || '');
+    }
+
+    function showSignupFields(on) {
+      nameInput.style.display = on ? 'block' : 'none';
+      nameLabel.style.display = on ? 'block' : 'none';
+    }
+
+    async function goApp(user) {
+      localStorage.setItem('kaizo_user_email', user.email || '');
+      location.href = next;
+    }
+
+    const existing = await getUser().catch(() => null);
+    if (existing) await goApp(existing);
+
+    document.getElementById('btn-login').onclick = async () => {
+      showSignupFields(false);
+      setMsg('Belépés…');
+      try {
+        const user = await login(
+          document.getElementById('email').value.trim(),
+          document.getElementById('password').value,
+        );
+        await goApp(user);
+      } catch (e) {
+        setMsg(e instanceof AuthError ? (e.status === 401 ? 'Hibás email vagy jelszó.' : e.message) : String(e), 'err');
+      }
+    };
+
+    document.getElementById('btn-signup').onclick = async () => {
+      if (nameInput.style.display === 'none') {
+        showSignupFields(true);
+        setMsg('Add meg a neved, majd nyomd újra a Regisztrációt.');
+        return;
+      }
+      setMsg('Regisztráció…');
+      try {
+        const user = await signup(
+          document.getElementById('email').value.trim(),
+          document.getElementById('password').value,
+          { full_name: nameInput.value.trim() || undefined },
+        );
+        if (user.emailVerified) await goApp(user);
+        else setMsg('Nézd meg az emailed a megerősítéshez, utána lépj be.', 'ok');
+      } catch (e) {
+        setMsg(e instanceof AuthError ? e.message : String(e), 'err');
+      }
+    };
+  </script>
+</body>
+</html>
