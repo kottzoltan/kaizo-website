@@ -1372,5 +1372,14 @@ applyLang(document.documentElement.lang || 'hu');
 })();
 </script>
 <script defer src="kaizo-voice-agents.js"></script>
+<script>
+  // Identity email-confirm / OAuth hash → app login (Site URL often points to /)
+  (function () {
+    var h = location.hash || '';
+    if (/confirmation_token=|access_token=|invite_token=|recovery_token=/.test(h)) {
+      location.replace('/app/login.html' + h);
+    }
+  })();
+</script>
 </body>
 </html>
