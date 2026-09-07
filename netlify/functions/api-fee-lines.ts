@@ -39,6 +39,7 @@ export default async (req: Request, context: Context) => {
         orgId,
         projectId: body.projectId || null,
         certificateId: body.certificateId || null,
+        catalogItemId: body.catalogItemId || null,
         invoiceId: body.invoiceId || null,
         description,
         quantity,
@@ -58,6 +59,7 @@ export default async (req: Request, context: Context) => {
       "unit",
       "projectId",
       "certificateId",
+      "catalogItemId",
       "invoiceId",
     ] as const) {
       if (body[key] !== undefined) patch[key] = body[key];

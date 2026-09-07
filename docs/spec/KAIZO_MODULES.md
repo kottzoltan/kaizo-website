@@ -1,18 +1,24 @@
 # KAIZO Modules
 
-## Aktív (v1 build)
+## Aktív (v1/v2 build)
 
 | Modul | Állapot | Megjegyzés |
 |-------|---------|------------|
-| Auth | Login kötelező | Netlify Identity |
-| CRM | API + UI gate | Partnerek, leadek |
-| ERP | API + UI gate | Projektek, TIG, díjak, számlák |
-| Marketing site | Élő | kaizo.hu |
+| Auth | Login + email confirm → auto-login | Netlify Identity |
+| Jogosultság | Felhasználók / szerepkörök | owner · admin · member · viewer |
+| CRM | Élő `/app` | Partnerek, kapcsolattartók, leadek |
+| ERP | Élő `/app` | Projektek, katalógus, TIG, számlák, kinnlevőség |
+| ICE / STAR / COOP | Brand szűrő | Partner / projekt / katalógus / számla |
+| Marketing site | Élő | kaizo.hu (demók érintetlenek) |
 | AI voice (Aivio) | Hátrébb | `/agent-api` proxy megmarad |
 
-## ERP v1 tartalom
+## Nincs a v2 scope-ban
 
-Projektek → Teljesítésigazolások → Díjak/tételek → Számlák
+Tagok (association), munkavállalók, számfejtési bérek / HR
+
+## ERP folyamat
+
+Katalógus → Projekt → TIG → Díjsor → Számla → Kinnlevőség
 
 ## Később
 

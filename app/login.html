@@ -64,7 +64,7 @@
 <body>
   <div class="shell">
     <h1 class="brand">Kaizo App</h1>
-    <p class="lead">Éles CRM / ERP. Regisztráció után email megerősítés kell (Autoconfirm nélkül).</p>
+    <p class="lead">Éles CRM / ERP. Regisztráció után email megerősítés kell — a link azonnal beléptet.</p>
     <div class="panel">
       <label for="email">Email</label>
       <input id="email" type="email" autocomplete="username" placeholder="te@ceged.hu" />
@@ -81,9 +81,9 @@
       </div>
       <div class="msg" id="msg"></div>
       <p class="hint">
-        A megerősítő linket <b>ezen az oldalon</b> kell megnyitni.
-        Netlify Identity → <b>Site URL</b>: <code>https://kaizo.hu/app/login.html</code>
-        (Autoconfirm maradjon <b>OFF</b>).
+        A megerősítő link kattintása után <b>azonnal belépsz</b> az appba.
+        Netlify Identity → Site URL: <code>https://kaizo.hu</code> (custom template)
+        vagy <code>https://kaizo.hu/app/login.html</code>. Autoconfirm: <b>OFF</b>.
       </p>
       <p class="hint"><a href="/">← Vissza a nyilvános oldalra</a> · <a href="/kaizo-crm.html">Demó CRM</a></p>
     </div>
@@ -94,7 +94,6 @@
       signup,
       getUser,
       handleAuthCallback,
-      confirmEmail,
       AuthError,
     } from 'https://esm.sh/@netlify/identity@2.0.0';
 
@@ -114,15 +113,13 @@
       nameLabel.style.display = on ? 'block' : 'none';
     }
 
-    function hashParams() {
-      const raw = (location.hash || '').replace(/^#/, '');
-      return new URLSearchParams(raw);
-    }
-
     function friendlyAuthError(e) {
       const raw = e instanceof AuthError ? e.message : String(e);
       if (/email not confirmed/i.test(raw) || /invalid_grant/i.test(raw)) {
-        return 'Email még nincs megerősítve. Nyisd meg a megerősítő linket ezen az oldalon, vagy nyomd az „újraküldés” gombot.';
+        return 'Email még nincs megerősítve. Nyisd meg a megerősítő linket, vagy nyomd az „újraküldés” gombot.';
+      }
+      if (/expired|invalid.*token|already.*confirm/i.test(raw)) {
+        return 'A megerősítő link érvénytelen vagy már felhasználták. Küldj újat, vagy lépj be jelszóval.';
       }
       if (e instanceof AuthError && e.status === 401) return 'Hibás email vagy jelszó.';
       return raw;
@@ -130,22 +127,20 @@
 
     async function goApp(user) {
       localStorage.setItem('kaizo_user_email', user.email || '');
-      // Clear auth hash so refresh doesn't re-run confirm
+      // handleAuthCallback already clears hash; keep URL clean
       if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-      location.href = next;
+      location.replace(next);
     }
 
+    /**
+     * Use handleAuthCallback (not confirmEmail alone): it confirms AND sets nf_jwt cookies,
+     * so the next page's getUser() sees the session immediately.
+     */
     async function processEmailConfirmation() {
-      const hp = hashParams();
-      const confirmationToken = hp.get('confirmation_token');
-      if (confirmationToken) {
-        setMsg('Email megerősítése…');
-        const user = await confirmEmail(confirmationToken);
-        setMsg('Email megerősítve — beléptetünk…', 'ok');
-        await goApp(user);
-        return true;
+      if (!location.hash || !/confirmation_token=|access_token=|invite_token=|recovery_token=|email_change_token=/.test(location.hash)) {
+        return false;
       }
-
+      setMsg('Email megerősítése és beléptetés…');
       const result = await handleAuthCallback();
       if (result?.type === 'confirmation' && result.user) {
         setMsg('Email megerősítve — beléptetünk…', 'ok');
@@ -157,7 +152,11 @@
         return true;
       }
       if (result?.type === 'recovery') {
-        setMsg('Jelszó-visszaállítási link feldolgozva. Állíts új jelszót a Netlify Identity flow szerint, majd lépj be.', 'ok');
+        setMsg('Jelszó-visszaállítási link feldolgozva. Állíts új jelszót, majd lépj be.', 'ok');
+        return true;
+      }
+      if (result?.type === 'invite') {
+        setMsg('Meghívó link érkezett. Állíts jelszót a Netlify Identity meghívó flow szerint.', 'ok');
         return true;
       }
       return false;
@@ -175,20 +174,19 @@
       }
     }
 
-    // 1) Confirm token from email link
     try {
       const handled = await processEmailConfirmation();
-      if (!handled) {
+      if (handled) {
+        // goApp navigates away; stop further script if still here briefly
+      } else {
         msg.textContent = '';
         msg.className = 'msg';
+        const existing = await getUser().catch(() => null);
+        if (existing) await goApp(existing);
       }
     } catch (e) {
       setMsg(friendlyAuthError(e), 'err');
     }
-
-    // 2) Already logged in
-    const existing = await getUser().catch(() => null);
-    if (existing) await goApp(existing);
 
     document.getElementById('btn-login').onclick = async () => {
       showSignupFields(false);
@@ -221,7 +219,7 @@
         if (user.emailVerified) await goApp(user);
         else {
           setMsg(
-            `Küldtünk emailt ide: ${email}. Nyisd meg a „Confirm your mail” linket — ide kell visszahoznia (${location.origin}/app/login.html). Utána automatikusan belépsz.`,
+            `Küldtünk emailt ide: ${email}. A megerősítő linkre kattintva azonnal belépsz az appba.`,
             'ok',
           );
         }
@@ -239,10 +237,10 @@
       setMsg('Megerősítő email küldése…');
       try {
         await resendConfirmation(email);
-        setMsg(`Új megerősítő email elküldve: ${email}. Nyisd meg a linket ezen az oldalon.`, 'ok');
+        setMsg(`Új megerősítő email elküldve: ${email}. A link azonnal beléptet.`, 'ok');
       } catch (e) {
         setMsg(
-          'Újraküldés sikertelen. Netlify Identity → Users → felhasználó → Send confirmation, vagy várj 15 percet és próbáld újra. ' +
+          'Újraküldés sikertelen. Netlify Identity → Users → Send confirmation, vagy várj 15 percet. ' +
             (e.message || ''),
           'err',
         );

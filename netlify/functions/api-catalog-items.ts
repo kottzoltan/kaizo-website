@@ -1,7 +1,7 @@
 import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "./_shared/db/index";
-import { projects } from "./_shared/db/schema";
+import { catalogItems } from "./_shared/db/schema";
 import { error, json, normalizeBrand, requireAuthOrg } from "./_shared/http";
 
 export default async (req: Request, context: Context) => {
@@ -13,80 +13,73 @@ export default async (req: Request, context: Context) => {
 
   if (req.method === "GET" && !id) {
     const brand = url.searchParams.get("brand");
-    const rows = brand
-      ? await db
-          .select()
-          .from(projects)
-          .where(and(eq(projects.orgId, orgId), eq(projects.brand, brand.toUpperCase())))
-          .orderBy(desc(projects.createdAt))
-      : await db
-          .select()
-          .from(projects)
-          .where(eq(projects.orgId, orgId))
-          .orderBy(desc(projects.createdAt));
-    return json({ projects: rows });
+    const kind = url.searchParams.get("kind");
+    const conditions = [eq(catalogItems.orgId, orgId)];
+    if (brand) conditions.push(eq(catalogItems.brand, brand.toUpperCase()));
+    if (kind) conditions.push(eq(catalogItems.kind, kind));
+    const rows = await db
+      .select()
+      .from(catalogItems)
+      .where(and(...conditions))
+      .orderBy(desc(catalogItems.createdAt));
+    return json({ catalogItems: rows });
   }
 
   if (req.method === "GET" && id) {
     const [row] = await db
       .select()
-      .from(projects)
-      .where(and(eq(projects.orgId, orgId), eq(projects.id, id)))
+      .from(catalogItems)
+      .where(and(eq(catalogItems.orgId, orgId), eq(catalogItems.id, id)))
       .limit(1);
     if (!row) return error("Not found", 404);
-    return json({ project: row });
+    return json({ catalogItem: row });
   }
 
   if (req.method === "POST" && !id) {
     const body = await req.json().catch(() => ({}));
     const name = String(body.name || "").trim();
     if (!name) return error("name required");
+    const kind = body.kind === "product" ? "product" : "service";
     const [row] = await db
-      .insert(projects)
+      .insert(catalogItems)
       .values({
         orgId,
         name,
-        code: body.code || null,
-        partnerId: body.partnerId || null,
+        sku: body.sku || null,
+        kind,
         brand: normalizeBrand(body.brand),
-        status: body.status || "draft",
+        unit: body.unit || "db",
+        unitPrice: body.unitPrice != null ? String(body.unitPrice) : "0",
+        currency: body.currency || "HUF",
         description: body.description || null,
-        budget: body.budget != null ? String(body.budget) : "0",
-        startsOn: body.startsOn || null,
-        endsOn: body.endsOn || null,
+        active: body.active !== false,
       })
       .returning();
-    return json({ project: row }, 201);
+    return json({ catalogItem: row }, 201);
   }
 
   if (req.method === "PATCH" && id) {
     const body = await req.json().catch(() => ({}));
     const patch: Record<string, unknown> = { updatedAt: new Date() };
-    for (const key of [
-      "name",
-      "code",
-      "partnerId",
-      "status",
-      "description",
-      "startsOn",
-      "endsOn",
-    ] as const) {
+    for (const key of ["name", "sku", "unit", "currency", "description"] as const) {
       if (body[key] !== undefined) patch[key] = body[key];
     }
+    if (body.kind !== undefined) patch.kind = body.kind === "product" ? "product" : "service";
     if (body.brand !== undefined) patch.brand = normalizeBrand(body.brand);
-    if (body.budget !== undefined) patch.budget = String(body.budget);
+    if (body.unitPrice !== undefined) patch.unitPrice = String(body.unitPrice);
+    if (body.active !== undefined) patch.active = Boolean(body.active);
     const [row] = await db
-      .update(projects)
+      .update(catalogItems)
       .set(patch)
-      .where(and(eq(projects.orgId, orgId), eq(projects.id, id)))
+      .where(and(eq(catalogItems.orgId, orgId), eq(catalogItems.id, id)))
       .returning();
     if (!row) return error("Not found", 404);
-    return json({ project: row });
+    return json({ catalogItem: row });
   }
 
   return error("Method not allowed", 405);
 };
 
 export const config: Config = {
-  path: ["/api/v1/projects", "/api/v1/projects/:id"],
+  path: ["/api/v1/catalog-items", "/api/v1/catalog-items/:id"],
 };

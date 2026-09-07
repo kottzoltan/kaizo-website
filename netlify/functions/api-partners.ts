@@ -2,20 +2,28 @@ import type { Config, Context } from "@netlify/functions";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "./_shared/db/index";
 import { partners } from "./_shared/db/schema";
-import { error, json, requireAuthOrg } from "./_shared/http";
+import { error, json, normalizeBrand, requireAuthOrg } from "./_shared/http";
 
 export default async (req: Request, context: Context) => {
   const gate = await requireAuthOrg(req);
   if (gate.response) return gate.response;
   const orgId = gate.org!.id;
   const id = context.params?.id;
+  const url = new URL(req.url);
 
   if (req.method === "GET" && !id) {
-    const rows = await db
-      .select()
-      .from(partners)
-      .where(eq(partners.orgId, orgId))
-      .orderBy(desc(partners.createdAt));
+    const brand = url.searchParams.get("brand");
+    const rows = brand
+      ? await db
+          .select()
+          .from(partners)
+          .where(and(eq(partners.orgId, orgId), eq(partners.brand, brand.toUpperCase())))
+          .orderBy(desc(partners.createdAt))
+      : await db
+          .select()
+          .from(partners)
+          .where(eq(partners.orgId, orgId))
+          .orderBy(desc(partners.createdAt));
     return json({ partners: rows });
   }
 
@@ -41,6 +49,10 @@ export default async (req: Request, context: Context) => {
         email: body.email || null,
         phone: body.phone || null,
         company: body.company || null,
+        brand: normalizeBrand(body.brand),
+        taxId: body.taxId || null,
+        city: body.city || null,
+        status: body.status || "active",
         notes: body.notes || null,
       })
       .returning();
@@ -50,9 +62,19 @@ export default async (req: Request, context: Context) => {
   if (req.method === "PATCH" && id) {
     const body = await req.json().catch(() => ({}));
     const patch: Record<string, unknown> = { updatedAt: new Date() };
-    for (const key of ["name", "email", "phone", "company", "notes"] as const) {
+    for (const key of [
+      "name",
+      "email",
+      "phone",
+      "company",
+      "taxId",
+      "city",
+      "status",
+      "notes",
+    ] as const) {
       if (body[key] !== undefined) patch[key] = body[key];
     }
+    if (body.brand !== undefined) patch.brand = normalizeBrand(body.brand);
     const [row] = await db
       .update(partners)
       .set(patch)
