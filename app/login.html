@@ -28,7 +28,7 @@
         linear-gradient(160deg, var(--bg0), var(--bg1));
       display: grid; place-items: center; padding: 1.5rem;
     }
-    .shell { width: min(420px, 100%); }
+    .shell { width: min(440px, 100%); }
     .brand {
       font-family: Syne, sans-serif; font-weight: 700; font-size: 1.8rem;
       letter-spacing: -.02em; margin: 0 0 .35rem;
@@ -46,24 +46,25 @@
       outline: none;
     }
     input:focus { border-color: var(--accent); }
-    .row { display: flex; gap: .6rem; margin-top: 1.15rem; }
+    .row { display: flex; gap: .6rem; margin-top: 1.15rem; flex-wrap: wrap; }
     button {
       flex: 1; border: 0; border-radius: 999px; padding: .75rem 1rem;
-      font: inherit; font-weight: 600; cursor: pointer;
+      font: inherit; font-weight: 600; cursor: pointer; min-width: 120px;
     }
     .primary { background: var(--accent); color: #041018; }
     .ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
-    .msg { margin-top: 1rem; font-size: .88rem; min-height: 1.2em; }
+    .msg { margin-top: 1rem; font-size: .88rem; min-height: 1.2em; line-height: 1.4; }
     .msg.ok { color: var(--ok); }
     .msg.err { color: var(--err); }
-    .hint { margin-top: 1rem; font-size: .8rem; color: var(--muted); line-height: 1.4; }
+    .hint { margin-top: 1rem; font-size: .8rem; color: var(--muted); line-height: 1.45; }
     a { color: var(--accent); }
+    code { font-size: .78em; color: #c7d7ff; }
   </style>
 </head>
 <body>
   <div class="shell">
     <h1 class="brand">Kaizo App</h1>
-    <p class="lead">Éles CRM / ERP kipróbálása. A publikus demó (kaizo.hu) változatlan — itt a saját trial fiókod indul.</p>
+    <p class="lead">Éles CRM / ERP. Regisztráció után email megerősítés kell (Autoconfirm nélkül).</p>
     <div class="panel">
       <label for="email">Email</label>
       <input id="email" type="email" autocomplete="username" placeholder="te@ceged.hu" />
@@ -75,11 +76,14 @@
         <button class="primary" id="btn-login" type="button">Belépés</button>
         <button class="ghost" id="btn-signup" type="button">Regisztráció</button>
       </div>
+      <div class="row">
+        <button class="ghost" id="btn-resend" type="button">Megerősítő email újraküldése</button>
+      </div>
       <div class="msg" id="msg"></div>
       <p class="hint">
-        A megerősítő email linkjét ezen az oldalon kell megnyitni
-        (Netlify Identity → Site URL: <code>https://kaizo.hu/app/login.html</code>).
-        Fejlesztéshez kapcsold be az <b>Autoconfirm</b>-ot az Identity beállításokban.
+        A megerősítő linket <b>ezen az oldalon</b> kell megnyitni.
+        Netlify Identity → <b>Site URL</b>: <code>https://kaizo.hu/app/login.html</code>
+        (Autoconfirm maradjon <b>OFF</b>).
       </p>
       <p class="hint"><a href="/">← Vissza a nyilvános oldalra</a> · <a href="/kaizo-crm.html">Demó CRM</a></p>
     </div>
@@ -90,6 +94,7 @@
       signup,
       getUser,
       handleAuthCallback,
+      confirmEmail,
       AuthError,
     } from 'https://esm.sh/@netlify/identity@2.0.0';
 
@@ -109,10 +114,15 @@
       nameLabel.style.display = on ? 'block' : 'none';
     }
 
+    function hashParams() {
+      const raw = (location.hash || '').replace(/^#/, '');
+      return new URLSearchParams(raw);
+    }
+
     function friendlyAuthError(e) {
       const raw = e instanceof AuthError ? e.message : String(e);
       if (/email not confirmed/i.test(raw) || /invalid_grant/i.test(raw)) {
-        return 'Az email még nincs megerősítve. Nyisd meg újra a megerősítő linket ebben a böngészőben, vagy Identity → Autoconfirm ON, majd regisztrálj újra.';
+        return 'Email még nincs megerősítve. Nyisd meg a megerősítő linket ezen az oldalon, vagy nyomd az „újraküldés” gombot.';
       }
       if (e instanceof AuthError && e.status === 401) return 'Hibás email vagy jelszó.';
       return raw;
@@ -120,21 +130,55 @@
 
     async function goApp(user) {
       localStorage.setItem('kaizo_user_email', user.email || '');
+      // Clear auth hash so refresh doesn't re-run confirm
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
       location.href = next;
     }
 
-    // Email confirm / invite / recovery / OAuth hash feldolgozás
-    try {
-      setMsg('Megerősítés ellenőrzése…');
+    async function processEmailConfirmation() {
+      const hp = hashParams();
+      const confirmationToken = hp.get('confirmation_token');
+      if (confirmationToken) {
+        setMsg('Email megerősítése…');
+        const user = await confirmEmail(confirmationToken);
+        setMsg('Email megerősítve — beléptetünk…', 'ok');
+        await goApp(user);
+        return true;
+      }
+
       const result = await handleAuthCallback();
       if (result?.type === 'confirmation' && result.user) {
         setMsg('Email megerősítve — beléptetünk…', 'ok');
         await goApp(result.user);
-      } else if (result?.type === 'oauth' && result.user) {
+        return true;
+      }
+      if (result?.type === 'oauth' && result.user) {
         await goApp(result.user);
-      } else if (result?.type === 'recovery') {
-        setMsg('Jelszó-visszaállítás: add meg az új jelszót a következő képernyőn, vagy lépj be ha már kész.', 'ok');
-      } else if (!result) {
+        return true;
+      }
+      if (result?.type === 'recovery') {
+        setMsg('Jelszó-visszaállítási link feldolgozva. Állíts új jelszót a Netlify Identity flow szerint, majd lépj be.', 'ok');
+        return true;
+      }
+      return false;
+    }
+
+    async function resendConfirmation(email) {
+      const r = await fetch('/.netlify/identity/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, type: 'signup' }),
+      });
+      if (!r.ok) {
+        const t = await r.text().catch(() => '');
+        throw new Error(t || `Resend failed (${r.status})`);
+      }
+    }
+
+    // 1) Confirm token from email link
+    try {
+      const handled = await processEmailConfirmation();
+      if (!handled) {
         msg.textContent = '';
         msg.className = 'msg';
       }
@@ -142,6 +186,7 @@
       setMsg(friendlyAuthError(e), 'err');
     }
 
+    // 2) Already logged in
     const existing = await getUser().catch(() => null);
     if (existing) await goApp(existing);
 
@@ -167,20 +212,40 @@
       }
       setMsg('Regisztráció…');
       try {
+        const email = document.getElementById('email').value.trim();
         const user = await signup(
-          document.getElementById('email').value.trim(),
+          email,
           document.getElementById('password').value,
           { full_name: nameInput.value.trim() || undefined },
         );
         if (user.emailVerified) await goApp(user);
         else {
           setMsg(
-            'Küldtünk megerősítő emailt. A linket ezen az oldalon nyisd meg (ugyanaz a böngésző). Utána automatikusan belépsz.',
+            `Küldtünk emailt ide: ${email}. Nyisd meg a „Confirm your mail” linket — ide kell visszahoznia (${location.origin}/app/login.html). Utána automatikusan belépsz.`,
             'ok',
           );
         }
       } catch (e) {
         setMsg(friendlyAuthError(e), 'err');
+      }
+    };
+
+    document.getElementById('btn-resend').onclick = async () => {
+      const email = document.getElementById('email').value.trim();
+      if (!email) {
+        setMsg('Add meg az email címet az újraküldéshez.', 'err');
+        return;
+      }
+      setMsg('Megerősítő email küldése…');
+      try {
+        await resendConfirmation(email);
+        setMsg(`Új megerősítő email elküldve: ${email}. Nyisd meg a linket ezen az oldalon.`, 'ok');
+      } catch (e) {
+        setMsg(
+          'Újraküldés sikertelen. Netlify Identity → Users → felhasználó → Send confirmation, vagy várj 15 percet és próbáld újra. ' +
+            (e.message || ''),
+          'err',
+        );
       }
     };
   </script>

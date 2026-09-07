@@ -1,22 +1,30 @@
-# Kaizo Backend — Netlify Identity + Database
+# Auth + trial — email confirmation (Autoconfirm OFF)
 
-## Deploy után (egyszer)
+## Kötelező Netlify beállítás
 
-1. **Identity** bekapcsolása: Netlify → Project configuration → Identity  
-   - Registration: Open (vagy Invite only)  
-   - Autoconfirm: fejlesztéshez ON
-2. A deploy automatikusan provisionálja a **Netlify Database**-t (`@netlify/database`)
-3. Migration: `netlify/database/migrations/20260907180000_kaizo_v1_core.sql` a deploy során lefut
+**Project configuration → Identity** (Autoconfirm maradjon **OFF**):
 
-## Identity beállítás (kötelező a email confirmhoz)
+1. **Site URL** = `https://kaizo.hu`  
+   (a custom confirm template a `/app/login.html#confirmation_token=` útvonalat használja)
+2. **Emails → Confirmation template** path (Pro): `/identity-email-templates/confirmation.html`  
+   Ha nincs Pro: állítsd a Site URL-t erre: `https://kaizo.hu/app/login.html`
 
-Netlify → Project configuration → **Identity**:
+## Hogyan működik
 
-1. **Site URL** = `https://kaizo.hu/app/login.html`  
-   (a megerősítő email ide hoz vissza a hash tokennel)
-2. Fejlesztés / trial: **Autoconfirm** = ON (nincs email confirm)
-3. Registration = Open
+1. Regisztráció → megerősítő email  
+2. Link → `/app/login.html#confirmation_token=…`  
+3. `confirmEmail(token)` / `handleAuthCallback()` → session  
+4. Átirányítás `/app/`
 
-A `/app/login.html` hívja a `handleAuthCallback()`-et — nélküle a confirm link nem zárja le a fiókot, és `invalid_grant: Email not confirmed` jön.
+Újraküldés: login oldal gomb, vagy Identity → Users → Send confirmation.
+
+## Próba
+
+1. https://kaizo.hu/app/login.html  
+2. Regisztráció  
+3. Email link ugyanabban a böngészőben  
+4. Demó CRM/ERP továbbra is login nélkül
+
+## Árazás (később)
 
 `organizations.plan` + `trial_ends_at` (default 60 nap, `KAIZO_TRIAL_DAYS`)
